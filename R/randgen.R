@@ -23,7 +23,7 @@
 ### 
 
 
-torus <- function(n, dim = 1, prime, mixed = FALSE, usetime = TRUE)
+torus <- function(n, dim = 1, prime, mixed = FALSE, usetime = FALSE)
 {
         if(n <0 || is.array(n))
                 stop("invalid argument 'n'")
@@ -56,8 +56,8 @@ torus <- function(n, dim = 1, prime, mixed = FALSE, usetime = TRUE)
                 as.matrix(res)
 }
 
-setTorusSeed <- function(seed)
-	invisible( .Call("doSetTorusSeed", seed) )
+setRandSeed <- function(seed)
+	invisible( .Call("doSetRandSeed", seed) )
 
 congruRand <- function(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
 {
@@ -85,17 +85,49 @@ congruRand <- function(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
                 as.matrix(res)
 }
 
-SFMT <- function(n, dim = 1, sse2=TRUE)
+SFMT <- function(n, dim = 1, sse2 = TRUE, withtorus = FALSE, usetime = FALSE)
 {
         if(n <0 || is.array(n))
                 stop("invalid argument 'n'")
         if(dim < 0 || length(dim) >1)
                 stop("invalid argument 'dim'")
+        if(!is.logical(withtorus) && !is.numeric(withtorus))
+                stop("invalid argument 'withtorus'")
     
-        if(length(n) > 1)
-                res <- .Call("doSFMersenneTwister", length(n), dim, sse2)
+        if(!is.logical(withtorus))
+        {
+                if(0 < withtorus && withtorus <= 1)
+                    nbTorus <- floor( withtorus * n )
+                if(withtorus <=0 || withtorus > 1) 
+                    stop("invalid argument 'withtorus'")
+        }
+        if(is.logical(withtorus))
+        {   
+                if(!withtorus)
+                    nbTorus <- 0
+                else
+                    stop("invalid argument 'withtorus'")
+        }
+    
+        if(nbTorus == 0)
+        {
+                if(length(n) > 1)
+                        res <- .Call("doSFMersenneTwister", length(n), dim, sse2)
+                else
+                        res <- .Call("doSFMersenneTwister", n, dim, sse2)	
+        }   
         else
-                res <- .Call("doSFMersenneTwister", n, dim, sse2)	
+        {
+                restorus <- torus(nbTorus, dim, mixed = FALSE, usetime = usetime)
+            
+                if(length(n) > 1)
+                        res <- .Call("doSFMersenneTwister", length(n) - nbTorus, dim, sse2)
+                else
+                        res <- .Call("doSFMersenneTwister", n- nbTorus, dim, sse2)
+            
+                res <- rbind(res, as.matrix( restorus, nbTorus, dim) )
+        }
+    
         if(dim == 1)
                 as.vector(res)
         else

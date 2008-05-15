@@ -3,7 +3,7 @@
 \alias{torus}
 \alias{congruRand}
 \alias{SFMT}
-\alias{setTorusSeed}
+\alias{setRandSeed}
 \title{Toolbox for pseudo and quasi random number generation}
 \description{
 	General linear congruential generators such as Park Miller sequence 
@@ -12,15 +12,15 @@
 	generation).
 }
 \usage{
-torus(n, dim = 1, prime, mixed = FALSE, usetime = TRUE)
+torus(n, dim = 1, prime, mixed = FALSE, usetime = FALSE)
 congruRand(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
-SFMT(n, dim = 1, sse2=TRUE)
-setTorusSeed(seed)
+SFMT(n, dim = 1, sse2 = TRUE, withtorus = FALSE, usetime = FALSE)
+setRandSeed(seed)
 }
 \arguments{
   \item{n}{number of observations. If length(n) > 1, 
   		  the length is taken to be the number required.}
-  \item{dim}{dimension of observations (must be <=1000, default 1).}
+  \item{dim}{dimension of observations (must be <=100 000, default 1).}
   \item{prime}{a single prime number or a vector of prime numbers to be used
   		 in the Torus sequence. (optional argument).}
   \item{mixed}{a logical to use the mixed Torus algorithm, default FALSE.}
@@ -31,7 +31,10 @@ setTorusSeed(seed)
   \item{mult}{an integer defining the multiplier of the linear congruential generator.}
   \item{incr}{an integer defining the increment of the linear congruential generator.}
   \item{echo}{a logical to plot the seed while computing the sequence.}
-  \item{sse2}{a logical for Intel SSE2.}
+  \item{withtorus}{a numeric in ]0,1] defining the proportion of the torus
+                    sequence appended to the SFMT sequence; 
+                    or a logical equals to FALSE (default).}
+  \item{sse2}{a logical for Intel SSE2. not yet supported.}
 }
 \details{
 	The \eqn{k}th term of the Torus algorithm in d dimension is given by
@@ -60,7 +63,7 @@ setTorusSeed(seed)
 \value{
   \code{torus}, \code{SFMT} and \code{congruRand} generates random variables in ]0,1[, ]0,1[ and [0,1[ respectively. It returns a \eqn{n}x\eqn{dim} matrix, when \code{dim}>1 otherwise a vector of length \code{n}.
 
-  \code{setTorusSeed} set the seed of the \code{torus} package 
+  \code{setRandSeed} set the seed of the \code{randtoolbox} package 
 (i.e. both for the \code{torus}, \code{SFMT} and \code{congruRand} functions).
 }
 \references{
@@ -86,12 +89,12 @@ Wikipedia (2008), \emph{a linear congruential generator}.
 torus(100)
 
 # example of setting the seed
-setTorusSeed(1)
+setRandSeed(1)
 torus(5)
-setTorusSeed(6)
+setRandSeed(6)
 torus(5)
 #the same
-setTorusSeed(1)
+setRandSeed(1)
 torus(10)
 
 #no use of the machine time
@@ -124,7 +127,7 @@ acf(torus(10^6, mix=TRUE))
 # 1457850878          8
 # 1458777923          9
 # 2007237709         10
-setTorusSeed(1)
+setRandSeed(1)
 congruRand(10, echo=TRUE)
 
 # the 9998+ th terms 
@@ -133,7 +136,7 @@ congruRand(10, echo=TRUE)
 # 1043618065      10000
 # 1589873406      10001
 # 2010798668      10002
-setTorusSeed(1614852353) #seed for the 9997th term
+setRandSeed(1614852353) #seed for the 9997th term
 congruRand(5, echo=TRUE)
 
 # (3) the SF Mersenne Twister algorithm
@@ -165,5 +168,14 @@ mean( rep( system.time( SFMT(n), gcFirst=TRUE)[3], n) )
 mean( rep( system.time( congruRand(n), gcFirst=TRUE)[3], n) )
 	}
 
+
+
+# (5) withtorus argument
+# 
+
+# one third of outputs comes from Torus algorithm
+u <- SFMT(1000, with=1/3)
+# the third term of the following code is the first term of torus sequence
+print(u[666:670] )
 }
 \keyword{distribution}

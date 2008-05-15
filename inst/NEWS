@@ -1,0 +1,38 @@
+=== randtoolbox: an R package for random number generation and tests ===
+
+
+Version 1.02
+=============
+
+NEW FEATURES
+
+- more random generation tests such as collision test and order test.
+- poker test is generalized to any dimension.
+- some auxiliary functions.
+- a detailed vignette on generating and test random generation.
+
+BUG FIXES
+
+- on windows, when the seed was not fixed by the user, we use the machine
+time. But we use only seconds of machine time not micro second like on 
+unix-like system. Hence a call like this
+> for(i in 1:10)print(torus(1))
+produces the same output. Now it is fixed.
+
+Version 1.01 (never released)
+=============
+
+NEW FEATURES
+
+- add withtorus option for SFMT function.
+- improve output of tests.
+
+
+
+Version 1.00
+=============
+
+- Initial release.
+- Contains functions bstraub(), simpf(), rearrangepf() and panjer(),
+  and the dataset hachemeister.
+

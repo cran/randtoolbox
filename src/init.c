@@ -35,10 +35,11 @@
 static const R_CallMethodDef callMethods[] = 
 {
         {"doTorus", (DL_FUNC) &doTorus, 5},
-        {"doSetTorusSeed", (DL_FUNC) &doSetTorusSeed, 1},
+        {"doSetRandSeed", (DL_FUNC) &doSetRandSeed, 1},
         {"doCongruRand", (DL_FUNC) &doCongruRand, 6},
         {"doSFMersenneTwister", (DL_FUNC) &doSFMersenneTwister, 3},
-        {"doTest", (DL_FUNC) &doTest, 3},
+        {"doPokerTest", (DL_FUNC) &doPokerTest, 3},
+        {"doCollisionTest", (DL_FUNC) &doCollisionTest, 3},
         {NULL, NULL, 0}
 };
 
@@ -48,8 +49,9 @@ void R_init_randtoolbox(DllInfo *info)
         R_registerRoutines(info, NULL, callMethods, NULL, NULL); 
         //make torus C functions available from other packages
         R_RegisterCCallable("randtoolbox", "torus", (DL_FUNC) torus);
-        R_RegisterCCallable("setTorusSeed", "setTorusSeed", (DL_FUNC) setTorusSeed);
-        R_RegisterCCallable("congrurand", "congrurand", (DL_FUNC) congrurand);
+        R_RegisterCCallable("setRandSeed", "setRandSeed", (DL_FUNC) setRandSeed);
+        R_RegisterCCallable("congruRand", "congruRand", (DL_FUNC) congruRand);
         R_RegisterCCallable("SFmersennetwister", "SFmersennetwister", (DL_FUNC) SFmersennetwister);
         R_RegisterCCallable("pokerTest", "pokerTest", (DL_FUNC) pokerTest);
+        R_RegisterCCallable("collisionTest", "collisionTest", (DL_FUNC) collisionTest);
 }

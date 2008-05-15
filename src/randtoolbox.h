@@ -18,7 +18,7 @@
  *                                                                                                                                           *
  **********************************************************************************************/
 /*
- *  Torus algorithm to generate quasi random numbers
+ *  Torus algorithm to generate random numbers
  *  
  *			header file
  *
@@ -33,21 +33,32 @@
 #include "locale.h"
 #include "SFMT.h"
 
-#include <time.h>
-#include <sys/time.h>
+
+#include "config.h"
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
+
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+
+#ifdef HAVE_WINDOWS_H
+# include <windows.h>
+#endif
 
 
 /* Functions accessed from .Call() */
 SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed);
-SEXP doSetTorusSeed(SEXP s);
+SEXP doSetRandSeed(SEXP s);
 SEXP doCongruRand(SEXP n, SEXP d, SEXP modulus, SEXP multiplier, SEXP increment, SEXP echo);
 SEXP doSFMersenneTwister(SEXP n, SEXP d, SEXP sse2);
 
 /* utility functions */
 void torus(double *u, int nb, int dim, int *prime, int ismixed, int usetime);
 static R_INLINE double fracPart(double x);
-void congrurand(double *u, int nb, int dim, unsigned long long mod, unsigned long long mult, unsigned long long incr, int show);
+void congruRand(double *u, int nb, int dim, unsigned long long mod, unsigned long long mult, unsigned long long incr, int show);
 void SFmersennetwister(double *u, int nb, int dim);
 
-void setTorusSeed(long s);
-static void randSetSeed();
+void setRandSeed(long s);
+void randSetSeed();

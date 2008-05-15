@@ -4,7 +4,7 @@ useDynLib(randtoolbox, .registration = TRUE)
 
 ### Exports
 export(torus)
-export(setTorusSeed)
+export(setRandSeed)
 export(congruRand)
 export(SFMT)
 
@@ -12,4 +12,7 @@ export(gap.test)
 export(freq.test)
 export(serial.test)
 export(poker.test)
-export(mars.test)
+export(order.test)
+export(coll.test)
+
+export(stirling)
