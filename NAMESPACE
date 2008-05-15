@@ -1,0 +1,15 @@
+### C code
+useDynLib(randtoolbox, .registration = TRUE)
+
+
+### Exports
+export(torus)
+export(setTorusSeed)
+export(congruRand)
+export(SFMT)
+
+export(gap.test)
+export(freq.test)
+export(serial.test)
+export(poker.test)
+export(mars.test)
