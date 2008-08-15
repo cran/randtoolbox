@@ -28,19 +28,33 @@
 
 #include "randtoolbox.h"
 
-/**************/
-/* constants */
+/*********************************/
+/*              constants               */
 //the seed
 static unsigned long seed; 
 //a pseudo boolean to initiate the seed
 static int isInit;
+//the length (maximal) of the internal seed array
+#define LENSEEDARRAY 1391
+static unsigned int seedArray[LENSEEDARRAY];
+//a pseudo boolean to initiate the seed array
+static int isInitByArray;
 
 //the first 100 000 prime numbers taken from http://primes.utm.edu/ declared at the end of the file
 static int primeNumber[100000];
 
 // pi
-const static long double constpi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 ;
+const long double constpi = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 ;
 
+
+/*********************************/
+/*          utility functions         */
+
+//fractional part
+static R_INLINE double fracPart(double x)
+{
+    return x - floor(x);
+}
 
 
 /*********************************/
@@ -49,109 +63,100 @@ const static long double constpi = 3.1415926535897932384626433832795028841971693
 //main function used .Call()
 SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed)
 {
-        if (!isNumeric(n) || !isNumeric(d) || !isLogical(timedseed) )
-                error(_("invalid argument"));
-                        
-        if(!isNull(p) && !isNumeric(p))           
-            error(_("invalid argument"));
-
-            
-        //temporary working variables
-        int nb = asInteger( n ); //number of random vectors
-        int dim  = asInteger( d ); //dimension of vector
-        int *prime; //prime numbers used when supplied
-        int mixed = asLogical( ismixed ); //boolean to use the mixed Torus algo
-        int usetime = asLogical( timedseed ); //boolean to use the machine time
+    if (!isNumeric(n) || !isNumeric(d) || !isLogical(timedseed) )
+        error(_("invalid argument"));
     
-        if( isNull(p) )
-                prime = NULL; 
-        else 
-                prime  = INTEGER( p ); 
+    if(!isNull(p) && !isNumeric(p))           
+        error(_("invalid argument"));
+    
+    
+    //temporary working variables
+    int nb = asInteger( n ); //number of random vectors
+    int dim  = asInteger( d ); //dimension of vector
+    int *prime; //prime numbers used when supplied
+    int mixed = asLogical( ismixed ); //boolean to use the mixed Torus algo
+    int usetime = asLogical( timedseed ); //boolean to use the machine time
+    
+    if( isNull(p) )
+        prime = NULL; 
+    else 
+        prime  = INTEGER( p ); 
     
 	
-        //result
-        double *u = (double *) R_alloc(nb * dim, sizeof(double));
-        SEXP resultinR; //result in R
-        PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
-        u = REAL( resultinR ); //plug the C pointer on the R type
+    //result
+    double *u = (double *) R_alloc(nb * dim, sizeof(double));
+    SEXP resultinR; //result in R
+    PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
+    u = REAL( resultinR ); //plug the C pointer on the R type
 	
-        R_CheckStack();
+    R_CheckStack();
 	
-        //computation step
-        if(prime == NULL)           
-                torus(u, nb, dim, primeNumber, mixed, usetime);
-        else
-                torus(u, nb, dim, prime, mixed, usetime);
+    //computation step
+    if(prime == NULL)           
+        torus(u, nb, dim, primeNumber, mixed, usetime);
+    else
+        torus(u, nb, dim, prime, mixed, usetime);
 	
-        UNPROTECT(1);
+    UNPROTECT(1);
 	
-        return resultinR;
+    return resultinR;
 }
 
 //compute the vector sequence of the Torus algorithm
 void torus(double *u, int nb, int dim, int *prime, int ismixed, int usetime)
 {
-        int i, j;
-        unsigned long state;
-    
-    
+    int i, j;
+    unsigned long state;
 	
-        if (!R_FINITE(nb) || !R_FINITE(dim))
-                error(_("non finite argument"));
-        
-        if(prime == NULL)    
-                error(_("internal error in torus function"));
+    if (!R_FINITE(nb) || !R_FINITE(dim))
+        error(_("non finite argument"));
     
-        //sanity check
-        if(dim > 100000) 
-                error(_("Torus algorithm not yet implemented for dimension %d"), dim);
-
-        //init the seed of Torus algo
-        if(!isInit) 
-                randSetSeed();	
+    if(prime == NULL)    
+        error(_("internal error in torus function"));
     
-        //init the state of SF Mersenne Twister algo
-        if(ismixed)        
-                init_gen_rand(seed);
-
+    //sanity check
+    if(dim > 100000) 
+        error(_("Torus algorithm not yet implemented for dimension %d"), dim);
     
-        //u_ij is the Torus sequence term 
-        //with n = state + i, s = j + 1, p = primeNumber[j] or prime[j]
-        //u is stored column by column
-        
-        if(ismixed) //SF Mersenne-Twister-mixed Torus algo
-        { 
-                for(j = 0; j < dim; j++)
-                {    
-                        for(i = 0; i < nb; i++) 
-                        {
-                                state = gen_rand32();
-                                u[i + j * nb] = fracPart( state * sqrt( prime[j] ) ) ;
-                        }
-                }
+    //init the seed of Torus algo
+    if(!isInit) 
+        randSeed();	
+    
+    //init the state of SF Mersenne Twister algo
+    if(ismixed)        
+        init_gen_rand(seed);
+    
+    
+    //u_ij is the Torus sequence term 
+    //with n = state + i, s = j + 1, p = primeNumber[j] or prime[j]
+    //u is stored column by column
+    
+    if(ismixed) //SF Mersenne-Twister-mixed Torus algo
+    { 
+        for(j = 0; j < dim; j++)
+        {    
+            for(i = 0; i < nb; i++) 
+            {
+                state = gen_rand32();
+                u[i + j * nb] = fracPart( state * sqrt( prime[j] ) ) ;
+            }
         }
-        else //classic Torus algo
-        {
-                if(usetime) //use the machine time
-                    state = seed;
-                else 
-                    state  = 1;
-                
-                for(j = 0; j < dim; j++)
-                        for(i = 0; i < nb; i++) 
-                                u[i + j * nb] = fracPart( ( state + i ) * sqrt( prime[j] ) ) ;
-                        
-                
-        }
-                    
-        isInit = 0;		
+    }
+    else //classic Torus algo
+    {
+        if(usetime) //use the machine time
+            state = seed;
+        else 
+            state  = 1;
+        
+        for(j = 0; j < dim; j++)
+            for(i = 0; i < nb; i++) 
+                u[i + j * nb] = fracPart( ( state + i ) * sqrt( prime[j] ) ) ;                
+    }
+    
+    isInit = 0;		
 }
 
-//fractional part
-R_INLINE double fracPart(double x)
-{
-	return x - floor(x);
-}
 
 /***********************************/
 /* pseudo random generation */ 
@@ -159,161 +164,435 @@ R_INLINE double fracPart(double x)
 //main function used .Call()
 SEXP doCongruRand(SEXP n, SEXP d, SEXP modulus, SEXP multiplier, SEXP increment, SEXP echo)
 {
-        if (!isNumeric(n) || !isNumeric(d))
-                error(_("invalid argument"));
+    if (!isNumeric(n) || !isNumeric(d))
+        error(_("invalid argument"));
 	
-        //temporary working variables
-        int nb = asInteger( n ); //number of random vectors
-        int dim  = asInteger( d ); //dimension of vector
-        int show =  asLogical( echo ); //to show the seed
-        
-        unsigned long long mod = asInteger( modulus ); //modulus
-        unsigned long long mult = asInteger( multiplier ); //modulus
-        unsigned long long incr = asInteger( increment ); //modulus    
+    //temporary working variables
+    int nb = asInteger( n ); //number of random vectors
+    int dim  = asInteger( d ); //dimension of vector
+    int show =  asLogical( echo ); //to show the seed
+    
+    unsigned long long mod = asInteger( modulus ); //modulus
+    unsigned long long mult = asInteger( multiplier ); //modulus
+    unsigned long long incr = asInteger( increment ); //modulus    
 	
-        //result
-        double *u = (double *) R_alloc(nb * dim, sizeof(double));
-        SEXP resultinR; //result in R
-        PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
-        u = REAL( resultinR ); //plug the C pointer on the R type
+    //result
+    double *u = (double *) R_alloc(nb * dim, sizeof(double));
+    SEXP resultinR; //result in R
+    PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
+    u = REAL( resultinR ); //plug the C pointer on the R type
 	
-        R_CheckStack();
+    R_CheckStack();
 	
-        //computation step
-        congruRand(u, nb, dim, mod, mult, incr, show);
+    //computation step
+    congruRand(u, nb, dim, mod, mult, incr, show);
 	
-        UNPROTECT(1);
+    UNPROTECT(1);
 	
-        return resultinR;
+    return resultinR;
 }
 
 //compute the sequence of a general congruential linear generator
 void congruRand(double *u, int nb, int dim, unsigned long long mod, unsigned long long mult, unsigned long long incr, int show)
 {
-        int i, j;
-        unsigned long long temp;
+    int i, j;
+    unsigned long long temp;
 	
-        if (!R_FINITE(nb) || !R_FINITE(dim))
-                error(_("non finite argument"));
+    if (!R_FINITE(nb) || !R_FINITE(dim))
+        error(_("non finite argument"));
 	
-        //initiate the seed with the machine time
-        // and ensure it is positive
-        if(!isInit) 
-        {    
-                do randSetSeed() ; 
-                while ( seed <= 0 );
-        }
+    //initiate the seed with the machine time
+    // and ensure it is positive
+    if(!isInit) 
+    {    
+        do randSeed() ; 
+        while ( seed <= 0 );
+    }
 	
-        //u_ij is the nth (n = i + j * nb) term of a general congruential linear generator
-        //i.e. u_ij = [ ( mult * x_{n-1}  + incr ) % mod ] / mod
-        //u is stored column by column
-        for(i = 0; i < nb; i++)
+    //u_ij is the nth (n = i + j * nb) term of a general congruential linear generator
+    //i.e. u_ij = [ ( mult * x_{n-1}  + incr ) % mod ] / mod
+    //u is stored column by column
+    for(i = 0; i < nb; i++)
+    {
+        for(j = 0; j < dim; j++) 
         {
-                for(j = 0; j < dim; j++) 
-                {
-                        temp  = mult * seed + incr;
-                        seed = temp % mod;
-                        
-                        //sanity check
-                        if(seed <= 0) 
-                                seed += mod; 
-                    
-                        if(show) 
-                                Rprintf("%u th integer generated : %u\n", 1+ i + j * nb, seed);
-                        
-                        u[i + j * nb] = (double) seed / (double) mod;
-                }
+            temp  = mult * seed + incr;
+            seed = temp % mod;
+            
+            //sanity check
+            if(seed <= 0) 
+                seed += mod; 
+            
+            if(show) 
+                Rprintf("%u th integer generated : %u\n", 1+ i + j * nb, seed);
+            
+            u[i + j * nb] = (double) seed / (double) mod;
         }
-        isInit = 0;		
+    }
+    isInit = 0;		
 }
 
 //main function used .Call()
-SEXP doSFMersenneTwister(SEXP n, SEXP d, SEXP sse2)
+SEXP doSFMersenneTwister(SEXP n, SEXP d, SEXP mersexpo, SEXP paramset)
 {
-        if (!isNumeric(n) || !isNumeric(d))
-            error(_("invalid argument"));
-        
-        //temporary working variables
-        int nb = asInteger( n ); //number of random vectors
-        int dim  = asInteger( d ); //dimension of vector
+    if (!isNumeric(n) || !isNumeric(d) || !isNumeric(mersexpo) || !isLogical(paramset))
+        error(_("invalid argument"));
     
-   //int useblock = asLogical( sse2 ); //boolean to use SSE2 block generation
-//#define HAVE_SSE2 asLogical(sse2)
+    //temporary working variables
+    int nb = asInteger( n ); //number of random vectors
+    int dim  = asInteger( d ); //dimension of vector
+    int mexp = asInteger( mersexpo );  //mersenne exponent
+    int usepset = asLogical( paramset ); //use param sets
+    
+    //result
+    double *u = (double *) R_alloc(nb * dim, sizeof(double));
+    SEXP resultinR; //result in R
+    PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
+    u = REAL( resultinR ); //plug the C pointer on the R type
+    
+    R_CheckStack();
+    
+    //computation step
+    SFmersennetwister(u, nb, dim, mexp, usepset );
+    
+    UNPROTECT(1);
+    
+    return resultinR;   
+}
+
+// call the SF mersenne twister of Matsumoto and Saito
+void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset)
+{
+    int i, j;
+    
+    //initiate the seed with the machine time
+    // and ensure it is positive
+    if(!isInit) 
+    {    
+        do randSeed() ; 
+        while ( seed <= 0 );
+    }
+    
+    //init SFMT parameters
+    init_SFMT(mexp, usepset);
+    //init the seed of SFMT
+    init_gen_rand(seed);
 
     /*
-#ifdef HAVE_SSE2
-    Rprintf("sse2\n");
-#endif
-     */
+    //size of internal array
+    int blocksize = get_min_array_size32();
+    //number of blocks to generate
+    //int nbblock = nb / blocksize; 
+    //last variates to generate
+    //int rest = nb % blocksize;
     
-        //result
-        double *u = (double *) R_alloc(nb * dim, sizeof(double));
-        SEXP resultinR; //result in R
-        PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
-        u = REAL( resultinR ); //plug the C pointer on the R type
+    unsigned int * array;
+    
+    //Rprintf("zog\n");
+    
+//    PROTECT(array = allocMatrix(INTSXP, nb, dim)); //allocate a n x d matrix
+    
+    array = (unsigned int *) R_alloc(nb * dim, sizeof(unsigned long long int));
+
+  //  Rprintf("blocksize %d\n nbblock %d\n rest %d\n", blocksize, nbblock, rest);
+
+//                    Rprintf("mem %d\t", array);
+   
+
+    
+    if(nb * dim >= blocksize)
+    {
+        fill_array32(array, nb * dim);
+    
+//    for(j = 0; j < dim; j++)
+//        fill_array32( (array+ i*blocksize), rest);
+//    fill_array32( (array + i + j * nbblock), rest);
+//
+//    for(j = 0; j < dim; j++)
+ //   {
+  //      for(i = 0; i < nb; i++) 
+   //     {
+    //        Rprintf("%u \t", array[i + j * nb] ); // real on ]0,1[ interval
+     //   }
+   // Rprintf("\n");
+//}
+    
+    
+    // compute u_ij
+    for(j = 0; j < dim; j++)
+        for(i = 0; i < nb; i++) 
+            u[i + j * nb] = to_real3( array[i + j * nb] ); // real on ]0,1[ interval
+            
         
-        R_CheckStack();
-        
-        //computation step
-        SFmersennetwister(u, nb, dim);
-        
-        UNPROTECT(1);
-        
-        return resultinR;   
+    //Free(array);
+    }
+    else
+    {
+        */
+
+
+    // compute u_ij
+    for(j = 0; j < dim; j++)
+        for(i = 0; i < nb; i++) 
+            u[i + j * nb] = genrand_real3(); // real on ]0,1[ interval
+
+    //}
+    
+    isInit = 0;	    
 }
 
-void SFmersennetwister(double *u, int nb, int dim)
+//main function used .Call()
+SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering)
 {
-        int i, j;
+    if (!isNumeric(n) || !isNumeric(d) || !isNumeric(order) || !isLogical(tempering))
+        error(_("invalid argument"));
     
-        //initiate the seed with the machine time
-        // and ensure it is positive
-        if(!isInit) 
-        {    
-            do randSetSeed() ; 
-            while ( seed <= 0 );
-        }
+    //temporary working variables
+    int nb = asInteger( n ); //number of random vectors
+    int dim  = asInteger( d ); //dimension of vector
+    int degree = asInteger( order );  //mersenne exponent
+    int dotemper = asLogical( tempering ); //tempering or not?
     
-        init_gen_rand(seed);
+    
+    //result
+    double *u = (double *) R_alloc(nb * dim, sizeof(double));
+    SEXP resultinR; //result in R
+    PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
+    u = REAL( resultinR ); //plug the C pointer on the R type
+    
+    R_CheckStack();
+    
+//    Rprintf("call wellrng\n");
+    
+    //computation step
+    WELLrng(u, nb, dim, degree, dotemper);
+    
+  //  Rprintf("fin WELLrng\n");
+    
+    UNPROTECT(1);
+    
+    return resultinR;   
+}
+
+// call the WELL generator of L'Ecuyer
+void WELLrng(double *u, int nb, int dim, int order, int temper)
+{
+    int i, j;
+    
+//    Rprintf("order %u", order);
+    
+    if(temper && order == 512)
+        error(_("no tempering possible"));
+    if(temper && order == 521)
+        error(_("no tempering possible"));
+    if(temper && order == 1024)
+        error(_("no tempering possible"));
         
     
-        // compute u_ij
-        for(j = 0; j < dim; j++)
-                for(i = 0; i < nb; i++) 
-                        u[i + j * nb] = genrand_real3(); // real on ]0,1[ interval
+    switch (order) 
+    {
+        case 512:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(16); 
+            
+            //init SFMT parameters
+            InitWELLRNG512a( seedArray );        
     
-        isInit = 0;	    
+            // compute u_ij
+            for(j = 0; j < dim; j++)
+                for(i = 0; i < nb; i++) 
+                    u[i + j * nb] = WELLRNG512a(); // real on ]0,1[ interval
+            break;
+            
+        case 521:
+            
+//            Rprintf("case 521\n");
+            
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(17); 
+
+  //                      Rprintf("case isinitbyarray\n");
+            
+            initWELL521(0);
+            
+    //                    Rprintf("case initWELL521\n");
+            //init SFMT parameters
+            InitWELLRNG521a( seedArray );        
+            
+      //      Rprintf("initwellrng521\n");
+            
+            // compute u_ij
+            for(j = 0; j < dim; j++)
+            {
+                for(i = 0; i < nb; i++) 
+                {
+       //             Rprintf("i - j : %u - %u", i,j);
+                    u[i + j * nb] = WELLRNG521a(); // real on ]0,1[ interval
+                }
+         //       Rprintf("\n");
+            }
+           // Rprintf("fin de la putain de boucle\n");
+            break;
+            
+        case 1024:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(32); 
+            
+            //init SFMT parameters
+            InitWELLRNG1024a( seedArray );        
+            
+            // compute u_ij
+            for(j = 0; j < dim; j++)
+                for(i = 0; i < nb; i++) 
+                    u[i + j * nb] = WELLRNG1024a(); // real on ]0,1[ interval
+            break;
+            
+        case 19937:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(624); 
+            
+            //init SFMT parameters
+            InitWELLRNG19937a( seedArray );        
+            initWELL19937( temper );
+            
+            // compute u_ij
+            for(j = 0; j < dim; j++)
+                for(i = 0; i < nb; i++) 
+                    u[i + j * nb] = WELLRNG19937a(); // real on ]0,1[ interval
+            break;
+        
+        case 44497:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(1391); 
+            
+            //init SFMT parameters
+            InitWELLRNG44497a( seedArray );        
+            initWELL44497( temper );
+            
+            // compute u_ij
+            for(j = 0; j < dim; j++)
+                for(i = 0; i < nb; i++) 
+                    u[i + j * nb] = WELLRNG44497a(); // real on ]0,1[ interval
+            break;        
+            
+        default:
+            error(_("error wrong exponent in WELL generator\n"));
+    }
+    
+   // Rprintf("fin du case\n");
+    
+    isInitByArray = 0;	          
+    
+    //Rprintf("isinitbyarray fait\n");
+}
+
+//main function used .Call()
+SEXP doKnuthTAOCP(SEXP n, SEXP d)
+{
+    if (!isNumeric(n) || !isNumeric(d))
+        error(_("invalid argument"));
+    
+    //temporary working variables
+    int nb = asInteger( n ); //number of random vectors
+    int dim  = asInteger( d ); //dimension of vector
+
+    //result
+    double *u = (double *) R_alloc(nb * dim, sizeof(double));
+    SEXP resultinR; //result in R
+    PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
+    u = REAL( resultinR ); //plug the C pointer on the R type
+    
+    R_CheckStack();
+    
+    //computation step
+    knuthTAOCP(u, nb, dim);
+    
+    UNPROTECT(1);
+    
+    return resultinR;   
+}
+
+// call the Knuth 'The Art Of Computer Programming' RNG
+void knuthTAOCP(double *u, int nb, int dim)
+{
+    int i, j;
+    
+    //initiate the seed with the machine time
+    // and ensure it is positive
+    if(!isInit) 
+    {    
+        do randSeed() ; 
+        while ( seed <= 0 );
+    }
+    
+    //init TAOCP RNG
+    ranf_start( seed );
+        
+    //ranf_arr_cycle();
+    
+    // compute u_ij's
+    // declare an array a little bit longer than KK (100) long lag if too short
+    // see Knuth's file for details
+    if( nb * dim <= 100 )
+    {
+        double * temp = (double *) R_alloc( 101, sizeof(double) );
+        
+        ranf_array( temp, 101 );
+        
+        for(j = 0; j < dim; j++)
+            for(i = 0; i < nb; i++) 
+                u[i + j * nb] = temp[i + j * nb]; // real on ]0,1[ interval
+        
+    }
+    else
+        ranf_array( u, nb*dim );
+    
+
+    
+    //Rprintf("1st term %.20f --- seed  %u\n", u[0], seed);
+        
+    isInit = 0;	    
 }
 
 
-
-/******************/
-/* set the seed */
+/**********************************/
+/*          set the seed                */
 
 //main function used .Call()
 //seed set by the user
 //idea taken from the R internal C function do_setseed
-SEXP doSetRandSeed(SEXP s)
+SEXP doSetSeed(SEXP s)
 {
-	if (!isNumeric(s))
-		error(_("invalid argument"));
+    if (!isNumeric(s))
+        error(_("invalid argument"));
 	
-	setRandSeed( (long) asInteger(s) );
-	return R_NilValue;	
+    setSeed( (long) asInteger(s) );
+    
+    return R_NilValue;	
 }
 
-void setRandSeed(long s)
+void setSeed(long s)
 {
-	if (!R_FINITE(s))
-		error(_("non finite seed"));
+    if (!R_FINITE(s))
+	error(_("non finite seed"));
 	
-	seed = s;
-	isInit = 1;
+    seed = s;
+    isInit = 1;
 }
 
 //randomize and set the seed when not initialized
 //idea taken from the R internal C function Randomize()
-void randSetSeed()
+void randSeed()
 {
         
 #if HAVE_SYS_TIME_H
@@ -329,7 +608,7 @@ void randSetSeed()
         struct timeval tv;
         gettimeofday (&tv, NULL);
         
-        seed = ((unsigned long long) tv.tv_usec << 24) ^ tv.tv_sec;
+        seed = ((unsigned long long) tv.tv_usec << 16) ^ tv.tv_sec;
     }
 #elif HAVE_WINDOWS_H
     {
@@ -353,10 +632,11 @@ void randSetSeed()
         GetSystemTime(&tv);
         
         /*
-         *   struct {
+         *  typedef union _LARGE_INTEGER {
+         struct {
          DWORD LowPart;
          LONG HighPart;
-         };
+         } ;
          struct {
          DWORD LowPart;
          LONG HighPart;
@@ -370,7 +650,7 @@ void randSetSeed()
         LARGE_INTEGER count;
         QueryPerformanceCounter( (LARGE_INTEGER *) &count );        
         
-        seed = (unsigned long long) ( (tv.wMilliseconds << 24) ^ tv.wSecond + count.LowPart );
+        seed = (unsigned long long) ( ( (tv.wMilliseconds << 16) ^ tv.wSecond ) + count.LowPart );
     }
 #elif HAVE_TIME_H
     {
@@ -381,7 +661,7 @@ void randSetSeed()
          * see http://opengroup.org/onlinepubs/007908799/xsh/time.h.html
          */
     
-        seed = ((unsigned long) time(NULL) <<24);
+        seed = ((unsigned long) time(NULL) <<16);
     }
 #else
     /* unlikely, but use random contents */
@@ -389,6 +669,67 @@ void randSetSeed()
     
     isInit = 1;
 }   
+
+//initialize internal state array, idea taken from Matsumoto's code dSFMT
+void randSeedByArray(int length)
+{
+    int i;
+    //unsigned long long int temp = 1;
+    
+    if( length > LENSEEDARRAY)
+        error(_("error while initializing WELL generator\n"));
+    
+    randSeed();
+    isInit = 0;
+
+//    Rprintf("length %d \n", length);
+  /*  for(i = 0; i < length/2; i++)
+    {
+        seedArray[i] = ( (unsigned long long) seed << (i+1) ) ^ ( (unsigned long long) seed >> (i+1) );
+        Rprintf("%lu \t", seedArray[i]);
+           seedArray[i] = ( (unsigned long long) seed << (i+1)/4 ) | ( (unsigned long long) seed >> (i/4+1) ) ^ ( (unsigned long long) seed << (i+1)/4 ) & ( (unsigned long long) seed >> (i/4+1) );
+    }
+    for(i = 0; i < length; i++)
+        seedArray[i] = ( seed << (i+0)/4 ) & ( seed >> (i+1)/4 ) ^ ( (seed << (i+2)/4) ) | ( seed >> (i+3)/4 );
+
+    
+    for(i = 0; i < length-1; i++)
+        seedArray[i] = i+1;
+    seedArray[length-1] = seed;
+
+    
+    for(i=0;i<length;i++)
+        Rprintf("- %lu %d %d %d %d \n", seedArray[i], i/4, (i+1)/4, (i+2)/4, (i+3)/4);
+    
+    Rprintf("\n");
+*/    
+    
+/*    
+    for(i = 0; i < length; i++)
+        seedArray[i] =  seed * ( i+1) ;
+    
+    for(i=0;i<length;i++)
+    Rprintf("- %lu \n", seedArray[i]);
+    
+    Rprintf("\n");
+*/    
+    // same initialisation as dSFMT 1.3.0 from Matsumoto and Saito
+    seedArray[0] = seed;
+    for (i = 1; i < length; i++) 
+        seedArray[i] = 1812433253UL * ( seedArray[i - 1] ^ ( seedArray[i - 1] >> 30 ) ) + i;
+    
+    
+   /*
+    for(i=0;i<length;i++)
+        Rprintf("- %lu \n", seedArray[i]);
+    
+    Rprintf("\n");
+    */
+    
+    
+    isInitByArray = 1;
+}
+
 
 
 /**************/
@@ -12897,3 +13238,4 @@ static int primeNumber[100000] =
 ,   1299451,   1299457,   1299491,   1299499,   1299533,   1299541,   1299553,   1299583 
 ,   1299601,   1299631,   1299637,   1299647,   1299653,   1299673,   1299689,   1299709 
 };
+

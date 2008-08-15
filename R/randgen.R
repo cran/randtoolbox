@@ -56,8 +56,8 @@ torus <- function(n, dim = 1, prime, mixed = FALSE, usetime = FALSE)
                 as.matrix(res)
 }
 
-setRandSeed <- function(seed)
-	invisible( .Call("doSetRandSeed", seed) )
+setSeed <- function(seed)
+	invisible( .Call("doSetSeed", seed) )
 
 congruRand <- function(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
 {
@@ -85,14 +85,24 @@ congruRand <- function(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
                 as.matrix(res)
 }
 
-SFMT <- function(n, dim = 1, sse2 = TRUE, withtorus = FALSE, usetime = FALSE)
-{
+SFMT <- function(n, dim = 1, mexp = 19937, usepset = TRUE, withtorus = FALSE, usetime = FALSE)
+{    
         if(n <0 || is.array(n))
                 stop("invalid argument 'n'")
         if(dim < 0 || length(dim) >1)
                 stop("invalid argument 'dim'")
         if(!is.logical(withtorus) && !is.numeric(withtorus))
                 stop("invalid argument 'withtorus'")
+        if(!is.numeric(mexp))
+                stop("invalid argument 'mexp'")
+        if(!is.logical(usepset))
+                stop("invalid argument 'usepset'")
+        
+        authorizedParam <- c(607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091)
+        
+        if( !(mexp %in% authorizedParam) )
+                stop("'mexp' must be in {607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091}. ")
+    
     
         if(!is.logical(withtorus))
         {
@@ -112,18 +122,18 @@ SFMT <- function(n, dim = 1, sse2 = TRUE, withtorus = FALSE, usetime = FALSE)
         if(nbTorus == 0)
         {
                 if(length(n) > 1)
-                        res <- .Call("doSFMersenneTwister", length(n), dim, sse2)
+                        res <- .Call("doSFMersenneTwister", length(n), dim, mexp, usepset)
                 else
-                        res <- .Call("doSFMersenneTwister", n, dim, sse2)	
+                        res <- .Call("doSFMersenneTwister", n, dim, mexp, usepset)	
         }   
         else
         {
                 restorus <- torus(nbTorus, dim, mixed = FALSE, usetime = usetime)
             
                 if(length(n) > 1)
-                        res <- .Call("doSFMersenneTwister", length(n) - nbTorus, dim, sse2)
+                        res <- .Call("doSFMersenneTwister", length(n) - nbTorus, dim, mexp, usepset)
                 else
-                        res <- .Call("doSFMersenneTwister", n- nbTorus, dim, sse2)
+                        res <- .Call("doSFMersenneTwister", n- nbTorus, dim, mexp, usepset)
             
                 res <- rbind(res, as.matrix( restorus, nbTorus, dim) )
         }
@@ -134,6 +144,55 @@ SFMT <- function(n, dim = 1, sse2 = TRUE, withtorus = FALSE, usetime = FALSE)
                 as.matrix(res)
 }
  
+WELL <- function(n, dim = 1, order = 512, temper = FALSE)
+{
+        if(n <0 || is.array(n))
+                stop("invalid argument 'n'")
+        if(dim < 0 || length(dim) >1)
+                stop("invalid argument 'dim'")
+        if(!is.numeric(order))
+                stop("invalid argument 'order'")
+#        if( !(order %in% c(512, 521, 1024, 19937, 44497) ) )
+#                stop("'order' must be in {512, 521, 1024, 19937, 44497}.")
+    if( !(order %in% c(512, 1024, 19937, 44497) ) )
+    stop("'order' must be in {512, 1024, 19937, 44497}.")
+
+    if(!is.logical(temper))
+                stop("invalid argument 'temper'")
+        if(temper && order %in% c(512, 521, 1024))
+                stop("tempering impossible")
+    
+        if(length(n) > 1)
+                res <- .Call("doWELL", length(n), dim, order, temper)
+        else
+                res <- .Call("doWELL", n, dim, order, temper)	
+    
+        print(" fin du call\n")
+    
+        if(dim == 1)
+                as.vector(res)
+        else
+                as.matrix(res)
+}
+
+knuthTAOCP <- function(n, dim = 1)
+{
+    if(n <0 || is.array(n))
+        stop("invalid argument 'n'")
+    if(dim < 0 || length(dim) >1)
+        stop("invalid argument 'dim'")
+    
+    if(length(n) > 1)
+        res <- .Call("doKnuthTAOCP", length(n), dim)
+    else
+        res <- .Call("doKnuthTAOCP", n, dim)	
+    
+    if(dim == 1)
+        as.vector(res)
+    else
+        as.matrix(res)
+}
+
 testTorus <- function(n, dim=1)
 {
 	primeNumber <- c(2,      3,      5,      7,     11,     13,     17,     19,     23,     29, 

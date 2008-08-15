@@ -32,33 +32,44 @@
 
 #include "locale.h"
 #include "SFMT.h"
+#include "WELL512a.h"
+#include "WELL521a.h"
+#include "WELL1024a.h"
+#include "WELL19937a.h"
+#include "WELL44497a.h"
+#include "knuthTAOCP2002.h"
 
 
 #include "config.h"
-#ifdef HAVE_TIME_H
+#if HAVE_TIME_H
 # include <time.h>
 #endif
 
-#ifdef HAVE_SYS_TIME_H
+#if HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
 
-#ifdef HAVE_WINDOWS_H
+#if HAVE_WINDOWS_H
 # include <windows.h>
 #endif
 
 
 /* Functions accessed from .Call() */
 SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed);
-SEXP doSetRandSeed(SEXP s);
+SEXP doSetSeed(SEXP s);
 SEXP doCongruRand(SEXP n, SEXP d, SEXP modulus, SEXP multiplier, SEXP increment, SEXP echo);
-SEXP doSFMersenneTwister(SEXP n, SEXP d, SEXP sse2);
+SEXP doSFMersenneTwister(SEXP n, SEXP d, SEXP mersexpo, SEXP paramset);
+SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering);
+SEXP doKnuthTAOCP(SEXP n, SEXP d);
 
 /* utility functions */
 void torus(double *u, int nb, int dim, int *prime, int ismixed, int usetime);
-static R_INLINE double fracPart(double x);
 void congruRand(double *u, int nb, int dim, unsigned long long mod, unsigned long long mult, unsigned long long incr, int show);
-void SFmersennetwister(double *u, int nb, int dim);
+void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset);
+void WELLrng(double *u, int nb, int dim, int order, int temper);
+void knuthTAOCP(double *u, int nb, int dim);
 
-void setRandSeed(long s);
-void randSetSeed();
+void setSeed(long s);
+void randSeedByArray(int length);
+void randSeed();
+

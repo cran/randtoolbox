@@ -35,11 +35,13 @@
 static const R_CallMethodDef callMethods[] = 
 {
         {"doTorus", (DL_FUNC) &doTorus, 5},
-        {"doSetRandSeed", (DL_FUNC) &doSetRandSeed, 1},
+        {"doSetSeed", (DL_FUNC) &doSetSeed, 1},
         {"doCongruRand", (DL_FUNC) &doCongruRand, 6},
-        {"doSFMersenneTwister", (DL_FUNC) &doSFMersenneTwister, 3},
+        {"doSFMersenneTwister", (DL_FUNC) &doSFMersenneTwister, 4},
         {"doPokerTest", (DL_FUNC) &doPokerTest, 3},
         {"doCollisionTest", (DL_FUNC) &doCollisionTest, 3},
+        {"doWELL", (DL_FUNC) &doWELL, 4},
+        {"doKnuthTAOCP", (DL_FUNC) &doKnuthTAOCP, 2},
         {NULL, NULL, 0}
 };
 
@@ -47,11 +49,13 @@ void R_init_randtoolbox(DllInfo *info)
 {
         //register method accessed with .Call
         R_registerRoutines(info, NULL, callMethods, NULL, NULL); 
-        //make torus C functions available from other packages
+        //make randtoolbox C functions available from other packages
         R_RegisterCCallable("randtoolbox", "torus", (DL_FUNC) torus);
-        R_RegisterCCallable("setRandSeed", "setRandSeed", (DL_FUNC) setRandSeed);
-        R_RegisterCCallable("congruRand", "congruRand", (DL_FUNC) congruRand);
-        R_RegisterCCallable("SFmersennetwister", "SFmersennetwister", (DL_FUNC) SFmersennetwister);
-        R_RegisterCCallable("pokerTest", "pokerTest", (DL_FUNC) pokerTest);
-        R_RegisterCCallable("collisionTest", "collisionTest", (DL_FUNC) collisionTest);
+        R_RegisterCCallable("randtoolbox", "setSeed", (DL_FUNC) setSeed);
+        R_RegisterCCallable("randtoolbox", "congruRand", (DL_FUNC) congruRand);
+        R_RegisterCCallable("randtoolbox", "SFmersennetwister", (DL_FUNC) SFmersennetwister);
+        R_RegisterCCallable("randtoolbox", "pokerTest", (DL_FUNC) pokerTest);
+        R_RegisterCCallable("randtoolbox", "collisionTest", (DL_FUNC) collisionTest);
+        R_RegisterCCallable("randtoolbox", "WELLrng", (DL_FUNC) WELLrng);
+        R_RegisterCCallable("randtoolbox", "knuthTAOCP", (DL_FUNC) knuthTAOCP);    
 }

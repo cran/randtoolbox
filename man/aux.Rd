@@ -1,4 +1,5 @@
 \name{auxiliary}
+\alias{auxiliary}
 \alias{stirling}
 \title{Auxiliary functions for 'randtoolbox' package.}
 \description{

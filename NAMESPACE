@@ -4,9 +4,11 @@ useDynLib(randtoolbox, .registration = TRUE)
 
 ### Exports
 export(torus)
-export(setRandSeed)
+export(setSeed)
 export(congruRand)
 export(SFMT)
+export(WELL)
+export(knuthTAOCP)
 
 export(gap.test)
 export(freq.test)

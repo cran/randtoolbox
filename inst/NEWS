@@ -1,6 +1,18 @@
 === randtoolbox: an R package for random number generation and tests ===
 
 
+Version 1.03
+=============
+
+NEW FEATURES
+- add the WELL generator thanks to the code of P. L'Ecuyer.
+- SFMT now allows for different mersenne exponents as well as parameter sets.
+- increase the possible dimension for Torus algorithm from 1000 to 100 000.
+- add the RAN_ARRAY generator of Knuth TAOCP (2002)
+- the function setRandSeed has be renamed by setSeed.
+- update the vignette.
+
+
 Version 1.02
 =============
 
@@ -16,7 +28,7 @@ BUG FIXES
 - on windows, when the seed was not fixed by the user, we use the machine
 time. But we use only seconds of machine time not micro second like on 
 unix-like system. Hence a call like this
-> for(i in 1:10)print(torus(1))
+> for(i in 1:10)print(congruRand(1))
 produces the same output. Now it is fixed.
 
 Version 1.01 (never released)

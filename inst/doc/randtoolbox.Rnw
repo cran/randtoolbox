@@ -167,12 +167,17 @@
 
 
 \section{Introduction}
-The simulation of random variables has a big number of applications from insurance to biology, 
-and from computer science to finance. Actually the only things that are truly random are the measurement
+Random simulation has long been a very popular and well studied
+field of mathematics. There exists a wide range of applications in biology, 
+finance, insurance, physics and many others. So simulations of random
+numbers are crucial. 
+In this note, we describe the most random number algorithms
+
+Let us recall the only things, that are truly random, are the measurement
 of physical phenomena such as thermal noises of semiconductor chips or radioactive sources\footnote{
 for more details go to \url{http://www.random.org/randomness/}.}.
 
-Thus the only way to simulate some
+The only way to simulate some
 randomness on computers are carried out by deterministic algorithms. 
 Excluding true randomness\footnote{For true random
 number generation on \soft{R}, use the \pkg{random} package of \cite{truerand}.},
@@ -180,25 +185,26 @@ there are two kinds random generation: pseudo and quasi random number generators
 
 The package
 \pkg{randtoolbox} provides \soft{R} functions for pseudo and quasi random number generations, as
-well as statistical tests to quantify the quality of random numbers generated.
+well as statistical tests to quantify the quality of generated random numbers.
 
 
-\section{Brief overview of random generation algoritms\label{rng}}
+\section{Overview of random generation algoritms\label{rng}}
 In this section, we present first the pseudo random number generation and second the quasi random
 number generation. By ``random numbers'', we mean random variates of the uniform $\mathcal U(0,1)$ distribution. 
-More complex distributions can be generated with uniform variates and rejection/inversion algorithms.
+More complex distributions can be generated with uniform variates and rejection or inversion methods.
 Pseudo random number generation aims to seem random whereas quasi random number
-generation aims to be deterministic.
+generation aims to be deterministic but well equidistributed.
 
 Those familiars with algorithms such as linear congruential generation, Mersenne-Twister type algorithms,
 and low discrepancy sequences should go directly to the next section.
 
 \subsection{Pseudo random generation}
-At the beginning of the nineties, there was no state-of-the-art algorithms to generate pseudo random numbers. And
-despite this fact, most users thought the \code{rand} function they used was good, because of a short period
-and a term to term dependence. But in 1998, Japenese
-mathematicians Matsumoto and Nishimura invents the first algorithm whose period ($2^{19937}-1$) exceeds
-the number of electron spin changes since the creation of the Universe ($10^{6000}$ against $10^{120}$).
+At the beginning of the nineties, there was no state-of-the-art algorithms to generate pseudo random numbers. And the article of \cite{parkmiller} entitled \emph{Random generators: good ones are
+hard to find} is a clear proof.
+
+Despite this fact, most users thought the \code{rand} function they used was good, because of a short period and a term to term dependence. But in 1998, Japenese
+mathematicians Matsumoto and Nishimura invents the first algorithm whose period ($2^{19937}-1$) exceeds the number of electron spin changes since 
+the creation of the Universe ($10^{6000}$ against $10^{120}$). It was a \textbf{big} breakthrough.
 
 
 As described in \cite{lecuyer90}, a (pseudo) random number generator (RNG) is defined by a structure $(S, \mu, f, U, g)$
@@ -214,8 +220,11 @@ Then the generation of random numbers is as follows:
 \item generate the initial state (called the \emph{seed}) $s_0$ according to $\mu$ and compute $u_0 = g(s_0)$,
 \item iterate for $i = 1,\dots$, $s_i = f(s_{i-1})$ and $u_i = g(s_i)$.
 \end{enumerate*}
-Generally, the seed $s_0$ is determined using the clock machine, and so the random variates $u_0, \dots, u_n, \dots$
-seems ``real'' i.i.d. uniform random variates. The period of a RNG is the smallest integer $p \in \mathbb N$, such that
+Generally, the seed $s_0$ is determined using the clock machine, 
+and so the random variates $u_0, \dots, u_n, \dots$
+seems ``real'' i.i.d. uniform random variates. 
+The period of a RNG, a key characteristic, is the smallest 
+integer $p \in \mathbb N$, such that
 $\forall n \in \mathbb N, s_{p+n} = s_n$.
 
 \subsubsection{Linear congruential generators}\label{congruRand}
@@ -229,18 +238,35 @@ is the set of (positive) integers). $f$ is such that
 $$
 x_n = (a x_{n-1} + c) \mod m.
 $$
-Typically,$c$ and $m$ are chosen to 
-be relatively prime and $a$ such that $\forall x \in \mathbb N, a x \mod m \neq 0$. When $c=0$, we find
-the special of Park-Miller algorithm or Lehmer algorithm (see \cite{parkmiller}). 
+Typically, $c$ and $m$ are chosen to 
+be relatively prime and $a$ such that $\forall x \in \mathbb N, a x \mod m \neq 0$. The cycle length of
+linear congruential generators will never exceed modulus $m$, but can 
+maximised with the three following conditions
+\begin{itemize*}
+\item increment $c$ is relatively prime to $m$,
+\item $a-1$ is a multiple of every prime dividing $m$,
+\item $a-1$ is a multiple of 4 when $m$ is a multiple of 4,
+\end{itemize*}
+see \cite{knuth02} for a proof.
+
+
+When $c=0$, we have
+the special case of Park-Miller algorithm or Lehmer algorithm (see \cite{parkmiller}). 
 Let us note that the $n+j$th term
 can be easily derived from the $n$th term with $a$ puts to $a^j \mod m$ (still when $c=0$). 
 
-Finally, we generally use of the three types of \emph{output function}: $g(x) = x/m$, $x/(m-1)$
-or $x/m +1/m$\footnote{the last one has the good property to generate variate in $]0,1[$.}.
+Finally, we generally use one of the three types of \emph{output function}: 
+\begin{itemize*}
+\item $g: \mathbb N \mapsto [0,1[$, and $g(x) = \frac{x}{m}$, % \{0,\dots, m-1\}
+\item $g: \mathbb N \mapsto ]0,1]$, and $ g(x) = \frac{x}{m-1}$,
+\item $g: \mathbb N \mapsto ]0,1[$, and $ g(x) = \frac{x+1}{m}$.
+\end{itemize*}
+%The last one has the good property to generate variate in $]0,1[$.
 Linear congruential generators are implemented in the \soft{R} function \code{congruRand}.
 
 \subsubsection{Multiple recursive generators}
-The multiple recursive generators are based on the following recurrences
+A generalisation of linear congruential generators are multiple recursive generators.
+They are based on the following recurrences
 $$
 x_n = (a_1 x_{n-1} +\dots +a_k x_{n-k}  c) \mod m,
 $$
@@ -249,9 +275,18 @@ $k$ previous one. A particular case of this type of generators is when
 $$
 x_n = (x_{n-37} + x_{n-100}) \mod 2^{30},
 $$
-which is a Fibonacci-lagged generator\footnote{see \cite{lecuyer90}.}. This generator has 
-been invented by \cite{knuth02} and is implemented
-in the \soft{R} function \code{runif} (see \code{.Random.seed}).
+which is a Fibonacci-lagged generator\footnote{see \cite{lecuyer90}.}. The period is around $2^{129}$.
+This generator has 
+been invented by \cite{knuth02} and is generally called ``Knuth-TAOCP-2002'' or 
+simply ``Knuth-TAOCP"\footnote{TAOCP stands for The Art Of Computer Programming, Knuth's famous book.}.
+
+An integer version of this generator is implemented
+in the \soft{R} function \code{runif} (see \code{RNG}). We include in the package the
+latest double version, which corrects undesirable deficiency. As described on Knuth's 
+webpage\footnote{go to \url{http://www-cs-faculty.stanford.edu/\~knuth/news02.html\#rng}.}
+, the previous version of 
+Knuth-TAOCP fails randomness test if we generate few sequences with several seeds.
+The cures to this problem is to discard the first 2000 numbers.
 
 
 \subsubsection{Mersenne-Twister}
@@ -260,45 +295,46 @@ generators (cf. \cite{lecuyer90}). But until here, no algorithms
 exploit the binary structure of computers (i.e. use binary operations). In 1994, 
 Matsumoto and Kurita invented the TT800 generator using
 binary operations. But \cite{matsumoto98} greatly improved the use of binary 
-operations and proposed a new type of random number generators, which could be
-called ``Mersenne-Twister type''\footnote{the name comes from the fact this
-generator has a Mersenne-prime number period.} generators.
+operations and proposed a new random number generator 
+called Mersenne-Twister.
 
 \cite{matsumoto98} work on the finite set $N_2 = \{0,1\}$, so a variable $x$
 is represented by a vectors of $\omega$ bits (e.g. 32 bits). They use the 
-following linear recurrence for the $k$th term:
+following linear recurrence for the $n+i$th term:
 $$
-x_{k+n} = x_{k+m} \oplus (x_k^{upp} | x_{k+1}^{low} ) A,
+x_{i+n} = x_{i+m} \oplus (x_i^{upp} | x_{i+1}^{low} ) A,
 $$
-where $n, m$ are constant integers, $x_k^{upp}$ (respectively $x_k^{low}$) means the upper (lower)
-$\omega -r$ ($r$) bits of $x_k$ and $A$ a $\omega\times\omega$ matrix
-of $N_2$. $|$ is the operator of concatenation, so $x_k^{upp} | x_{k+1}^{low}$ appends the upper
-$\omega-r$ bits of $x_k$ with the lower $r$ bits of $x_{k+1}$. After a right multiplication with
-the matrix %------------ footnote
-$A$\footnote{%Matrix $A$ equals to 
-%Matrix $A$ equals to %$\left( \begin{array}{cc}  0 & I_{\omega-1}\\
-%\multicolumn{2}{c}{a} \end{array} \right)$, 
+where $n > m$ are constant integers, $x_i^{upp}$ (respectively $x_i^{low}$) means the upper (lower)
+$\omega -r$ ($r$) bits of $x_i$ and $A$ a $\omega\times\omega$ matrix
+of $N_2$. $|$ is the operator of concatenation, so $x_i^{upp} | x_{i+1}^{low}$ appends the upper
+$\omega-r$ bits of $x_i$ with the lower $r$ bits of $x_{i+1}$. After a right multiplication with
+the matrix A\footnote{%------------ footnote
+Matrix $A$ equals to $\left( \begin{array}{cc}  0 & I_{\omega-1}\\
+\multicolumn{2}{c}{a} \end{array} \right)$
 whose right multiplication can be done with a bitwise rightshift 
 operation and an addition with integer $a$. See the section 2 of \cite{matsumoto98} for explanations.}, %------------ footnote
-$\oplus$ adds the result with $x_{k+m}$ bit to bit. 
+$\oplus$ adds the result with $x_{i+m}$ bit to bit modulo two (i.e. $\oplus$ 
+denotes the exclusive-or called xor).
+
 Once provided an initial seed $x_0, \dots, x_{n-1}$, Mersenne Twister produces
-random integers in $0,\dots, 2^{omega}-1$.
-
-
+random integers in $0,\dots, 2^{\omega}-1$.
 All operations 
 used in the recurrence are bitwise operations, thus it is a very fast computation
 compared to modulus operations used in previous algorithms.
+
 To increase the equidistribution, \cite{matsumoto98} added a tempering step:
 \begin{eqnarray*}
 %Y_k &\leftarrow& X_{k+n}\\
-y_k &\leftarrow& x_{k+n} \oplus (x_{k+n} >> u),\\
-y_k &\leftarrow& y_k \oplus ( (y_k << s) \oplus b ),\\
-y_k &\leftarrow& y_k \oplus ( (y_k << t) \oplus c ),\\
-y_k &\leftarrow& y_k \oplus (y_k >> l),
+y_i &\leftarrow& x_{i+n} \oplus (x_{i+n} >> u),\\
+y_i &\leftarrow& y_i \oplus ( (y_i << s) \oplus b ),\\
+y_i &\leftarrow& y_i \oplus ( (y_i << t) \oplus c ),\\
+y_i &\leftarrow& y_i \oplus (y_i >> l),
 \end{eqnarray*}
 where $>> u$ (resp. $<< s$) denotes a rightshift (leftshift) of $u$ ($s$) bits. 
-At last, we transform random integers to reals with the output function
-$g(x) = \frac{x+1}{2^\omega}$. Details of 
+At last, we transform random integers to reals with one of output functions
+$g$ proposed above.
+
+Details of 
 the order of the successive operations used in the Mersenne-Twister (MT) algorithm can
 be found at the page 7 of \cite{matsumoto98}. However, the least, we need to 
 learn and to retain, is all these (bitwise) operations can be easily done in many computer
@@ -313,44 +349,156 @@ The set of parameters used are
 These parameters ensure a good equidistribution and a period of $2^{n\omega -r}-1 = 2^{19937}-1$.
 
 The great advantages of the MT algorithm are a far longer period than
-any linear congruential generators (greater than the period of \cite{parkmiller} sequence of $2^{32}-1$ or
-of \cite{knuth02} around $2^{129}$), a far better equidistribution (since it passed the DieHard test)
-as well as an VERY good computation time (since it used binary operations and not 
-the costly real operation of modullus).
+any previous generators (greater than the period of \cite{parkmiller} sequence of $2^{32}-1$ or
+the period of \cite{knuth02} around $2^{129}$), 
+a far better equidistribution (since it passed the DieHard test)
+as well as an \textbf{very} good computation time (since it used binary operations and not 
+the costly real operation modullus).
 
 MT algorithm is already implemented in \soft{R} (function \code{runif}). However
-the package \code{randtoolbox} provides a function to compute a ten-years improved version
-of Mersenne-Twister:  SIMD-oriented Fast Mersenne Twister algorithm. 
-A decade after the invention of MT, \cite{matsumoto08} enhances their algorithm with the
-computer of today, that have Single Instruction Mutiple Data operations letting to work
-conceptually with 128 bits integers.
+the package \code{randtoolbox} provide functions to compute a new version
+of Mersenne-Twister (the SIMD-oriented Fast Mersenne Twister algorithm) as well
+as the WELL (Well Equidistributed Long-period Linear) generator.
 
-\subsubsection{SF-Mersenne Twister}\label{sfmt}
+\subsubsection{Well Equidistributed Long-period Linear generators}
+The MT recurrence can be rewritten as 
+$$
+x_i = A x_{i-1},
+$$
+where $x_k$ are vectors of $N_2$ and $A$ a transition matrix.
+The charateristic polynom of $A$ is 
+$$
+\chi_A(z) \stackrel{\triangle}{=} \textrm{det}(A-zI) = z^k - \alpha_1 z^{k-1}-\dots- \alpha_{k-1} z -\alpha_k,
+$$
+with coefficients $\alpha_k$'s in $N_2$.
+Those coefficients are linked with output integers by
+$$
+x_{i,j} = (\alpha_1 x_{i-1,j} +\dots + \alpha_k x_{i-k,j}) \mod 2
+$$
+for all component $j$.
+
+From \cite{well}, we have the period length of the recurrence 
+reaches the upper bound $2^k-1$ if and only if the polynom $\chi_A$
+is a primitive polynomial over $N_2$.
+
+The more complex is the matrix $A$ the slower will be the associated
+generator. Thus, we compromise between speed and quality (of equidistribution). 
+If we denote by $\psi_d$ the set of all $d$-dimensional vectors produced by the generator
+from all initial \emph{states}\footnote{The cardinality of $\psi_d$ is $2^k$.}.
+
+If we divide each dimension into $2^l$\footnote{with $l$ an integer such
+that $l\leq \lfloor k/d\rfloor$.} cells (i.e. the unit hypercube $[0,1[^d$ is
+divided into $2^{ld}$ cells), the set $\psi_d$ is said to be $(d,l)$-equidistributed 
+if and only if each cell contains exactly $2^{k-dl}$ of its points. The largest
+dimension for which the set $\psi_d$ is $(d,l)$-equidistributed is denoted by $d_l$.
+
+
+The great advantage of using this definition is we are not forced to compute
+random points to know the uniformity of a generator. Indeed, thanks to the
+linear structure of the recurrence we can express the property of bits of the current
+state. From this we define a dimension gap for $l$ bits resolution
+as $\delta_l = \lfloor k/l \rfloor - d_l$.
+
+An usual measure of uniformity is the sum of dimension gaps
+$$
+\Delta_1 = \sum_{l=1}^\omega \delta_l.
+$$
+\cite{well} tries to find generators with a dimension gap sum $\Delta_1$ around zero 
+and a number $Z_1$ of non-zero coefficients in $\chi_A$ around $k/2$.
+Generators with these two characteristics are called Well Equidistributed Long-period Linear
+generators.
+As a benchmark, Mersenne Twister algorithm is characterized with $k=19937$,
+$\Delta_1=6750$ and $Z_1=135$. 
+
+The WELL generator is characterized by the following $A$ matrix
+$$
+\left(
+\begin{array}{cccccc}
+T_{5,7,0} & 0 & \dots & & & \\
+T_0 & 0 & \dots & & & \\
+0 & I & \ddots & & & \\
+ & \ddots & \ddots & & &\\
+ & & \ddots & I  & 0 &\\
+ & & & 0 & L & 0\\
+\end{array}
+\right),
+$$
+where $T_.$ are specific matrices, $I$ the identity matrix and $L$ has ones on its ``top left'' corner.
+The first two lines are not entirely sparse but ``fill'' with $T_{.}$ matrices. All $T_.$'s matrices are
+here to change the state in a very efficient way, while the subdiagonal (nearly full of ones) is used to shift the unmodified part of the current state to the next one. See \cite{well} for details.
+
+The MT generator can be obtained with special values of $T_.$'s matrices. \cite{well} proposes
+a set of parameters, where they computed dimension gap number $\Delta_1$. The full table
+can be found in \cite{well}, we only sum up parameters for those implemented in this package
+in table \ref{welltable}.
+
+\begin{table}[!htb]
+\center
+\begin{tabular}{lcccccc}
+\hline
+name & $k$ & $N_1$ & $\Delta_1$\\
+\hline
+WELL512a & 512 & 225 & 0\\
+\hline
+WELL1024a & 1024 & 407 & 0\\
+\hline
+WELL19937a & 19937 & 8585 & 4\\
+\hline 
+WELL44497a & 44497 & 16883 & 7\\
+\hline
+\end {tabular}
+\caption{Specific WELL generators}
+\label{welltable}
+\end{table}
+
+Let us note that for the last two generators a tempering step is possible in order to have
+maximally equidistributed generator (i.e. $(d,l)$-equidistributed for all $d$ and $l$). These 
+generators are implemented in this package thanks to the \soft{C} code of L'Ecuyer and Panneton.
+
+\subsubsection{SIMD-oriented Fast Mersenne Twister algorithms}\label{sfmt}
+A decade after the invention of MT, \cite{matsumoto08} enhances their algorithm with the
+computer of today, which have Single Instruction Mutiple Data operations letting to work
+conceptually with 128 bits integers. 
+
 MT and its successor
 are part of the family of multiple-recursive matrix generators since they verify
 a multiple recursive equation with matrix constants. For MT, we have
-$$
-x_{k+n} = x_{k+m} + x_{k+1} 
-\left(\begin{array}{cc} 0 & 0\\ 0 & I_{r} \end{array}\right) A 
-+ x_k \left(\begin{array}{cc} I_{\omega-r} &0\\ 0 & 0 \end{array}\right) A. 
-$$
-This recursive equation can be expressed with the following function
-$$
-h(x_k, x_{k+1}, \dots, x_{k+n-1}) = x_m + (x_k| x_{k+1})A.
-$$
-The recursion could be rewritten as 
-$$
-h(\omega_0, \dots, \omega_{n-1}) = \omega_m + (\omega_k | \omega_{k+1})A,
-$$
-where $\omega_i$ denotes a 32-bit integer (i.e. horizontal vectors of $N_2$).
+the following recurrence
+\begin{multline*}
+x_{k+n} =\\ \underbrace{
+x_k \left(\begin{array}{cc} I_{\omega-r} &0\\ 0 & 0 \end{array}\right) A
+\oplus x_{k+1} \left(\begin{array}{cc} 0 & 0\\ 0 & I_{r} \end{array}\right)A  \oplus x_{k+m}.}_{
+h(x_k, x_{k+1}, \dots, x_m,\dots,x_{k+n-1})}
+\end{multline*}
+for the $k+n$th term.
 
-The general recurrence of SFMT generalizes MT recursion to
+Thus the MT recursion is entirely characterized by 
 $$
-h(\omega_0, \dots, \omega_{n-1}) = \omega_0 A + \omega_m B + \omega_{n-2} C + \omega_{n-1} D,
+h(\omega_0, \dots, \omega_{n-1}) = (\omega_0 | \omega_{1})A\oplus \omega_m ,
 $$
-where $A, B, C, D$ are sparse matrix over $N_2$, $\omega_i$ could be integers of $\omega=32, 64, 128$ 
-bits and $n=\left\lceil \frac{19937}{128}\right\rceil = 156$. The right multiplication matrix operations
-can EASILY be done using SIMD opertations\footnote{see section 2.3 of \cite{matsumoto08}. }.
+where $\omega_i$ denotes the $i$th word integer (i.e. horizontal vectors of $N_2$).
+
+The general recurrence for the SFMT algorithm extends MT recursion to
+$$
+h(\omega_0, \dots, \omega_{n-1}) = \omega_0 A \oplus \omega_m B 
+\oplus \omega_{n-2} C \oplus \omega_{n-1} D,
+$$
+where $A, B, C, D$ are sparse matrices 
+over $N_2$, $\omega_i$ are 128-bit integers and 
+the degree of recursion is $n=\left\lceil \frac{19937}{128}\right\rceil = 156$. 
+
+The matrices $A, B, C$ and $ D$ for a word $w$ are defined as follows,
+\begin{itemize*}
+\item $wA = \left(w \stackrel{128}{<<} 8\right) \oplus w$, 
+\item $wB = \left(w \stackrel{32}{>>} 11\right) \otimes c$, where $c$ is a 128-bit constant 
+%$0\times BFFFFFF6 BFFAFFFF DDFECB7F DFFFFFEF$ in hexadecimal form 
+and $\otimes$ the bitwise AND operator,
+\item $wC = w \stackrel{128}{>>} 8$,
+\item $wD = w \stackrel{32}{<<} 18$,
+\end{itemize*}
+where $\stackrel{128}{<<}$ denotes a 128-bit operation while $\stackrel{32}{>>}$ a 32-bit 
+operation, i.e. an operation on the four 32-bit parts of  128-bit word $w$.
+
 Hence the \emph{transition function} of SFMT is given by
 \begin{eqnarray*}
 f :  \left( N_2^\omega \right)^n &\mapsto & \left( N_2^\omega \right)^n \\
@@ -358,50 +506,69 @@ f :  \left( N_2^\omega \right)^n &\mapsto & \left( N_2^\omega \right)^n \\
 \end{eqnarray*}
 where $ \left( N_2^\omega \right)^n$ is the \emph{state} space.
 
-There are various sets of parameters for SFMT which allow different periods from 
-$2^{607}-1$ to $2^{216091}-1$. The advantage of SFMT over MT is the computation speed, SFMT is twice
-faster without SIMD operations and nearly fourth faster with SIMD operations. But SFMT has also
+The selection of recursion and parameters was carried out to find
+a good dimension of equidistribution for a given a period. This step is done by
+studying the characteristic polynomial of $f$. 
+SFMT allow periods of $2^{p}-1$ with
+$p$ a (prime) Mersenne exponent. 
+\cite{matsumoto08} proposes the following set of exponents
+607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049 and 216091.
+
+The advantage of SFMT over MT is the computation speed, SFMT is twice
+faster without SIMD operations and nearly fourt times faster with SIMD operations. SFMT has also
 a better equidistribution\footnote{See linear algebra arguments of \cite{matsumoto98}.} 
 and a better recovery time from zeros-excess states\footnote{states with too many zeros.}.
 The function \code{SFMT} provides an interface to the \soft{C} code of Matsumoto and Saito.
 
+
+
 \subsection{Quasi random generation}
-Before detailing and explaining quasi random generation, we must (quickly) explain Monte-Carlo methods,
-which have been introduced in the forties. In this section, we follow the approach of \cite{niederreiter}. 
+Before explaining and detailing quasi random generation, 
+we must (quickly) explain Monte-Carlo\footnote{according to wikipedia the name comes
+from a famous casino in Monaco.} methods,
+which have been introduced in the forties. In this section, 
+we follow the approach of \cite{niederreiter}. 
+
 Let us work on the $d$-dimensional unit cube $I^d =[0,1]^d$ and with a (multivariate) bounded 
-(Lebesgues) integrable function on $I^d$. Then we
+(Lebesgues) integrable function $f$ on $I^d$. Then we
 define the Monte Carlo approximation of integral of $f$ over $I^d$ by
 $$
-\int_{I^d} f(x)dx \approx \frac{1}{n} \sum_{i=1}^n f(x_i),
+\int_{I^d} f(x)dx \approx \frac{1}{n} \sum_{i=1}^n f(X_i),
 $$
-where $(x_i)_{1\leq i\leq n}$ are independent random points from $I^d$. The strong law of large numbers
+where $(X_i)_{1\leq i\leq n}$ are independent random points from $I^d$. 
+
+The strong law of large numbers
 ensures the almost surely convergence of the approximation. Furthermore, the expected integration
 error is bounded by $O(\frac{1}{\sqrt n})$, with the interesting fact it does not depend on dimension $d$.
+Thus Monte Carlo methods have a wide range of applications.
 
-The main difference between Monte-Carlo methods and quasi Monte-Carlo methods is that we no longer
+The main difference between (pseudo) Monte-Carlo methods 
+and quasi Monte-Carlo methods is that we no longer
 use random points $(x_i)_{1\leq i\leq n}$ but deterministic points. Unlike statistical tests,
 numerical integration does not rely on true randomness. Let us note that quasi Monte-Carlo methods dates
 from the fifties, and have also been used for interpolation problems and integral equations solving.
 
 
 In the following, we consider a sequence
-$(u_i)_{1\leq i\leq n}$ of points in $I^d$, that are NOT random. As $n$ increases, we want
+$(u_i)_{1\leq i\leq n}$ of points in $I^d$, that are \textbf{not} random. As $n$ increases, we want
 $$
 \frac{1}{n} \sum_{i=1}^n f(u_i) \underset{n\rightarrow +\infty}{ \longrightarrow} \int_{I^d} f(x)dx.
 $$
-The condition on the sequence $(u_i)_i$ is to be uniformly distributed in the unit cube $I^d$
+Furthermore the convergence condition on the sequence $(u_i)_i$ 
+is to be uniformly distributed in the unit cube $I^d$
 with the following sense:
 $$
 \forall J\subset I^d, \underset{n\rightarrow +\infty}{\lim} \frac{1}{n} \sum_{i=1}^n \ind_J(u_i)  = \lambda_d(I),
 $$
-where $\lambda_d$ stands for the volume (i.e. the $d$-dimensional Lebesgue measure) and $\ind_J$ the 
+where $\lambda_d$ stands for the $d$-dimensional volume 
+(i.e. the $d$-dimensional Lebesgue measure) and $\ind_J$ the 
 indicator function of subset $J$. The problem is that our discrete sequence will never constitute
 a ``fair'' distribution in $I^d$, since there will always be a small subset with no points.
 
-Therefore, we need to consider a more fexible defition of uniform distribution of a sequence. Before 
+Therefore, we need to consider a more flexible definition of uniform distribution of a sequence. Before 
 introducing the discrepancy, we need to define $\card_E(u_1,\dots, u_n)$
 as $\sum_{i=1}^n \ind_E(u_i)$ the number of points in subset $E$.
-The discrepancy $D_n$ of the $n$ points $(u_i)_{1\leq i\leq n}$ in $I^d$ is given by 
+Then the discrepancy $D_n$ of the $n$ points $(u_i)_{1\leq i\leq n}$ in $I^d$ is given by 
 $$
 D_n = \underset{J\in \mathcal J}{\sup}\left| \frac{\card_J(u_1,\dots, u_n)}{n} - \lambda_d(J) \right|
 $$
@@ -409,9 +576,10 @@ where $\mathcal J$ denotes the family of all subintervals of $I^d$ of the form $
 If we took the family of all subintervals of $I^d$ of the form $\prod_{i=1}^d [0,b_i ]$, $D_n$
 is called the star discrepancy (cf. \cite{niederreiter92}). 
 
-Let us also note that
-the $D_n$ discrepancy is nothing else than the $L_{\infty}$-norm of points $(u_i)_{1\leq i\leq n}$
-over the unit cube. A $L_{2}$-norm can be defined as well, see \cite{niederreiter92} or \cite{jackel}.
+Let us note that
+the $D_n$ discrepancy is nothing else than the $L_{\infty}$-norm over the unit cube 
+of the difference between the empirical ratio of
+points $(u_i)_{1\leq i\leq n}$ in a subset $J$ and the theoretical point number in $J$. A $L_{2}$-norm can be defined as well, see \cite{niederreiter92} or \cite{jackel}.
 
 The integral error is bounded by
 $$
@@ -420,13 +588,15 @@ $$
 where $V_d(f)$ is the $d$-dimensional Hardy and Krause variation\footnote{
 Interested readers can find the definition page 966 of \cite{niederreiter}. In a sentence, the
 Hardy and Krause variation of $f$ is the supremum of sums of $d$-dimensional
-delta operators applied to function $f$. } of $f$ on $I^d$ (supposed to be finite). Let us
-notice that the integral error bound of the product of two independent quantities:
+delta operators applied to function $f$. } of $f$ on $I^d$ (supposed to be finite). 
+
+Actually the integral error bound is the product of two independent quantities:
 the variability of function $f$ through $V_d(f)$ and the regularity of the sequence
 through $D_n$. So, we want
-to minimize the discrepancy $D_n$.
+to minimize the discrepancy $D_n$ since we generally do not have
+a choice in the ``problem'' function $f$.
 
-We will not explain it but this type of result can be extented to subset $J$ of
+We will not explain it but this concept can be extented to subset $J$ of
 the unit cube $I^d$ in order to have a similar bound for $\int_J f(x)dx$. 
 
 In the literature, there were many ways to find sequences with small discrepancy,
@@ -446,14 +616,14 @@ the sequence of $n$ terms given by $(\frac{1}{2n}, \frac{3}{2n}, \dots, \frac{2n
 This sequence has a discrepancy $\frac{1}{n}$, see \cite{niederreiter} for details.
 
  The problem with
-this finite sequence is it depends on $n$. If we want different points numbers,
-we need to recompute the whole sequence. In the following, we will
+this finite sequence is it depends on $n$. And if we want different points numbers,
+we need to recompute the whole sequence. In the following, we will on
 work the first $n$ points of an infinite sequence in order to use previous
 computation if we increase $n$.
 
-We introduce the notion of discrepancy on a finite sequence  $(u_i)_{1\leq i\leq n}$. In 
-the example, we are able to calculate exactly the discrepancy. With infinite sequence,
-this is no longer possible. Thus, we will try to estimate asymptotic equivalents of 
+Moreover we introduce the notion of discrepancy on a finite sequence  $(u_i)_{1\leq i\leq n}$. In 
+the above example, we are able to calculate exactly the discrepancy. With infinite sequence,
+this is no longer possible. Thus, we will only try to estimate asymptotic equivalents of 
 discrepancy.
 
 The discrepancy of the average sequence of points is governed by the law of the iterated
@@ -463,22 +633,20 @@ $$
 $$
 which leads to the following asymptotic equivalent for $D_n$:
 $$
-D_n = O\left( \frac{\log \log n}{\sqrt{n} } \right).
+D_n = O\left( \sqrt{\frac{\log \log n}{n}} \right).
 $$
 
 
 \subsubsection{Van der Corput sequences}
-An example of quasi-random points which are low discrepancy is the
-the (unidimensional) Van der Corput sequences. The big advantage
-of Van der Corput sequence is that they use $p$-adic fractions easily 
-computable on the binary structure of computers.
+An example of quasi-random points, which have a low discrepancy, is
+the (unidimensional) Van der Corput sequences. 
 
-Let $p$ be a prime number. Every integer $n$ can decompose the $p$ basis,
+Let $p$ be a prime number. Every integer $n$ can be decomposed in the $p$ basis,
 i.e. there exists some integer $k$ such that
 $$
 n = \sum_{j=1}^k a_j p^j.
 $$
-Thus, we can define the radical-inverse function of integer $n$ as
+Then, we can define the radical-inverse function of integer $n$ as
 $$
 \phi_p(n) = \sum_{j=1}^k \frac{a_j}{ p^{j+1}}.
 $$
@@ -515,6 +683,10 @@ $n$	&	$p=2$ & $p=3$ & $p=5$ & 	$p=2$& $p=3$& $p=5$\\
 \caption{Van der Corput first terms}
 \label{vandercorput}
 \end{table}
+
+The big advantage
+of Van der Corput sequence is that they use $p$-adic fractions easily 
+computable on the binary structure of computers.
 
 %\begin{table}[!htb]
 %\center
@@ -582,7 +754,7 @@ $a_j$:
 $$
 \forall 2\leq D \leq d, a_{D,j} = \sum_{j=i}^k C_j^i a_{D-1,j} \mod p,
 $$
-where $C_i^j$ denotes standard combination $\frac{i!}{j!(i-j)!}$.
+where $C_j^i$ denotes standard combination $\frac{j!}{i!(j-i)!}$.
 Then we take the radical-inversion $\phi_p(a_{D,1}, \dots, a_{D,k})$ defined as
 $$
 \phi_p(a_{1}, \dots, a_{k}) = \sum_{j=1}^k \frac{a_{j}}{ p^{j+1}},
@@ -604,23 +776,25 @@ sequence are listed in table \ref{faure}.
 % & \multicolumn{2}{c}{$n$ in $p$-basis} & \multicolumn{2}{c}{$\phi_p(n)$}\\
 $n$	&	$a_{13}a_{12}a_{11}\fmark$ & $a_{23}a_{22}a_{21}$ & $\phi(a_{13}..)$ & $\phi(a_{23}..)$\\	%$\phi_p(a_{13}a_{12}a_{11})$& $\phi_p(a_{13}a_{12}a_{11})$\\
 \hline
-0	&	0	&	0	&	0	&	0\\
+0	&	000	&	000	&	0	&	0\\
+1 	&	001	&	001	&	1/3	&	1/3\\
+2	&	002	&	002	&	2/3	&	2/3\\
 \hline
-1 	&	1	&	1	&	1/3	&	1/3\\
+3	&	010	&	012	&	1/9	&	7/9\\
+4	&	011	&	010	&	4/9	&	1/9\\
+5	&	012	&	011	&	7/9	&	4/9\\
 \hline
-2	&	2	&	2	&	2/3	&	2/3\\
+6	&	020	&	021	&	2/9	&	5/9\\
+7	&	021	&	022	&	5/9	&	8/9\\
+8	&	022	&	020	&	8/9	&	2/9\\
 \hline
-3	&	10	&	12	&	1/9	&	7/9\\
+9	&	100	&	100	&	1/27	&	1/27\\
+10	&	101	&	101	&	10/27	&	10/27\\
+11	&	102	&	102	&	19/27	&	19/27\\
 \hline
-4	&	11	&	10	&	4/9	&	1/9\\
-\hline
-5	&	12	&	11	&	7/9	&	4/9\\
-\hline
-6	&	20	&	21	&	2/9	&	5/9\\
-\hline
-7	&	21	&	22	&	5/9	&	8/9\\
-\hline
-8	&	22	&	20	&	8/9	&	2/9\\
+12	&	110	&	112	&	4/27	&	22/27\\
+13	&	111	&	110	&	12/27	&	4/27\\
+14	&	112	&	111	&	22/27	&	12/27\\
 \hline
 \end {tabular}
 \caption{Faure first terms}
@@ -634,7 +808,7 @@ $n$	&	$a_{13}a_{12}a_{11}\fmark$ & $a_{23}a_{22}a_{21}$ & $\phi(a_{13}..)$ & $\p
 
 \subsubsection{Kronecker sequences}
 Another kind of low-discrepancy sequence uses irrational number and fractional part.
-The fractional part of a real $x$ is given by $\{x\} = x-\lfloor x \rfloor$. The infinite
+The fractional part of a real $x$ is denoted by $\{x\} = x-\lfloor x \rfloor$. The infinite
 sequence $(n \{\alpha\})_{n\leq 0}$ has a bound for its discrepancy
 $$
 D_n \leq C\frac{1+\log n}{n}.
@@ -643,9 +817,9 @@ This family of infinite sequence $(n \{\alpha\})_{n\leq 0}$ is called the Kronec
 
 A special case of the Kronecker sequence is the Torus algorithm where irrational number $\alpha$
 is a square root of a prime number. 
-The $n$th term of Torus algorithm is defined by
+The $n$th term of the $d$-dimensional Torus algorithm is defined by
 $$
-( n \{\sqrt{p_1}\} , \dots, n \{\sqrt{p_d}\}) \in I^d,
+\left( n \{\sqrt{p_1}\} , \dots, n \{\sqrt{p_d}\} \right) \in I^d,
 $$
 where $(p_1, \dots,p_d)$ are prime numbers, generally the first $d$ prime numbers.
 With the previous inequality, we can derive an estimate of the Torus algorithm discrepancy:
@@ -678,12 +852,12 @@ regularity of $f$.
 If $f$ is 1-periodic for each variable, then the approximation with
 good lattice points is
 $$
-\int_{I^d} f(x)dx \approx \frac{1}{n} \sum_{i=1}^n f(\frac{i}{n}g),
+\int_{I^d} f(x)dx \approx \frac{1}{n} \sum_{i=1}^n f\left(\frac{i}{n}g\right),
 $$
 where $g\in \mathbb Z^d$ is suitable $d$-dimensional lattice point. To impose $f$
 to be $1$-periodic may seem too brutal. But there exists a method
 to transform $f$ into a $1$-periodic function while preserving
-regularity and value of the integrand (see \cite{niederreiter} page 983).
+regularity and value of the integrand (see \citealp[page 983]{niederreiter}).
 
 We have the following theorem for good lattice points. For every
 dimension $d\geq 2$ and integer $n\geq 2$, there exists a lattice points
@@ -696,10 +870,10 @@ $$
 
 Numerous studies of good lattice points try to find point $g$
 which minimizes the discrepancy. Korobov test $g$ of the 
-following form $(1, m, \dots, m^{d-1})$ with $m\in \mathbb N$.
+following form $\left(1, m, \dots, m^{d-1}\right)$ with $m\in \mathbb N$.
 Bahvalov tries Fibonnaci numbers $(F_1,\dots, F_d)$.
 Other studies look directly for the point $\alpha=\frac{g}{n}$
-e.g. $\alpha = (p^{\frac{1}{d+1}}, m, \dots, p^{\frac{d}{d+1}})$
+e.g. $\alpha = \left(p^{\frac{1}{d+1}}, \dots, p^{\frac{d}{d+1}}\right)$
 or some cosinus functions. We let interested readers to 
 look for detailed information in \cite{niederreiter}.
 
@@ -714,11 +888,11 @@ For pseudo random generation, \soft{R} provides many
 algorithms through the function \code{runif} parametrized 
 with \code{.Random.seed}. We encourage readers to 
 look in the corresponding help pages for examples and
-usage of this function. Let us just say \code{runif} use
+usage of those functions. Let us just say \code{runif} use
 the Mersenne-Twister algorithm by default and other
 generators such as Wichmann-Hill, Marsaglia-Multicarry or
 Knuth-TAOCP-2002\footnote{see \cite{wichmann},
-\cite{marsaglia} and \cite{knuth02}}.
+\cite{marsaglia} and \cite{knuth02} for details.}.
 
 \subsubsection{\code{congruRand}}
 The \code{randtoolbox} package provides two pseudo-random 
@@ -742,15 +916,15 @@ congruRand(10)
 One will quickly note that two calls to \code{congruRand} will
 not produce the same output. This is due to the fact that we use
 the machine time to initiate the sequence at each call.
-But the user can set the \emph{seed} with the function \code{setRandSeed}:
+But the user can set the \emph{seed} with the function \code{setSeed}:
 %%% R code
 <<congrurandseed1, fig=FALSE, echo=TRUE, eval=FALSE>>=
-setRandSeed(1)
+setSeed(1)
 congruRand(10)
 @
 <<congrurandseed2, fig=FALSE, echo=FALSE>>=
 options( width =40)
-setRandSeed(1)
+setSeed(1)
 congruRand(10)
 @
 %%%
@@ -759,16 +933,17 @@ One can follow the evolution of the $n$th integer generated with the option
 \code{echo=TRUE}.
 %%% R code
 <<congrurandseed3, fig=FALSE, echo=TRUE, eval=FALSE>>=
-setRandSeed(1)
+setSeed(1)
 congruRand(10, echo=TRUE)
 @
 <<congrurandseed4, fig=FALSE, echo=FALSE>>=
 options( width =40)
-setRandSeed(1)
+setSeed(1)
 congruRand(10, echo=TRUE)
 @
 %%%
-The integers used for the 10 first terms are listed in table \ref{parkmiller}.
+We can check that those integers are the 10 first terms are listed in table \ref{parkmiller},
+coming from \url{http://www.firstpr.com.au/dsp/rand31/}.
 \begin{table}[!htb]
 \center
 \begin{tabular}{llll}
@@ -786,38 +961,38 @@ $n$&$x_n$ & $n$ &$x_n$\\
 \label{parkmiller}
 \end{table}
 
-We can check that the 9998th term of the sequence. From CITATION,
-we know for sure that integers of the Park-Miller sequence are 
+We can also check around the 10000th term. From the site \url{http://www.firstpr.com.au/dsp/rand31/},
+we know that 9998th to 10002th terms of the Park-Miller sequence are 
 925166085, 1484786315, 1043618065, 1589873406, 2010798668.
 The \code{congruRand} generates 
 %%% R code
 <<congrurandseed5, fig=FALSE, echo=TRUE, eval=FALSE>>=
-setRandSeed(1614852353)
+setSeed(1614852353)
 congruRand(5, echo=TRUE)
 @
 <<congrurandseed6, fig=FALSE, echo=FALSE>>=
 options( width =40)
-setRandSeed(1614852353)
+setSeed(1614852353)
 congruRand(5, echo=TRUE)
 @
 %%%
-with 1614852353 being the 9997th term. 
+with 1614852353 being the 9997th term of Park-Miller sequence. 
 
 However, we are not limited to the Park-Miller sequence. If we change 
 the modulus, the increment and the multiplier, we get other random sequences.
 For example, 
 %%% R code
 <<congrurandseed5, fig=FALSE, echo=TRUE, eval=FALSE>>=
-setRandSeed(12)
+setSeed(12)
 congruRand(5, mod = 2^8, mult = 25, incr = 16, echo= TRUE)
 @
 <<congrurandseed6, fig=FALSE, echo=FALSE>>=
 options( width =30)
-setRandSeed(12)
+setSeed(12)
 congruRand(5, mod = 2^8, mult = 25, incr = 16, echo= TRUE)
 @
 %%%
-Those values are correct according to \cite{planchetMFAbook} (page 119).
+Those values are correct according to \citealp[page 119]{planchetMFAbook}.
 
 \initFmark
 Here is a list of RNGs computable with \code{congruRand}:
@@ -843,21 +1018,21 @@ Park - Miller & $2^{32}-1$ & $16807$ & $0$\\
 %en dehors du tableau/legende, mettre a jour le compteur footnote avec \updateFtext
 %placer \ftext{...le texte de la legende... } en dehors du tableau ou de la legende
 \updateFtext
-\ftext{1013904223}
+\ftext{1013904223.}
 
-\ftext{636412233846793005}
+\ftext{636412233846793005.}
 
 
 
 One may wonder why we implement such a short-period algorithm since
 we know the Mersenne-Twister algorithm. It is provided to make
-comparisons with other algorithms. The Park-Miller should \emph{not} be 
+comparisons with other algorithms. The Park-Miller should \textbf{not} be 
 viewed as a ``good'' random generator. 
 
 Finally, \code{congruRand} function has a \code{dim} argument to generate 
 \code{dim}- dimensional vectors of random numbers. The $n$th vector
 is build with $d$ consecutive numbers of the RNG sequence 
-(i.e. $(u_{n+1}, \dots, u_{n+d})$).
+(i.e. the $n$th term is the $(u_{n+1}, \dots, u_{n+d})$).
 
 \subsubsection{\code{SFMT}}
 The SF- Mersenne Twister algorithm is described in sub-section \ref{sfmt}.
@@ -870,17 +1045,36 @@ argument \code{dim} the dimension.
 SFMT(10)
 SFMT(5, 2) #bi dimensional variates
 @
-<<sfmt, fig=FALSE, echo=FALSE>>=
+<<sfmt2, fig=FALSE, echo=FALSE>>=
 options( width =40)
 SFMT(10)
 SFMT(5, 2)
 @
 %%%
 
-We must precise that we do \emph{not} implement the SFMT algorithm, we ``just''
+A third argument is \code{mexp} for Mersenne exponent with possible values
+(607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049 and 216091).
+Below an example with a period of $2^{607}-1$:
+%%% R code
+<<sfmt3, fig=FALSE, echo=TRUE, eval=FALSE>>=
+SFMT(10, mexp = 607)
+@
+<<sfmt4, fig=FALSE, echo=FALSE>>=
+options( width =40)
+SFMT(10, mexp = 607)
+@
+%%%
+
+Furthermore, following the advice of \cite{matsumoto08} for each exponent below 19937,
+\code{SFMT} uses a different set of parameters\footnote{this can be avoided
+with \code{usepset} argument to \code{FALSE}.} in order to increase the independence
+of random generated variates between two calls. Otherwise (for greater exponent
+than 19937) we use one set of parameters\footnote{These parameter sets can be found
+in the \soft{C} function \code{initSFMT} in \code{SFMT.c} source file.}. 
+
+We must precise that we do \textbf{not} implement the SFMT algorithm, we ``just''
 use the \soft{C} code of \cite{matsumoto08}. For the moment, we do not fully use
-the strength of their code. For example, we do not use block generation for multivariate
-generation as well as SIMD operations.
+the strength of their code. For example, we do not use block generation and SSE2 SIMD operations.
 
 
 
@@ -911,7 +1105,7 @@ torus(5, use =TRUE)
 %%%
 The optional argument \code{useTime} can be used to the machine time or not to initiate
 the seed. If we do not use the machine time, two calls of \code{torus} produces obviously 
-the same output.
+the \textbf{same} output.
 
 
 If we want the random sequence with prime number 7, we just type:
@@ -925,6 +1119,14 @@ torus(5, p =7)
 @
 %%%
 
+The \code{dim} argument is exactly the same
+as \code{congruRand} or \code{SFMT}. By default,
+we use the first prime numbers, e.g. 2, 3 and 5 for 
+a call like \code{torus(10, 3)}. But the user can
+specify a set of prime numbers, e.g. \code{torus(10, 3, c(7, 11, 13))}.
+The dimension argument is limited to 100 000\footnote{the
+first 100 000 prime numbers are take from \url{http://primes.utm.edu/lists/small/millions/}.}.
+
 As described in sub-section \ref{mixtorus}, one way to deal with serial dependence is to mix
 the Torus algorithm with a pseudo random generator. The \code{torus} function offers this operation
 thanks to argument \code{mixed} (the Torus algorithm is mixed with SFMT).
@@ -937,7 +1139,8 @@ options( width =40)
 torus(5,  mixed =TRUE)
 @
 %%%
-In order to see the difference between, we can plot the empirical autocorrelation function \code{acf}.
+In order to see the difference between, we can plot the empirical autocorrelation 
+function (\code{acf} in \soft{R}).
 %%% R code
 <<torus9, fig=FALSE, echo=TRUE, eval=FALSE>>=
 par(mfrow = c(2,1))
@@ -961,7 +1164,8 @@ acf(torus(10^5, mix=TRUE))
 %TODO : mix argument in SFMT
 
 \subsection{Visual comparisons}
-Before doing some serious statistical tests, we can make visual comparisons of how random numbers
+To understand the difference between pseudo and quasi RNGs, 
+we can make visual comparisons of how random numbers
 fill the unit square.
 
 %%% R code
@@ -980,17 +1184,9 @@ plot(torus(1000, 2), xlab ="u", ylab="v", main="Torus")
 @
 \end{center}
 \end{figure} 
-
-%\begin{figure}[!htb]
-%\begin{center}
-%<<unitsquare2, fig=TRUE, echo=FALSE, width=5, height=10, eps=FALSE>>=
-%par(mfrow = c(2,1))
-%plot(torus(1000, 2), xlab ="u", ylab="v", main="Torus")
-%plot(torus(1000, 2, mix=TRUE), xlab ="u", ylab="v", main="mixed Torus")
-%@
-%\end{center}
-%\end{figure} 
 %%%
+
+
 
 %problem of high dimensions of qmc sequence
 
@@ -1000,8 +1196,8 @@ plot(torus(1000, 2), xlab ="u", ylab="v", main="Torus")
 
 \subsection{Applications of QMC methods}
 In this sub-section, we will present one financial application of QMC methods.
-Firstly, we want to price a vanilla European call. In the framework of a geometric
-Brownian motion for the underlying asset, Those options are already 
+Firstly, we want to price a vanilla European call in the framework of a geometric
+Brownian motion for the underlying asset. Those options are already 
 implemented in the package \code{fOptions} of \code{Rmetrics}
 bundle\footnote{created by \cite{foptions}.}.
 
@@ -1014,11 +1210,11 @@ for this call was derived by \cite{blackscholes73}.
 
 The Monte Carlo method to price this option is quite simple
 \begin{enumerate*}
-\item simulate $s_{T,i}$ for $i=1\dots n$ from starting point $S_0$,
+\item simulate $s_{T,i}$ for $i=1\dots n$ from starting point $s_0$,
 \item compute the mean of the discounted payoff $\frac{1}{n}\sum_{i=1}^n e^{-rT}(s_{T,i}-K)_+ $.
 \end{enumerate*}
-With parameters ($S_0=100$, $T=1$, $r=5\%$, $K=60$, $\sigma=20\%$), we get
-the following relative error as a function of number of simulation $n$. 
+With parameters ($S_0=100$, $T=1$, $r=5\%$, $K=60$, $\sigma=20\%$), we plot
+the relative error as a function of number of simulation $n$ on figure \ref{vanilla}.
 
 We
 test two pseudo-random generators (namely Park Miller and SF-Mersenne Twister)
@@ -1030,18 +1226,20 @@ for Gaussian distribution simulation (default in \soft{R}).
 \begin{figure}[!htb]
 \begin{center}
 \includegraphics{vanilla.pdf}
+\caption{Error function for Vanilla call}
+\label{vanilla}
 \end{center}
 \end{figure} 
 
-As showed on the supra figure, the convergence of Monte Carlo price for the Torus algorithm
-is extremly fast. Whereas for SF-Mersenne Twister and Park Miller prices, the convergence
+As showed on figure \ref{vanilla}, the convergence of Monte Carlo price for the Torus algorithm
+is extremely fast. Whereas for SF-Mersenne Twister and Park Miller prices, the convergence
 is very slow.
 
 
 Secondly, we want to price a barrier option: a down-out call i.e. an Downward
 knock-Out Call\footnote{ DOC is disactived when the underlying
-asset hits the barrier.}. These kind of options are path-dependent, i.e. we need
-to simulate a whole trajectory of the underlying asset on $[0,T]$.
+asset hits the barrier.}. These kind of options belongs to the path-dependent
+option family, i.e. we need to simulate whole trajectories of the underlying asset $S$ on $[0,T]$.
 
 In the same framework of a geometric Brownian motion,
 there exists a closed formula for DOCs (see \cite{rubinstein}). Those options
@@ -1076,31 +1274,34 @@ As the price is needed on the whole period $[0,T]$, we produc as follows:
 where $n$ is the simulation number, $d$ the point number for the grid of time and $ \overline D_i$ the opposite
 of boolean $D_i$. 
 
-In the following, we set $T=1$, $r=5\%$, $S_0=100$, $H=K=50$, $d=250$ and $\sigma=20\%$. 
+In the following, we set $T=1$, $r=5\%$, $s_{t_0}=100$, $H=K=50$, $d=250$ and $\sigma=20\%$. 
 We test crude Monte Carlo methods with Park Miller and SF-Mersenne Twister generators and
-a quasi-Monte Carlo method with (multidimensional) Torus algoritm on the figure below.
+a quasi-Monte Carlo method with (multidimensional) Torus algoritm on the figure \ref{doc}.
 
 \begin{figure}[!htb]
 \begin{center}
 \includegraphics{DOC1e5.pdf}
+\caption{Error function for Down Out Call}
+\label{doc}
 \end{center}
 \end{figure} 
 
-One may wonder how the Torus algorithm is still the best (on this example). We use
+One may wonder why the Torus algorithm is still the best (on this example). We use
 the $d$-dimensional Torus sequence. Thus for time $t_j$, the simulated underlying assets
 $(s_{t_j,i})_i$ are computed with the sequence $(i \{\sqrt{p_j}\})_i$. Thanks to the linear
 independence of the Torus sequence over the rationals\footnote{i.e. for $k\neq j, \forall i, (i \{\sqrt{p_j}\})_i$ 
 and $(i \{\sqrt{p_k}\})_i$ are linearly independent over $\mathbb Q$.},
 we guarantee a non-correlation of Torus quasi-random numbers.
 
-However, these results do \emph{not} prove the Torus algorithm is always better than
+However, these results do \textbf{not} prove the Torus algorithm is always better than
 traditional Monte Carlo. The results are sensitive to the barrier level $H$, the strike price $X$
 (being in or out the money has a strong impact), the asset volatility $\sigma$ and
 the time point number $d$.
 
 \section{Random generation tests\label{rngtest}}
-Tests of random generators aim to check the output $u_1,\dots, u_n,\dots$ could be 
-considered as independent and identically distributed (i.i.d.) uniform variates. There are
+Tests of random generators aim to check if the output $u_1,\dots, u_n,\dots$ could be 
+considered as independent and identically distributed (i.i.d.) uniform variates for
+a given confidence level. There are
 two kinds of tests of the uniform distribution: first on the interval $]0,1[$,
 second on the binary set $\{0,1\}$. In this note, we only describe tests for $]0,1[$ outputs
 (see \cite{lecuyer07} for details about these two kind of tests).
@@ -1110,10 +1311,11 @@ but on a function of the output such as the spacings (coordinate difference of t
 
 \subsection{Test on one sequence of $n$ numbers}
 \subsubsection{Goodness of Fit}
-Goodness of Fit tests compare the empirical distribution $\mathbb F_n$ of $u_i$'s with a specific
-distribution ($\mathcal U(0,1)$ here).The most known test are Kolmogorov-Smirnov,
+Goodness of Fit tests compare the empirical cumulative distribution 
+function (cdf) $\mathbb F_n$ of $u_i$'s with a specific
+distribution ($\mathcal U(0,1)$ here). The most known test are Kolmogorov-Smirnov,
 Cr\'amer-von Mises and Anderson-Darling tests. They use different norms to quantify
-the difference between $\mathbb F_n$ and $F_{\mathcal U_{(0,1)}}$.
+the difference between the empirical cdf $\mathbb F_n$ and the true cdf $F_{\mathcal U_{(0,1)}}$.
 \begin{itemize*}
 \item Kolmogorov-Smirnov statistic is
 $$K_n = \sqrt n ~\underset{x\in \mathbb R}{\sup} \left |\mathbb F_n(x) - F_{\mathcal U_{(0,1)}}(x) \right |,$$
@@ -1146,14 +1348,15 @@ of zero gaps of length $j$.
 The chi-squared statistic of a such test is given by
 $$ S = \sum_{j=1}^m \frac{(n_j - n p_j)^2}{n p_j},
 $$	
-where $p_j=(1-p)^2 p^j$ stands for the probability the length of gaps equals 
-to $j$ and $m$ the max number of lengths.  
+where $p_j=(1-p)^2 p^j$ is the probability that the length of gaps equals 
+to $j$; and $m$ the max number of lengths. In theory $m$ equals to $+\infty$,
+but in pratice, it is a large integer.
 We fix $m$ to be at least
 $$\left\lfloor \frac{ \log( 10^{-1} ) - 2\log(1- p)-log(n) }{ \log( p )} \right\rfloor,$$
 in order to have lengths whose appearance probabilitie is at least $0.1$.
 
 \subsubsection{The order test\label{ordertest}}
-The order test looks for another kind of patterns. For a $d$-tuple, if the coordinates are ordered
+The order test looks for another kind of patterns. We test a $d$-tuple, if its components are ordered
 equiprobably. For example with $d=3$, we should have an equal number of
 vectors $(u_i, u_{i+1}, u_{i+2})_i$ such that 
 \begin{itemize*}
@@ -1168,7 +1371,8 @@ For some $d$, we have $d!$ possible orderings of coordinates, which have the sam
 to appear $\frac{1}{d!}$. The chi-squared statistic for the order test for a sequence $(u_i)_{1\leq i\leq n}$ is just
  $$ S = \sum_{j=1}^{d!} \frac{(n_j - m\frac{1}{d!})^2}{m \frac{1}{d!}},
 $$	
-where $n_j$'s are the counts for different orders and $ m=\frac{n}{d}$.
+where $n_j$'s are the counts for different orders and $ m=\frac{n}{d}$. Computing
+$d!$ possible orderings has an exponential cost, so in practive $d$ is small.
 
 \subsubsection{The frequency test\label{freqtest}}
 The frequency test works on a serie of ordered contiguous integers 
@@ -1179,17 +1383,17 @@ $$
 $$
 which is independent of $j$. From this, we can compute a chi-squared statistic
 $$
-S = \sum_{j=1}^l \frac{(\card(n_i=i_j) - m)^2}{m}.
+S = \sum_{j=1}^l \frac{(\card(n_i=i_j) - m)^2}{m},
 $$
-
+where $ m=\frac{n}{d}$.
 
 %todo run test
 
 \subsection{Tests based on multiple sequences}
 Under the i.i.d. hypothesis, a vector of output values $u_i, \dots, u_{i+t-1}$
 is uniformly distributed over the unit hypercube $[0,1]^t$. Tests based on 
-multiple sequences partition the unit hypercube into cells and count
-the number of points in each cell.
+multiple sequences partition the unit hypercube into cells and compare
+the number of points in each cell with the expected number.
 
 \subsubsection{The serial test\label{serialtest}}
 The most intuitive way to split the unit hypercube $[0,1]^t$ into $k=d^t$
@@ -1197,7 +1401,7 @@ subcubes. It is achieved by splitting each dimension into $d>1$ pieces.
 The volume (i.e. a probability) of each cell is just $\frac{1}{k}$.
 
 The associated chi-square statistic is defined as
-$$ S = \sum_{j=1}^m \frac{(N_j - \lambda)^2}{n \lambda},
+$$ S = \sum_{j=1}^m \frac{(N_j - \lambda)^2}{\lambda},
 $$	
 where $N_j$ denotes the counts and $\lambda=\frac{n}{k}$
 their expectation.
@@ -1233,7 +1437,7 @@ $\frac{n^2}{2k}$.
 
 
 \subsubsection{The $\phi$-divergence test}
-There exists generalizations of these tests where we take a 
+There exist generalizations of these tests where we take a 
 function of counts $N_j$, which we called $\phi$-divergence test.
 Let $f$ be a real valued function. The test statistic is given by
 $$
@@ -1261,6 +1465,25 @@ the second-kind Stirling numbers. For a demonstration, go to \cite{knuth02}.
 \section{Description of RNG test functions\label{rngtestfunc}}
 In this section, we will give usage examples of RNG test functions, in a similar way
 as section \ref{rngfunc} illustrates section \ref{rng}.
+
+%todo add comparison of mean, standard deviation kurtosis... from http://www.puc-rio.br/macro.ind/quasi_mc.html
+
+%%% R code
+<<hist, fig=FALSE, echo=TRUE, eval=FALSE>>=
+par(mfrow = c(2,1))
+hist(SFMT(10^3), 100)
+hist(torus(10^3), 100)
+@
+\begin{figure}[!htb]
+\begin{center}
+<<hist, fig=TRUE, echo=FALSE, width=5, height=10, eps=FALSE>>=
+par(mfrow = c(2,1))
+hist(SFMT(10^3), 100)
+hist(torus(10^3), 100)
+@
+\end{center}
+\end{figure} 
+%%%
 
 \subsection{Test on one sequence of $n$ numbers}
 Goodness of Fit tests are already implemented in \soft{R} with the function
@@ -1396,7 +1619,8 @@ With function \code{coll.test}, we do not yet implement the normal
 approximation. 
 
 The following example tests Mersenne-Twister algorithm (default in R)
-and parameters implying the use of the exact distribution:
+and parameters implying the use of the exact distribution (i.e. $n<2^8$ and
+$\lambda>1/32$).
 %%% R code
 <<coll1, fig=FALSE, echo=TRUE, eval=FALSE>>=
 coll.test(runif, 2^7, 2^10)
@@ -1420,7 +1644,7 @@ res <- coll.test(runif, 2^7, 2^10, echo=FALSE)
 %%%
 
 When the cell number is far greater than the sample length, we use 
-the Poisson approximation. For example with \code{congruRand}
+the Poisson approximation (i.e. $\lambda<1/32$). For example with \code{congruRand}
 generator we have
 %%% R code
 <<coll3, fig=FALSE, echo=TRUE, eval=FALSE>>=
@@ -1523,10 +1747,12 @@ exports'' and page 64 in sub-section ``registering native routines''.
 
 
 
-
 \newpage
 \bibliographystyle{agsm}
 \bibliography{randtoolbox}
+
+
+
 
 \end{document}
 

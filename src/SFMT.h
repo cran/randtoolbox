@@ -62,6 +62,31 @@
 
 #include <stdio.h>
 
+/*
+ * code of Christophe Dutang 
+ * added to interface with R 
+ */
+/* ===================  my code  =================== */
+
+//to have pre-processors definition such as HAVE_SSE2 update
+//#include "config.h"
+
+//added to have _() error message in R
+#include "locale.h"
+
+#if (!HAVE_INTTYPES_H) && (!defined(PRIu64))
+    typedef unsigned int uint32_t;
+    typedef unsigned long long uint64_t;  
+#   define PRIu64 "llu"
+#   define PRIx64 "llx"
+#endif
+
+
+//init SFMT parameters
+void init_SFMT(int mersennexponent, int useparamset);
+
+/* =================== end of my code =============== */
+
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
   #include <inttypes.h>
 #elif defined(_MSC_VER) || defined(__BORLANDC__)
@@ -101,7 +126,7 @@
   #define PRE_ALWAYS inline
 #endif
 
-#define MEXP 19937
+
 
 uint32_t gen_rand32(void);
 uint64_t gen_rand64(void);
