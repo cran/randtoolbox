@@ -74,7 +74,7 @@
 //added to have _() error message in R
 #include "locale.h"
 
-#if (!HAVE_INTTYPES_H) && (!defined(PRIu64))
+#if (!HAVE_STDINT_H) && (!HAVE_INTTYPES_H) && (!defined(PRIu64))
     typedef unsigned int uint32_t;
     typedef unsigned long long uint64_t;  
 #   define PRIu64 "llu"

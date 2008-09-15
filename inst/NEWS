@@ -1,5 +1,10 @@
 === randtoolbox: an R package for random number generation and tests ===
 
+Version 1.04
+=============
+
+NEW FEATURES
+
 
 Version 1.03
 =============
@@ -21,7 +26,7 @@ NEW FEATURES
 - more random generation tests such as collision test and order test.
 - poker test is generalized to any dimension.
 - some auxiliary functions.
-- a detailed vignette on generating and test random generation.
+- a detailed vignette on generating and testing random generation.
 
 BUG FIXES
 
@@ -40,11 +45,8 @@ NEW FEATURES
 - improve output of tests.
 
 
-
 Version 1.00
 =============
 
-- Initial release.
-- Contains functions bstraub(), simpf(), rearrangepf() and panjer(),
-  and the dataset hachemeister.
+- Initial release based on the torus package (which is no longer available).
 

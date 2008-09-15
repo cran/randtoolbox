@@ -63,7 +63,7 @@ The currently available generator are given below.
 
     \item{\bold{Linear congruential generators:}}{	
 	The \eqn{k}th term of a linear congruential generator is defined as
-	   \deqn{u_k = \frac{ ( a * u_{k-1} + c ) mod m }{m}}{%
+	   \deqn{u_k = \frac{ ( a * u_{k-1} + c ) \textrm{~mod~} m }{m}}{%
 			[ ( a * u_{k-1} + c ) mod m ] / m}
 	where \eqn{a} denotes the multiplier, \eqn{c} the increment and \eqn{m} 
 	the modulus, with the constraint \eqn{0 <= a < m } and \eqn{0 <= c < m }.
@@ -124,7 +124,7 @@ The currently available generator are given below.
 	The Knuth-TACOP-2002 is a Fibonnaci-lagged 
 	generator invented by Knuth(2002), based on the
 	following recurrence.
-	\deqn{x_n = (x_{n-37} + x_{n-100}) \textrm{mod} 2^{30},}{
+	\deqn{x_n = (x_{n-37} + x_{n-100}) \textrm{~mod~} 2^{30},}{
 		x_n = (x_{n-37} + x_{n-100}) mod 2^{30},}	
 	In R, there is the integer version of this generator.	
 
@@ -149,20 +149,23 @@ See the vignette for details.
 (i.e. both for the \code{torus}, \code{SFMT}, \code{WELL} and \code{congruRand} functions).
 }
 \references{
-Planchet F., Jacquemin J. (2003), \emph{L'utilisation de methodes de 
-simulation en assurance}. Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
-
-Park S. K., Miller K. W. (1988), \emph{Random number generators: good
-ones are hard to find}. Association for Computing Machinery, vol. 31, 10, 1192-2001. 
+Knuth D. (1997), \emph{The Art of Computer Programming V2 Seminumerical Algorithms}, Third Edition, Massachusetts: Addison-Wesley.
 
 Matsumoto M. and Nishimura T. (1998), \emph{Dynamic Creation of Pseudorandom Number Generators},
-Monte Carlo and Quasi-Monte Carlo Methods, Springer, 2000, pp 56--69. (available online)
+Monte Carlo and Quasi-Monte Carlo Methods, Springer, pp 56--69. (available online)
 
 Matsumoto M., Saito M. (2008), \emph{SIMD-oriented Fast Mersenne Twister: a 128-bit Pseudorandom Number Generator}. (available online)
 
 Paneton F., L'Ecuyer P. and Matsumoto M. (2006), \emph{Improved Long-Period Generators 
 Based on Linear Recurrences Modulo 2}, ACM Transactions on Mathematical Software. (preprint
 available online)
+
+Park S. K., Miller K. W. (1988), \emph{Random number generators: good
+ones are hard to find}. Association for Computing Machinery, vol. 31, 10, pp 1192-2001. (available online) 
+
+Planchet F., Jacquemin J. (2003), \emph{L'utilisation de methodes de 
+simulation en assurance}. Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
+
 
 Wikipedia (2008), \emph{a linear congruential generator}.
 }
@@ -305,6 +308,7 @@ knuthTAOCP(10, 2)
 
 # (7) computation times on my macbook, mean of 1000 runs
 #
+
 \dontrun{
 # algorithm			time in seconds for n=10^6
 # Torus algo					0.058 
@@ -312,7 +316,7 @@ knuthTAOCP(10, 2)
 # classical Mersenne Twister  			0.066 
 # SF Mersenne Twister  	       			0.044 
 # WELL generator				0.065
-# Knuth TAOCP				0.046
+# Knuth TAOCP					0.046
 # Park Miller  		      			0.174 
 n <- 1e+06
 mean( replicate( 1000, system.time( torus(n), gcFirst=TRUE)[3]) )

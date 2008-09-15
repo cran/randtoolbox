@@ -182,7 +182,7 @@ AC_DEFUN([AX_EXT],
 
 
 # initialize
-AC_INIT([randtoolbox], 1.03, [christophe.dutang@ensimag.fr])
+AC_INIT([randtoolbox], 1.04, [christophe.dutang@ensimag.fr])
 
 #check header (1st arg), preprocessor @DEFS@ (2nd arg) if found, nothing if not found (3rd arg) 
 AC_CHECK_HEADER([sys/time.h], 
@@ -196,7 +196,8 @@ AC_CHECK_HEADER([windows.h],
 AC_CHECK_HEADER([inttypes.h], 
 		[AC_DEFINE(HAVE_INTTYPES_H,1,[manual check for inttypes.h header. define to 1 if you know you have it.])])
 
-
+AC_CHECK_HEADER([stdint.h], 
+		[AC_DEFINE(HAVE_STDINT_H,1,[manual check for stdint.h header. define to 1 if you know you have it.])])
 
 #no support of ALTIVEC, simply not define it
 #AC_DEFINE(HAVE_ALTIVEC,0,[no support of ALTIVEC.])
