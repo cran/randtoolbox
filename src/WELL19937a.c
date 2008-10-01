@@ -6,23 +6,6 @@
 /*                 please contact P. L'Ecuyer at: lecuyer@iro.UMontreal.ca       */
 /* ***************************************************************************** */
 
-/*
- * code of Christophe Dutang 
- * added to interface with R 
- */
-/* ===================  my code  =================== */
-
-/* global variable */
-int dotempering;
-
-/* init the pseudo boolean dotempering */
-void initWELL19937(int tempering)   
-{
-    dotempering = tempering;
-}
-
-/* ===================  end of my code
- + ifthenelse structure below =================== */
 
 #define W 32
 #define R 624
@@ -39,9 +22,9 @@ void initWELL19937(int tempering)
 #define MAT3POS(t,v) (v>>t)
 
 /* To obtain the WELL19937c, uncomment the following line */
-/* #define TEMPERING                                      */
+/* #define TEMPERING                                      
 #define TEMPERB 0xe46e1700U
-#define TEMPERC 0x9b868000U
+#define TEMPERC 0x9b868000U     */
 
 #define V0            STATE[state_i]
 #define VM1Over       STATE[state_i+M1-R]
@@ -93,17 +76,8 @@ double case_1 (void){
    newV0Under = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
    state_i = R - 1;
    WELLRNG19937a = case_3;
-if(dotempering)
-{//#ifdef TEMPERING
-   y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-   y =              y ^ ((             y << 15) & TEMPERC);
-   return ((double) y * FACT);
-}
-else
-{//#else
+
    return ((double) STATE[state_i] * FACT);
-//#endif
-}
 }
 
 static double case_2 (void){
@@ -115,17 +89,8 @@ static double case_2 (void){
    newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
    state_i = 0;
    WELLRNG19937a = case_1;
-if(dotempering)
-{//#ifdef TEMPERING
-   y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-   y =              y ^ ((             y << 15) & TEMPERC);
-   return ((double) y * FACT);
-}
-else
-{//#else
+
    return ((double) STATE[state_i] * FACT);
-//#endif
-}
 }
 
 static double case_3 (void){
@@ -138,17 +103,8 @@ static double case_3 (void){
    state_i--;
    if (state_i + M1 < R)
       WELLRNG19937a = case_5;
-if(dotempering)
-{//#ifdef TEMPERING
-   y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-   y =              y ^ ((             y << 15) & TEMPERC);
-   return ((double) y * FACT);
-}
-else
-{//#else
+
    return ((double) STATE[state_i] * FACT);
-//#endif
-}
 }
 
 static double case_4 (void){
@@ -161,17 +117,8 @@ static double case_4 (void){
    state_i--;
    if (state_i + M3 < R)
       WELLRNG19937a = case_6;
-if(dotempering)
-{//#ifdef TEMPERING
-   y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-   y =              y ^ ((             y << 15) & TEMPERC);
-   return ((double) y * FACT);
-}
-else
-{//#else
+
    return ((double) STATE[state_i] * FACT);
-//#endif
-}
 }
 
 static double case_5 (void){
@@ -184,17 +131,8 @@ static double case_5 (void){
    state_i--;
    if (state_i + M2 < R)
       WELLRNG19937a = case_4;
-if(dotempering)
-{//#ifdef TEMPERING
-   y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-   y =              y ^ ((             y << 15) & TEMPERC);
-   return ((double) y * FACT);
-}
-else
-{//#else
+
    return ((double) STATE[state_i] * FACT);
-//#endif
-}
 }
 
 static double case_6 (void){
@@ -207,16 +145,7 @@ static double case_6 (void){
    state_i--;
    if (state_i == 1)
       WELLRNG19937a = case_2;
-if(dotempering)
-{//#ifdef TEMPERING
-   y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-   y =              y ^ ((             y << 15) & TEMPERC);
-   return ((double) y * FACT);
-}
-else
-{//#else
+
    return ((double) STATE[state_i] * FACT);
-//#endif
-}
 }
 

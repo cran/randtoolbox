@@ -1,15 +1,15 @@
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* 1234 = LIL_ENDIAN, 4321 = BIGENDIAN */
+#undef BYTEORDER
+
 /* manual check for inttypes.h header. define to 1 if you know you have it. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Support SSE2 (Streaming SIMD Extensions 2) instructions */
-#undef HAVE_SSE2
-
-/* manual check for stdint.h header. define to 1 if you know you have it. */
+/* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
@@ -24,13 +24,13 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
-/* manual check for time.h header. define to 1 if you know you have it. */
+/* manual check for sys/time.h header. define to 1 if you know you have it. */
 #undef HAVE_SYS_TIME_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* manual check for sys/time.h header. define to 1 if you know you have it. */
+/* manual check for time.h header. define to 1 if you know you have it. */
 #undef HAVE_TIME_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
@@ -55,5 +55,11 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* The size of `unsigned long long', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_LONG_LONG
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* whether byteorder is bigendian */
+#undef WORDS_BIGENDIAN

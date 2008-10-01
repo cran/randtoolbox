@@ -6,7 +6,11 @@
 /*                 please contact P. L'Ecuyer at: lecuyer@iro.UMontreal.ca       */
 /* ***************************************************************************** */
 
-void InitWELLRNG521a (unsigned int *init);
-double WELLRNG521a (void);
+#ifndef WELL521a_H
+#define WELL521a_H
 
-extern void initWELL521(int tempering);
+void InitWELLRNG521a (unsigned int *init);
+extern double (*WELLRNG521a)(void);
+
+#endif
+

@@ -578,3 +578,4 @@ stirlingDividedByK <- function(n, cmax, cste)
     }
     return(res)    
 }
+

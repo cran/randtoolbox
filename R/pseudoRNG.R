@@ -17,47 +17,19 @@
  #   59 Temple Place, Suite 330, Boston, MA 02111-1307, USA                                                             #
  #                                                                                                                                                                         #
  #############################################################################
-### Torus algorithm to generate quasi random numbers
+### pseudo random generation
 ###
 ###			R functions
 ### 
 
 
-torus <- function(n, dim = 1, prime, mixed = FALSE, usetime = FALSE)
-{
-        if(n <0 || is.array(n))
-                stop("invalid argument 'n'")
-        if(dim < 0 || length(dim) >1)
-                stop("invalid argument 'dim'")
-        if(!is.logical(usetime))
-                stop("invalid argument 'mixed'")
-        if(!is.logical(mixed))
-                stop("invalid argument 'mixed'")
-    
-        if(missing(prime)) 
-                prime <- NULL
-        else
-        {
-                if(any(prime < 0) || !is.vector(prime))
-                        stop("invalid argument 'prime'")
-
-                dim <- length(prime)
-                prime <- as.integer( prime )
-        }
-    
-        
-        if(length(n) > 1)
-                res <- .Call("doTorus", length(n), dim, prime, mixed, usetime)
-        else
-                res <- .Call("doTorus", n, dim, prime, mixed, usetime)	
-        if(dim == 1)
-                as.vector(res)
-        else
-                as.matrix(res)
-}
+### set the seed ###
 
 setSeed <- function(seed)
 	invisible( .Call("doSetSeed", seed) )
+
+
+### pseudo random generation ###
 
 congruRand <- function(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
 {
@@ -144,35 +116,45 @@ SFMT <- function(n, dim = 1, mexp = 19937, usepset = TRUE, withtorus = FALSE, us
                 as.matrix(res)
 }
  
-WELL <- function(n, dim = 1, order = 512, temper = FALSE)
+WELL <- function(n, dim = 1, order = 512, temper = FALSE, version = "a")
 {
-        if(n <0 || is.array(n))
-                stop("invalid argument 'n'")
-        if(dim < 0 || length(dim) >1)
-                stop("invalid argument 'dim'")
-        if(!is.numeric(order))
-                stop("invalid argument 'order'")
-#        if( !(order %in% c(512, 521, 1024, 19937, 44497) ) )
-#                stop("'order' must be in {512, 521, 1024, 19937, 44497}.")
-    if( !(order %in% c(512, 1024, 19937, 44497) ) )
-    stop("'order' must be in {512, 1024, 19937, 44497}.")
+    if(n <0 || is.array(n))
+        stop("invalid argument 'n'")
+    if(dim < 0 || length(dim) >1)
+            stop("invalid argument 'dim'")
+    if(!is.numeric(order))
+            stop("invalid argument 'order'")
+    if( !(order %in% c(512, 521, 607, 800, 1024, 19937, 21701, 23209, 44497) ) )
+            stop("'order' must be in {512, 521, 607, 800, 1024, 19937, 21071, 23209, 44497}.")
+    if( !(version %in% c("a", "b") ) )
+            stop("'version' must be either 'a' or 'b'.")
 
     if(!is.logical(temper))
-                stop("invalid argument 'temper'")
-        if(temper && order %in% c(512, 521, 1024))
-                stop("tempering impossible")
+        stop("invalid argument 'temper'")
+    if(temper && order %in% c(512, 521, 607, 1024))
+        stop("tempering impossible")
     
-        if(length(n) > 1)
-                res <- .Call("doWELL", length(n), dim, order, temper)
-        else
-                res <- .Call("doWELL", n, dim, order, temper)	
+    zeversion <- 0
+    if(version == "a")
+        zeversion <- 1
+    if(version == "b")
+        zeversion <- 2
+    if(zeversion == 0)
+        stop("wrong version for WELL RNG")
+    if(version == "b" && order %in% c(512,  21701) ) 
+        stop("this WELL RNG does not have a 'b' version")
     
-        print(" fin du call\n")
+    if(length(n) > 1)
+        res <- .Call("doWELL", length(n), dim, order, temper, zeversion)
+    else
+        res <- .Call("doWELL", n, dim, order, temper, zeversion)	
     
-        if(dim == 1)
-                as.vector(res)
-        else
-                as.matrix(res)
+
+    
+    if(dim == 1)
+        as.vector(res)
+    else
+        as.matrix(res)
 }
 
 knuthTAOCP <- function(n, dim = 1)
@@ -193,33 +175,3 @@ knuthTAOCP <- function(n, dim = 1)
         as.matrix(res)
 }
 
-testTorus <- function(n, dim=1)
-{
-	primeNumber <- c(2,      3,      5,      7,     11,     13,     17,     19,     23,     29, 
-	31,     37,     41,     43,     47,     53,     59,     61,     67,     71, 
-	73,     79,     83,     89,     97,    101,    103,    107,    109,    113, 
-    127,    131,    137,    139,    149,    151,    157,    163,    167,    173, 
-    179,    181,    191,    193,    197,    199,    211,    223,    227,    229, 
-    233,    239,    241,    251,    257,    263,    269,    271,    277,    281, 
-    283,    293,    307,    311,    313,    317,    331,    337,    347,    349, 
-    353,    359,    367,    373,    379,    383,    389,    397,    401,    409, 
-    419,    421,    431,    433,    439,    443,    449,    457,    461,    463, 
-    467,    479,    487,    491,    499,    503,    509,    521,    523,    541 )
-	
-	prime <- primeNumber[1:dim]
-	
-	nSqrtP <- outer(1:n, sqrt(prime))
-	
-	return( nSqrtP - floor(nSqrtP) )
-} 
-
-graphTest <- function(nmax = 100, dim=2, h=100)
-{
-	echant <- 1:nmax*h
-	resTimeC <- sapply(echant, function(x) system.time(torus(x, dim))[3])
-	resTimeR <- sapply(echant, function(x) system.time(testTorus(x, dim))[3])
-	
-	plot(echant, resTimeR, t='l', col="blue", main="computation time")
-	lines(echant, resTimeC, col="green")
-	legend("bottomright",c("in R","in C"), col=c("blue","green"),lty=1)
-}

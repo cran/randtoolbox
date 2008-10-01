@@ -6,6 +6,11 @@
 /*                 please contact P. L'Ecuyer at: lecuyer@iro.UMontreal.ca       */
 /* ***************************************************************************** */
 
+#ifndef WELL1024a_H
+#define WELL1024a_H
+
 void InitWELLRNG1024a (unsigned int *init);
 double WELLRNG1024a (void);
+
+#endif
 

@@ -5,22 +5,11 @@
 /*                 or non-commercial purposes. For commercial purposes,          */
 /*                 please contact P. L'Ecuyer at: lecuyer@iro.UMontreal.ca       */
 /* ***************************************************************************** */
-
-
 /*
- * code of Christophe Dutang 
- * added to interface with R 
+ * WELL521 is __entirely__ based on the code of WELL44497 by P. L'Ecuyer.
+ * we just change constants, parameters to get WELL521, add some
+ * code to interface with R and add some comments on #define's.
  */
-/* ===================  my code  =================== */
-
-/* global variable */
-int dotempering;
-
-/* init the pseudo boolean dotempering */
-void initWELL521(int tempering)
-{
-    dotempering = tempering;
-}
 
 /* functions work like this :
  * state_i      function
@@ -42,11 +31,6 @@ void initWELL521(int tempering)
  */
 
 
-/* ===================  end of my code
- + ifthenelse structure below =================== */
-
-
-
 #define W 32
 #define R 17
 #define P 23
@@ -56,13 +40,6 @@ void initWELL521(int tempering)
 #define M1 13
 #define M2 11
 #define M3 10
-
-/* To obtain the WELL521c, uncomment the following line */
-/*#define TEMPERING                                       */
-
-
-#define TEMPERB 0x93dd1400U
-#define TEMPERC 0xfa118000U
 
 //Mi matrices defined in table 1 of Panneton et al (2006)
 //matrix M3(t)
@@ -128,7 +105,7 @@ static double case_6(void);
 double (*WELLRNG521a)(void);
 
 
-#include <Rinternals.h>
+//#include <Rinternals.h>
 
 
 void InitWELLRNG521a(unsigned int *init )
@@ -137,12 +114,7 @@ void InitWELLRNG521a(unsigned int *init )
     state_i=0;
     WELLRNG521a = case_1;
     for(j=0;j<R;j++)
-    {
-        Rprintf("- i - %u ",j);
         STATE[j]=init[j];
-        Rprintf("STATE[state_i = i mod r] : %u\n", STATE[j]);
-    }
-
 }
 
 
@@ -152,7 +124,7 @@ void InitWELLRNG521a(unsigned int *init )
 double case_1(void)
 {
     
-    Rprintf("c1 state_i = i mod r : %u\n", state_i);
+    //Rprintf("c1 state_i = i mod r : %u\n", state_i);
     
     z0 = (Vrm1Under & MASKL) | (Vrm2Under & MASKU);
     z1 = MAT0NEG(-13,V0) ^ MAT0NEG(-15,VM1);
@@ -161,24 +133,15 @@ double case_1(void)
     newV0Under = MAT0NEG(-13,z0) ^ MAT3POS(1,z1) ^ MAT7(z2) ^ MAT0POS(11,newV1);
     state_i = R-1;
     WELLRNG521a = case_3;
-    if(dotempering)
-    {//#ifdef TEMPERING
-        y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-        y =              y ^ ((             y << 15) & TEMPERC);
-        return ((double) y * FACT);
-    }
-    else
-    {//#else
-        return ((double) STATE[state_i] * FACT);
-        //#endif
-    }
+
+    return ((double) STATE[state_i] * FACT);
 }
 
 // state_i == 1
 static double case_2(void)
 {
     
-    Rprintf("c2 state_i = i mod r : %u\n", state_i);
+    //Rprintf("c2 state_i = i mod r : %u\n", state_i);
 
     z0 = (Vrm1 & MASKL) | (Vrm2Under & MASKU);
     z1 = MAT0NEG(-13,V0) ^ MAT0NEG(-15,VM1);
@@ -187,24 +150,14 @@ static double case_2(void)
     newV0 =  MAT0NEG(-13,z0) ^ MAT3POS(1,z1) ^ MAT7(z2) ^ MAT0POS(11,newV1);
     state_i=0;
     WELLRNG521a = case_1;
-    if(dotempering)
-    {//#ifdef TEMPERING
-        y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-        y =              y ^ ((             y << 15) & TEMPERC);
-        return ((double) y * FACT);
-    }
-    else
-    {//#else
-        return ((double) STATE[state_i] * FACT);
-        //#endif
-    }
-     
+
+    return ((double) STATE[state_i] * FACT);
 }
 
 // state_i+M3 >= R
 static double case_3(void)
 {
-    Rprintf("c3 state_i = i mod r : %u\n", state_i);
+    //Rprintf("c3 state_i = i mod r : %u\n", state_i);
 
     z0 = (Vrm1 & MASKL) | (Vrm2 & MASKU);
     z1 = MAT0NEG(-13,V0) ^ MAT0NEG(-15,VM1Over);
@@ -212,26 +165,16 @@ static double case_3(void)
     newV1 = z1 ^ z2;
     newV0 = MAT0NEG(-13,z0) ^ MAT3POS(1,z1) ^ MAT7(z2) ^ MAT0POS(11,newV1);
     state_i--;
-    if(state_i+M1<R)
+    if(state_i+M3<R)
         WELLRNG521a = case_4;
-    if(dotempering)
-    {//#ifdef TEMPERING
-        y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-        y =              y ^ ((             y << 15) & TEMPERC);
-        return ((double) y * FACT);
-    }
-    else
-    {//#else
-        return ((double) STATE[state_i] * FACT);
-        //#endif
-    }
- 
+
+    return ((double) STATE[state_i] * FACT);
 }
 
 // state_i+M2 >= R
 static double case_4(void)
 {
-    Rprintf("c4 state_i = i mod r : %u\n", state_i);
+    //Rprintf("c4 state_i = i mod r : %u\n", state_i);
 
     z0 = (Vrm1 & MASKL) | (Vrm2 & MASKU);
     z1 = MAT0NEG(-13,V0) ^ MAT0NEG(-15,VM1Over);
@@ -239,26 +182,16 @@ static double case_4(void)
     newV1 = z1 ^ z2;
     newV0 = MAT0NEG(-13,z0) ^ MAT3POS(1,z1) ^ MAT7(z2) ^ MAT0POS(11,newV1);
     state_i--;
-    if (state_i+M3 < R)
+    if (state_i+M2< R)
         WELLRNG521a = case_5;
-    if(dotempering)
-    {//#ifdef TEMPERING
-        y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-        y =              y ^ ((             y << 15) & TEMPERC);
-        return ((double) y * FACT);
-    }
-    else
-    {//#else
-        return ((double) STATE[state_i] * FACT);
-        //#endif
-    }
- 
+
+    return ((double) STATE[state_i] * FACT);
 }
 
 //state_i+M1 >= R
 static double case_5(void)
 {
-    Rprintf("c5 state_i = i mod r : %u\n", state_i);
+    //Rprintf("c5 state_i = i mod r : %u\n", state_i);
 
     z0 = (Vrm1 & MASKL) | (Vrm2 & MASKU);
     z1 = MAT0NEG(-13,V0) ^ MAT0NEG(-15,VM1Over);
@@ -266,26 +199,16 @@ static double case_5(void)
     newV1 = z1 ^ z2;
     newV0 = MAT0NEG(-13,z0) ^ MAT3POS(1,z1) ^ MAT7(z2) ^ MAT0POS(11,newV1);
     state_i--;
-    if(state_i+M2 < R)
+    if(state_i+M1 < R)
         WELLRNG521a = case_6;
-    if(dotempering)
-    {//#ifdef TEMPERING
-        y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-        y =              y ^ ((             y << 15) & TEMPERC);
-        return ((double) y * FACT);
-    }
-    else
-    {//#else
-        return ((double) STATE[state_i] * FACT);
-        //#endif
-    }
- 
+    
+    return ((double) STATE[state_i] * FACT);
 }
 
 // 2 <= state_i <= R-M1-1
 static double case_6(void)
 {
-    Rprintf("c6 state_i = i mod r : %u\n", state_i);
+    //Rprintf("c6 state_i = i mod r : %u\n", state_i);
 
     z0 = (Vrm1 & MASKL) | (Vrm2 & MASKU);
     z1 = MAT0NEG(-13,V0) ^ MAT0NEG(-15,VM1);
@@ -295,16 +218,6 @@ static double case_6(void)
     state_i--;
     if(state_i == 1 )
         WELLRNG521a = case_2;
-    if(dotempering)
-    {//#ifdef TEMPERING
-        y = STATE[state_i] ^ ((STATE[state_i] << 7) & TEMPERB);
-        y =              y ^ ((             y << 15) & TEMPERC);
-        return ((double) y * FACT);
-    }
-    else
-    {//#else
-        return ((double) STATE[state_i] * FACT);
-        //#endif
-    }
- 
+
+    return ((double) STATE[state_i] * FACT);
 }

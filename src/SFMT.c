@@ -42,7 +42,7 @@
 #include <assert.h>
 
 #include "SFMT.h"
-//#include "SFMT-params.h"
+/* no longer needed #include "SFMT-params.h" */
 
 
 
@@ -100,26 +100,21 @@ typedef struct W128_T w128_t;
   FILE GLOBAL VARIABLES
   internal state, index counter and flag 
   --------------------------------------*/
-/** the 128-bit internal state array 
+/** the 128-bit internal state array
 static w128_t sfmt[N]; */
-/** the 32bit integer pointer to the 128-bit internal state array 
+/** the 32bit integer pointer to the 128-bit internal state array
 static uint32_t *psfmt32 = &sfmt[0].u[0];
 #if !defined(BIG_ENDIAN64) || defined(ONLY64) */
-/** the 64bit integer pointer to the 128-bit internal state array 
+/** the 64bit integer pointer to the 128-bit internal state array
 static uint64_t *psfmt64 = (uint64_t *)&sfmt[0].u[0];
 #endif */
- /** index counter to the 32-bit internal state array */
-static int idx;
+ /** index counter to the 32-bit internal state array
+static int idx; */
 /** a flag: it is 0 if and only if the internal state is not yet
- * initialized. */
-static int initialized = 0;
+ * initialized. 
+static int initialized = 0; */
 /** a parity check vector which certificate the period of 2^{MEXP} 
 static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4}; */
-
-
-
-
-
 
 
 
@@ -130,8 +125,13 @@ static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4}; */
  */
 /* ===================  my code  =================== */
 
+/* global variables such as sfmt, psfmt32, psfmt64 are defined below */
+
 /* global constants */ 
+
+//number of paramter sets
 #define NBSET 32
+
 // D param, not used for the moment
 const int SFMT607_D_ParamSet[NBSET] = {
 96,     96,     98,     102, 119,    134,    135,    136,
@@ -868,6 +868,9 @@ const long int SFMT19937_PARITY4_ParamSet[NBSET] = {
 0xb6a0c2e9U,    0x4bf4dbf0U,    0x43471de2U,    0xc4cda29cU};
     
 
+/* global variables
+ * based on line 71-85 of Matsumoto and Saito original code */
+
 /* Mersenne exponent parameters */
 int POS1;
 int SL1;
@@ -889,8 +892,10 @@ int idxSFMT4253 = 0;
 int idxSFMT11213 = 0;
 int idxSFMT19937 = 0;
 
+
 /* Mersenne Exponent. The period of the sequence 
  *  is a multiple of 2^MEXP-1. */
+int mexp = 607;
 /* SFMT generator has an internal state array of 128-bit integers,
  * and N is its size. */
 int N;
@@ -901,9 +906,11 @@ int N32;
  * of 64-bit integers.*/
 int N64;
 
-//NMAX  defined as  (216091 / 128 + 1) for max MEXP
+//NMAX  defined as  (216091 / 128 + 1) for max MEXPs
 #define NMAX 1869
 
+/* based on line 71-85 of Matsumoto and Saito original code */
+/* the 128-bit internal state array */
 static w128_t sfmt[NMAX];
 /* the 32bit integer pointer to the 128-bit internal state array */ 
 static uint32_t *psfmt32 = &sfmt[0].u[0];
@@ -911,28 +918,32 @@ static uint32_t *psfmt32 = &sfmt[0].u[0];
 /* the 64bit integer pointer to the 128-bit internal state array */
 static uint64_t *psfmt64 = (uint64_t *)&sfmt[0].u[0];
 #endif
-
+/** index counter to the 32-bit internal state array */
+static int idx;
+/** a flag: it is 0 if and only if the internal state is not yet
+ * initialized. */
+static int initialized = 0;
  
 
-/* init SFMT constant, such as POS1, SL1...*/
+/* init SFMT constant, such as POS1, SL1, etc...*/
 void init_SFMT(int mersennexponent, int useparamset)
 {
 #if defined(HAVE_SSE2)
     {
-        Rprintf("SSE2 supported\n");
+        //Rprintf("SSE2 supported\n");
     }
 #endif
     
-
     
     switch (mersennexponent) 
     {
         case 607:
+            mexp = 607;
             
             if(!useparamset)
                 idxSFMT607 = 0;
             
-            //Rprintf("%d idx\n", idxSFMT607);
+            //Rprintf("1_ %d idx\n", idxSFMT607);
             
             if(idxSFMT607 >= NBSET)
                 error(_("internal in initSFMT"));
@@ -958,6 +969,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
         
         case 1279:
+            mexp = 1279;
+            
             if(!useparamset)
                 idxSFMT1279 = 0;
             
@@ -988,6 +1001,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
             
         case 2281:
+            mexp = 2281;
+            
             if(!useparamset)
                 idxSFMT2281 = 0;
             
@@ -1017,6 +1032,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
             
         case 4253:
+            mexp = 4253;
+            
             if(!useparamset)
                 idxSFMT4253 = 0;
 
@@ -1046,6 +1063,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
             
         case 11213:
+            mexp = 11213;
+            
             if(!useparamset)
                 idxSFMT11213 = 0;
 
@@ -1074,6 +1093,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
             
         case 19937:
+            mexp = 19937;
+            
             if(!useparamset)
                 idxSFMT19937 = 0;
             
@@ -1102,6 +1123,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
             
         case 44497:
+            mexp = 44497;
+            
             POS1 = 330;
             SL1 = 5;
             SL2 = 3;
@@ -1120,6 +1143,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
             
         case 86243:
+            mexp = 86243;
+            
             POS1 = 366;
             SL1 = 6;
             SL2 = 7;
@@ -1138,6 +1163,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
             
         case 132049:
+            mexp = 132049;
+            
             POS1 = 110;
             SL1 = 19;
             SL2 = 1;
@@ -1156,6 +1183,8 @@ void init_SFMT(int mersennexponent, int useparamset)
             break;
         
         case 216091:
+            mexp = 216091;
+            
             POS1 = 627;
             SL1 = 11;
             SL2 = 3;
@@ -1514,7 +1543,124 @@ uint32_t gen_rand32(void) {
 
     assert(initialized);
     if (idx >= N32) {
-	gen_rand_all();
+        
+        /*
+         * code of Christophe Dutang 
+         * added to interface with R 
+         */
+        /* ===================  my code  =================== */    
+#if defined(HAVE_SSE2)
+        
+        switch(mexp)
+        {
+            case 607:
+                //Rprintf("2- %d idx\n", idxSFMT607);
+                switch(idxSFMT607)
+                {
+                    case 1: 
+                        gen_rand_all_607_1();                       break;    
+                    case 2:
+                        gen_rand_all_607_2();                        break;
+                    case 3:
+                        gen_rand_all_607_3();                        break;
+                    case 4:
+                        gen_rand_all_607_4();                        break;
+                    case 5:
+                        gen_rand_all_607_5();                        break;
+                    case 6: 
+                        gen_rand_all_607_6();                        break;    
+                    case 7:
+                        gen_rand_all_607_7();                        break;
+                    case 8:
+                        gen_rand_all_607_8();                        break;
+                    case 9:
+                        gen_rand_all_607_9();                        break;
+                    case 10:
+                        gen_rand_all_607_10();                        break;
+                    case 11: 
+                        gen_rand_all_607_11();                        break;    
+                    case 12:
+                        gen_rand_all_607_12();                        break;
+                    case 13:
+                        gen_rand_all_607_13();                        break;
+                    case 14:
+                        gen_rand_all_607_14();                        break;
+                    case 15:
+                        gen_rand_all_607_15();                        break;                        
+                    case 16: 
+                        gen_rand_all_607_16();                        break;    
+                    case 17:
+                        gen_rand_all_607_17();                        break;
+                    case 18:
+                        gen_rand_all_607_18();                        break;
+                    case 19:
+                        gen_rand_all_607_19();                        break;
+                    case 20:
+                        gen_rand_all_607_20();                        break;                        
+                    case 21: 
+                        gen_rand_all_607_21();                        break;    
+                    case 22:
+                        gen_rand_all_607_22();                        break;
+                    case 23:
+                        gen_rand_all_607_23();                        break;
+                    case 24:
+                        gen_rand_all_607_24();                        break;
+                    case 25:
+                        gen_rand_all_607_25();                        break;                        
+                    case 26: 
+                        gen_rand_all_607_26();                        break;    
+                    case 27:
+                        gen_rand_all_607_27();                        break;
+                    case 28:
+                        gen_rand_all_607_28();                        break;
+                    case 29:
+                        gen_rand_all_607_29();                        break;
+                    case 30:
+                        gen_rand_all_607_30();                        break;                        
+                    case 31:
+                        gen_rand_all_607_31();                        break;                        
+                    case 0:
+                        gen_rand_all_607_32();                        break;                                                
+                    default:
+                        error(_("wrong index in SFMT - sse2 support"));
+                }
+                break;
+            case 1279:
+                gen_rand_all_1279_1();
+                break;
+            case 2281:
+                gen_rand_all_2281_1();
+                break;
+            case 4253:
+                gen_rand_all_4253_1();
+                break;
+            case 11213:
+                gen_rand_all_11213_1();
+                break;
+            case 19937:
+                gen_rand_all_19937_1();
+                break;
+            case 44497:
+                gen_rand_all_44497_1();
+                break;
+            case 86243:
+                gen_rand_all_86243_1();
+                break;
+            case 132049:
+                gen_rand_all_132049_1();
+                break;
+            case 216091:
+                gen_rand_all_216091_1();
+                break;                
+            default:
+                error(_("wrong mersenne exponent - sse2 support"));
+        }
+#else
+        gen_rand_all();
+#endif
+        
+        /* =================== end of my code =============== */
+        
 	idx = 0;
     }
     r = psfmt32[idx++];
@@ -1528,7 +1674,8 @@ uint32_t gen_rand32(void) {
  * unless an initialization is again executed. 
  * @return 64-bit pseudorandom number
  */
-uint64_t gen_rand64(void) {
+uint64_t gen_rand64(void) 
+{
 #if defined(BIG_ENDIAN64) && !defined(ONLY64)
     uint32_t r1, r2;
 #else
@@ -1538,8 +1685,124 @@ uint64_t gen_rand64(void) {
     assert(initialized);
     assert(idx % 2 == 0);
 
-    if (idx >= N32) {
-	gen_rand_all();
+    if (idx >= N32) 
+    {
+        /*
+         * code of Christophe Dutang 
+         * added to interface with R 
+         */
+        /* ===================  my code  =================== */    
+#if defined(HAVE_SSE2)
+        switch(mexp)
+        {
+            case 607:
+                Rprintf("2 64bit- %d idx\n", idxSFMT607);
+                switch(idxSFMT607)
+                {
+                    case 1: 
+                        gen_rand_all_607_1();                       break;    
+                    case 2:
+                        gen_rand_all_607_2();                        break;
+                    case 3:
+                        gen_rand_all_607_3();                        break;
+                    case 4:
+                        gen_rand_all_607_4();                        break;
+                    case 5:
+                        gen_rand_all_607_5();                        break;
+                    case 6: 
+                        gen_rand_all_607_6();                        break;    
+                    case 7:
+                        gen_rand_all_607_7();                        break;
+                    case 8:
+                        gen_rand_all_607_8();                        break;
+                    case 9:
+                        gen_rand_all_607_9();                        break;
+                    case 10:
+                        gen_rand_all_607_10();                        break;
+                    case 11: 
+                        gen_rand_all_607_11();                        break;    
+                    case 12:
+                        gen_rand_all_607_12();                        break;
+                    case 13:
+                        gen_rand_all_607_13();                        break;
+                    case 14:
+                        gen_rand_all_607_14();                        break;
+                    case 15:
+                        gen_rand_all_607_15();                        break;                        
+                    case 16: 
+                        gen_rand_all_607_16();                        break;    
+                    case 17:
+                        gen_rand_all_607_17();                        break;
+                    case 18:
+                        gen_rand_all_607_18();                        break;
+                    case 19:
+                        gen_rand_all_607_19();                        break;
+                    case 20:
+                        gen_rand_all_607_20();                        break;                        
+                    case 21: 
+                        gen_rand_all_607_21();                        break;    
+                    case 22:
+                        gen_rand_all_607_22();                        break;
+                    case 23:
+                        gen_rand_all_607_23();                        break;
+                    case 24:
+                        gen_rand_all_607_24();                        break;
+                    case 25:
+                        gen_rand_all_607_25();                        break;                        
+                    case 26: 
+                        gen_rand_all_607_26();                        break;    
+                    case 27:
+                        gen_rand_all_607_27();                        break;
+                    case 28:
+                        gen_rand_all_607_28();                        break;
+                    case 29:
+                        gen_rand_all_607_29();                        break;
+                    case 30:
+                        gen_rand_all_607_30();                        break;                        
+                    case 31:
+                        gen_rand_all_607_31();                        break;                        
+                    case 0:
+                        gen_rand_all_607_32();                        break;                                                
+                    default:
+                        error(_("wrong index in SFMT - sse2 support"));
+                }
+                break;
+            case 1279:
+                gen_rand_all_1279_1();
+                break;
+            case 2281:
+                gen_rand_all_2281_1();
+                break;
+            case 4253:
+                gen_rand_all_4253_1();
+                break;
+            case 11213:
+                gen_rand_all_11213_1();
+                break;
+            case 19937:
+                gen_rand_all_19937_1();
+                break;
+            case 44497:
+                gen_rand_all_44497_1();
+                break;
+            case 86243:
+                gen_rand_all_86243_1();
+                break;
+            case 132049:
+                gen_rand_all_132049_1();
+                break;
+            case 216091:
+                gen_rand_all_216091_1();
+                break;   
+            default:
+                error(_("wrong mersenne exponent - sse2 support"));
+        }
+#else
+        gen_rand_all();
+#endif
+        
+        /* =================== end of my code =============== */
+        
 	idx = 0;
     }
 #if defined(BIG_ENDIAN64) && !defined(ONLY64)
@@ -1586,7 +1849,122 @@ void fill_array32(uint32_t *array, int size) {
     assert(size % 4 == 0);
     assert(size >= N32);
 
+    /*
+     * code of Christophe Dutang 
+     * added to interface with R 
+     */
+    /* ===================  my code  =================== */    
+#if defined(HAVE_SSE2)
+   switch(mexp)
+    {
+        case 607:
+            //Rprintf("2- %d idx\n", idxSFMT607);
+            switch(idxSFMT607)
+            {
+                case 1: 
+                    gen_rand_array_607_1((w128_t *)array, size / 4); break;    
+                case 2:
+                    gen_rand_array_607_2((w128_t *)array, size / 4); break;    
+                case 3:
+                    gen_rand_array_607_3((w128_t *)array, size / 4); break;    
+                case 4:
+                    gen_rand_array_607_4((w128_t *)array, size / 4); break;    
+                case 5:
+                    gen_rand_array_607_5((w128_t *)array, size / 4); break;    
+                case 6: 
+                    gen_rand_array_607_6((w128_t *)array, size / 4); break;    
+                case 7:
+                    gen_rand_array_607_7((w128_t *)array, size / 4); break;    
+                case 8:
+                    gen_rand_array_607_8((w128_t *)array, size / 4); break;    
+                case 9:
+                    gen_rand_array_607_9((w128_t *)array, size / 4); break;    
+                case 10:
+                    gen_rand_array_607_10((w128_t *)array, size / 4); break;    
+                case 11: 
+                    gen_rand_array_607_11((w128_t *)array, size / 4); break;    
+                case 12:
+                    gen_rand_array_607_12((w128_t *)array, size / 4); break;    
+                case 13:
+                    gen_rand_array_607_13((w128_t *)array, size / 4); break;    
+                case 14:
+                    gen_rand_array_607_14((w128_t *)array, size / 4); break;    
+                case 15:
+                    gen_rand_array_607_15((w128_t *)array, size / 4); break;    
+                case 16: 
+                    gen_rand_array_607_16((w128_t *)array, size / 4); break;    
+                case 17:
+                    gen_rand_array_607_17((w128_t *)array, size / 4); break;    
+                case 18:
+                    gen_rand_array_607_18((w128_t *)array, size / 4); break;    
+                case 19:
+                    gen_rand_array_607_19((w128_t *)array, size / 4); break;    
+                case 20:
+                    gen_rand_array_607_20((w128_t *)array, size / 4); break;    
+                case 21: 
+                    gen_rand_array_607_21((w128_t *)array, size / 4); break;    
+                case 22:
+                    gen_rand_array_607_22((w128_t *)array, size / 4); break;    
+                case 23:
+                    gen_rand_array_607_23((w128_t *)array, size / 4); break;    
+                case 24:
+                    gen_rand_array_607_24((w128_t *)array, size / 4); break;    
+                case 25:
+                    gen_rand_array_607_25((w128_t *)array, size / 4); break;    
+                case 26: 
+                    gen_rand_array_607_26((w128_t *)array, size / 4); break;    
+                case 27:
+                    gen_rand_array_607_27((w128_t *)array, size / 4); break;    
+                case 28:
+                    gen_rand_array_607_28((w128_t *)array, size / 4); break;    
+                case 29:
+                    gen_rand_array_607_29((w128_t *)array, size / 4); break;    
+                case 30:
+                    gen_rand_array_607_30((w128_t *)array, size / 4); break;    
+                case 31:
+                    gen_rand_array_607_31((w128_t *)array, size / 4); break;    
+                case 0:
+                    gen_rand_array_607_32((w128_t *)array, size / 4); break;                           
+                default:
+                    error(_("wrong index in SFMT - sse2 support"));
+            }
+            break;
+        case 1279:
+            gen_rand_array_1279_1((w128_t *)array, size / 4);
+            break;
+        case 2281:
+            gen_rand_array_607_1((w128_t *)array, size / 4);
+            break;
+        case 4253:
+            gen_rand_array_4253_1((w128_t *)array, size / 4);
+            break;
+        case 11213:
+            gen_rand_array_11213_1((w128_t *)array, size / 4);
+            break;
+        case 19937:
+            gen_rand_array_19937_1((w128_t *)array, size / 4);
+            break;
+        case 44497:
+            gen_rand_array_44497_1((w128_t *)array, size / 4);
+            break;
+        case 86243:
+            gen_rand_array_86243_1((w128_t *)array, size / 4);
+            break;
+        case 132049:
+            gen_rand_array_132049_1((w128_t *)array, size / 4);
+            break;
+        case 216091:
+            gen_rand_array_216091_1((w128_t *)array, size / 4);
+            break;   
+        default:
+            error(_("wrong mersenne exponent - sse2 support"));
+    }
+#else
     gen_rand_array((w128_t *)array, size / 4);
+#endif
+    
+    /* =================== end of my code =============== */
+    
     idx = N32;
 }
 #endif
@@ -1622,7 +2000,122 @@ void fill_array64(uint64_t *array, int size) {
     assert(size % 2 == 0);
     assert(size >= N64);
 
+    /*
+     * code of Christophe Dutang 
+     * added to interface with R 
+     */
+    /* ===================  my code  =================== */    
+#if defined(HAVE_SSE2)
+    switch(mexp)
+    {
+        case 607:
+            Rprintf("2 64bit- %d idx\n", idxSFMT607);
+            switch(idxSFMT607)
+            {
+                case 1: 
+                    gen_rand_array_607_1((w128_t *)array, size / 2); break;    
+                case 2:
+                    gen_rand_array_607_2((w128_t *)array, size / 2); break;    
+                case 3:
+                    gen_rand_array_607_3((w128_t *)array, size / 2); break;    
+                case 4:
+                    gen_rand_array_607_4((w128_t *)array, size / 2); break;    
+                case 5:
+                    gen_rand_array_607_5((w128_t *)array, size / 2); break;    
+                case 6: 
+                    gen_rand_array_607_6((w128_t *)array, size / 2); break;    
+                case 7:
+                    gen_rand_array_607_7((w128_t *)array, size / 2); break;    
+                case 8:
+                    gen_rand_array_607_8((w128_t *)array, size / 2); break;    
+                case 9:
+                    gen_rand_array_607_9((w128_t *)array, size / 2); break;    
+                case 10:
+                    gen_rand_array_607_10((w128_t *)array, size / 2); break;    
+                case 11: 
+                    gen_rand_array_607_11((w128_t *)array, size / 2); break;    
+                case 12:
+                    gen_rand_array_607_12((w128_t *)array, size / 2); break;    
+                case 13:
+                    gen_rand_array_607_13((w128_t *)array, size / 2); break;    
+                case 14:
+                    gen_rand_array_607_14((w128_t *)array, size / 2); break;    
+                case 15:
+                    gen_rand_array_607_15((w128_t *)array, size / 2); break;    
+                case 16: 
+                    gen_rand_array_607_16((w128_t *)array, size / 2); break;    
+                case 17:
+                    gen_rand_array_607_17((w128_t *)array, size / 2); break;    
+                case 18:
+                    gen_rand_array_607_18((w128_t *)array, size / 2); break;    
+                case 19:
+                    gen_rand_array_607_19((w128_t *)array, size / 2); break;    
+                case 20:
+                    gen_rand_array_607_20((w128_t *)array, size / 2); break;    
+                case 21: 
+                    gen_rand_array_607_21((w128_t *)array, size / 2); break;    
+                case 22:
+                    gen_rand_array_607_22((w128_t *)array, size / 2); break;    
+                case 23:
+                    gen_rand_array_607_23((w128_t *)array, size / 2); break;    
+                case 24:
+                    gen_rand_array_607_24((w128_t *)array, size / 2); break;    
+                case 25:
+                    gen_rand_array_607_25((w128_t *)array, size / 2); break;    
+                case 26: 
+                    gen_rand_array_607_26((w128_t *)array, size / 2); break;    
+                case 27:
+                    gen_rand_array_607_27((w128_t *)array, size / 2); break;    
+                case 28:
+                    gen_rand_array_607_28((w128_t *)array, size / 2); break;    
+                case 29:
+                    gen_rand_array_607_29((w128_t *)array, size / 2); break;    
+                case 30:
+                    gen_rand_array_607_30((w128_t *)array, size / 2); break;    
+                case 31:
+                    gen_rand_array_607_31((w128_t *)array, size / 2); break;    
+                case 0:
+                    gen_rand_array_607_32((w128_t *)array, size / 2); break;                           
+                default:
+                    error(_("wrong index in SFMT - sse2 support"));
+            }
+            break;
+        case 1279:
+            gen_rand_array_1279_1((w128_t *)array, size / 2);
+            break;
+        case 2281:
+            gen_rand_array_607_1((w128_t *)array, size / 2);
+            break;
+        case 4253:
+            gen_rand_array_4253_1((w128_t *)array, size / 2);
+            break;
+        case 11213:
+            gen_rand_array_11213_1((w128_t *)array, size / 2);
+            break;
+        case 19937:
+            gen_rand_array_19937_1((w128_t *)array, size / 2);
+            break;
+        case 44497:
+            gen_rand_array_44497_1((w128_t *)array, size / 2);
+            break;
+        case 86243:
+            gen_rand_array_86243_1((w128_t *)array, size / 2);
+            break;
+        case 132049:
+            gen_rand_array_132049_1((w128_t *)array, size / 2);
+            break;
+        case 216091:
+            gen_rand_array_216091_1((w128_t *)array, size / 2);
+            break;               
+        default:
+            error(_("wrong mersenne exponent - sse2 support"));
+    }
+#else
     gen_rand_array((w128_t *)array, size / 2);
+#endif
+    
+    /* =================== end of my code =============== */
+    
     idx = N32;
 
 #if defined(BIG_ENDIAN64) && !defined(ONLY64)

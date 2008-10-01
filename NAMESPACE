@@ -3,18 +3,10 @@ useDynLib(randtoolbox, .registration = TRUE)
 
 
 ### Exports
-export(torus)
-export(setSeed)
-export(congruRand)
-export(SFMT)
-export(WELL)
-export(knuthTAOCP)
+export(torus, runif.halton, halton, runif.sobol, sobol)
 
-export(gap.test)
-export(freq.test)
-export(serial.test)
-export(poker.test)
-export(order.test)
-export(coll.test)
+export(setSeed, congruRand, SFMT, WELL, knuthTAOCP)
+
+export(gap.test, freq.test, serial.test, poker.test, order.test, coll.test)
 
 export(stirling)

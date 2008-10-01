@@ -18,7 +18,7 @@
  *                                                                                                                                           *
  **********************************************************************************************/
 /*
- *  Torus algorithm to generate random numbers
+ *  various Random Number Generators
  *
  *		C functions	
  *  
@@ -32,9 +32,10 @@
 /*              constants               */
 //the seed
 static unsigned long seed; 
+static unsigned long torusoffset;
 //a pseudo boolean to initiate the seed
 static int isInit;
-//the length (maximal) of the internal seed array
+//the length (maximal) of the internal seed array for WELL44497
 #define LENSEEDARRAY 1391
 static unsigned int seedArray[LENSEEDARRAY];
 //a pseudo boolean to initiate the seed array
@@ -61,7 +62,7 @@ static R_INLINE double fracPart(double x)
 /* quasi random generation */
 
 //main function used .Call()
-SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed)
+SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP offset, SEXP ismixed, SEXP timedseed)
 {
     if (!isNumeric(n) || !isNumeric(d) || !isLogical(timedseed) )
         error(_("invalid argument"));
@@ -74,6 +75,7 @@ SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed)
     int nb = asInteger( n ); //number of random vectors
     int dim  = asInteger( d ); //dimension of vector
     int *prime; //prime numbers used when supplied
+    int seqstart = asInteger( offset ); //sequence starting point
     int mixed = asLogical( ismixed ); //boolean to use the mixed Torus algo
     int usetime = asLogical( timedseed ); //boolean to use the machine time
     
@@ -83,7 +85,7 @@ SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed)
         prime  = INTEGER( p ); 
     
 	
-    //result
+    //allocate result
     double *u = (double *) R_alloc(nb * dim, sizeof(double));
     SEXP resultinR; //result in R
     PROTECT(resultinR = allocMatrix(REALSXP, nb, dim)); //allocate a n x d matrix
@@ -93,9 +95,9 @@ SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed)
 	
     //computation step
     if(prime == NULL)           
-        torus(u, nb, dim, primeNumber, mixed, usetime);
+        torus(u, nb, dim, primeNumber, seqstart, mixed, usetime);
     else
-        torus(u, nb, dim, prime, mixed, usetime);
+        torus(u, nb, dim, prime, seqstart, mixed, usetime);
 	
     UNPROTECT(1);
 	
@@ -103,7 +105,7 @@ SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP ismixed, SEXP timedseed)
 }
 
 //compute the vector sequence of the Torus algorithm
-void torus(double *u, int nb, int dim, int *prime, int ismixed, int usetime)
+void torus(double *u, int nb, int dim, int *prime, int offset, int ismixed, int usetime)
 {
     int i, j;
     unsigned long state;
@@ -147,7 +149,7 @@ void torus(double *u, int nb, int dim, int *prime, int ismixed, int usetime)
         if(usetime) //use the machine time
             state = seed;
         else 
-            state  = 1;
+            state  = offset;
         
         for(j = 0; j < dim; j++)
             for(i = 0; i < nb; i++) 
@@ -278,7 +280,7 @@ void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset)
     //init the seed of SFMT
     init_gen_rand(seed);
 
-    /*
+    
     //size of internal array
     int blocksize = get_min_array_size32();
     //number of blocks to generate
@@ -286,23 +288,40 @@ void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset)
     //last variates to generate
     //int rest = nb % blocksize;
     
-    unsigned int * array;
+    
     
     //Rprintf("zog\n");
     
 //    PROTECT(array = allocMatrix(INTSXP, nb, dim)); //allocate a n x d matrix
     
-    array = (unsigned int *) R_alloc(nb * dim, sizeof(unsigned long long int));
-
-  //  Rprintf("blocksize %d\n nbblock %d\n rest %d\n", blocksize, nbblock, rest);
-
-//                    Rprintf("mem %d\t", array);
    
-
-    
+    /*
+    * @param size the number of 32-bit pseudorandom integers to be
+    * generated.  size must be a multiple of 4, and greater than or equal
+    * to (MEXP / 128 + 1) * 4.
+    */
+#if defined(HAVE_SSE2)    
     if(nb * dim >= blocksize)
     {
-        fill_array32(array, nb * dim);
+
+        //unsigned int *array;
+//        static __m128i array1[BLOCK_SIZE / 4];
+//        static __m128i array2[10000 / 4];
+
+        __m128i array1[nb * dim*4];
+
+        uint32_t *array32 = (uint32_t *)array1;
+        
+//        array = (unsigned int *) R_alloc(nb * dim, sizeof(__m128i));
+        
+        //Rprintf("blocksize %d\n", blocksize);
+        
+        //Rprintf("mem %d \n", array);
+        
+        //int roundedsize = ( (nb*dim) / 4 ) *4;
+        //Rprintf("rounded size %d initial size %d\n", roundedsize, nb*dim);
+        fill_array32(array32, nb*dim);
+        //Rprintf("fill_array32 ends\n");
     
 //    for(j = 0; j < dim; j++)
 //        fill_array32( (array+ i*blocksize), rest);
@@ -321,14 +340,14 @@ void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset)
     // compute u_ij
     for(j = 0; j < dim; j++)
         for(i = 0; i < nb; i++) 
-            u[i + j * nb] = to_real3( array[i + j * nb] ); // real on ]0,1[ interval
+            u[i + j * nb] = to_real3( array32[i + j * nb] ); // real on ]0,1[ interval
             
         
     //Free(array);
     }
     else
     {
-        */
+#endif        
 
 
     // compute u_ij
@@ -336,15 +355,18 @@ void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset)
         for(i = 0; i < nb; i++) 
             u[i + j * nb] = genrand_real3(); // real on ]0,1[ interval
 
-    //}
+#if defined(HAVE_SSE2)
+    }
+#endif
+    
     
     isInit = 0;	    
 }
 
 //main function used .Call()
-SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering)
+SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering, SEXP version)
 {
-    if (!isNumeric(n) || !isNumeric(d) || !isNumeric(order) || !isLogical(tempering))
+    if (!isNumeric(n) || !isNumeric(d) || !isNumeric(order) || !isLogical(tempering) || !isNumeric(version))
         error(_("invalid argument"));
     
     //temporary working variables
@@ -352,7 +374,7 @@ SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering)
     int dim  = asInteger( d ); //dimension of vector
     int degree = asInteger( order );  //mersenne exponent
     int dotemper = asLogical( tempering ); //tempering or not?
-    
+    int theversion = asInteger( version ); //1 for 'a' version and 2 for 'b'
     
     //result
     double *u = (double *) R_alloc(nb * dim, sizeof(double));
@@ -365,7 +387,7 @@ SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering)
 //    Rprintf("call wellrng\n");
     
     //computation step
-    WELLrng(u, nb, dim, degree, dotemper);
+    WELLrng(u, nb, dim, degree, dotemper, theversion);
     
   //  Rprintf("fin WELLrng\n");
     
@@ -375,22 +397,25 @@ SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering)
 }
 
 // call the WELL generator of L'Ecuyer
-void WELLrng(double *u, int nb, int dim, int order, int temper)
+void WELLrng(double *u, int nb, int dim, int order, int temper, int version)
 {
     int i, j;
     
-//    Rprintf("order %u", order);
-    
     if(temper && order == 512)
-        error(_("no tempering possible"));
+        error(_("no tempering possible since it is useless, cf. Panneton et al.(2006)."));
     if(temper && order == 521)
-        error(_("no tempering possible"));
+        error(_("no tempering possible since it is useless, cf. Panneton et al.(2006)."));
+    if(temper && order == 607)
+        error(_("no tempering possible since it is useless, cf. Panneton et al.(2006)."));
     if(temper && order == 1024)
-        error(_("no tempering possible"));
+        error(_("no tempering possible since it is useless, cf. Panneton et al.(2006)."));
         
+    if(version !=1 && version != 2)
+        error(_("wrong version for WELL RNG, it must be 1 or 2."));
     
     switch (order) 
     {
+    //no tempering for the first four RNGs
         case 512:
             //initiate the seed with the machine time
             // and ensure it is positive
@@ -406,36 +431,60 @@ void WELLrng(double *u, int nb, int dim, int order, int temper)
                     u[i + j * nb] = WELLRNG512a(); // real on ]0,1[ interval
             break;
             
-        case 521:
-            
-//            Rprintf("case 521\n");
-            
+        case 521:            
             //initiate the seed with the machine time
             // and ensure it is positive
             if(!isInitByArray) 
-                randSeedByArray(17); 
-
-  //                      Rprintf("case isinitbyarray\n");
-            
-            initWELL521(0);
-            
-    //                    Rprintf("case initWELL521\n");
-            //init SFMT parameters
-            InitWELLRNG521a( seedArray );        
-            
-      //      Rprintf("initwellrng521\n");
-            
-            // compute u_ij
-            for(j = 0; j < dim; j++)
+                randSeedByArray(17);
+        
+            if(version == 1)
             {
-                for(i = 0; i < nb; i++) 
-                {
-       //             Rprintf("i - j : %u - %u", i,j);
-                    u[i + j * nb] = WELLRNG521a(); // real on ]0,1[ interval
-                }
-         //       Rprintf("\n");
+                //init SFMT parameters
+                InitWELLRNG521a( seedArray );        
+
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG521a(); // real on ]0,1[ interval
             }
-           // Rprintf("fin de la putain de boucle\n");
+            else
+            {
+                //init SFMT parameters
+                InitWELLRNG521b( seedArray );        
+                
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG521b(); // real on ]0,1[ interval
+            }
+            break;
+            
+       case 607:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(19);
+            
+            if(version == 1)
+            {
+                //init SFMT parameters
+                InitWELLRNG607a( seedArray );        
+                
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG607a(); // real on ]0,1[ interval
+            }
+            else
+            {
+                //init SFMT parameters
+                InitWELLRNG607b( seedArray );        
+                
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG607b(); // real on ]0,1[ interval                
+            }
             break;
             
         case 1024:
@@ -444,13 +493,77 @@ void WELLrng(double *u, int nb, int dim, int order, int temper)
             if(!isInitByArray) 
                 randSeedByArray(32); 
             
-            //init SFMT parameters
-            InitWELLRNG1024a( seedArray );        
+            if(version == 1)
+            {
+                //init SFMT parameters
+                InitWELLRNG1024a( seedArray );        
+                
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG1024a(); // real on ]0,1[ interval
+            }
+            else
+            {
+                //init SFMT parameters
+                InitWELLRNG1024b( seedArray );        
+                
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG1024b(); // real on ]0,1[ interval
+            }            
+            break;
+        
+    //tempering possible for these RNGs
+        case 800:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(25); 
             
-            // compute u_ij
-            for(j = 0; j < dim; j++)
-                for(i = 0; i < nb; i++) 
-                    u[i + j * nb] = WELLRNG1024a(); // real on ]0,1[ interval
+            if(temper == 0)
+            {
+                if(version == 1)
+                {
+                    //init SFMT parameters
+                    InitWELLRNG800a( seedArray );       
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG800a(); // real on ]0,1[ interval
+                }
+                else
+                {
+                    //init SFMT parameters
+                    InitWELLRNG800b( seedArray );        
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG800b(); // real on ]0,1[ interval
+                }
+            }
+            else
+            {
+                if(version == 1)
+                {
+                    //init SFMT parameters
+                    InitWELLRNG800aTemp( seedArray );       
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG800aTemp(); // real on ]0,1[ interval
+                }
+                else
+                {
+                    //init SFMT parameters
+                    InitWELLRNG800bTemp( seedArray );        
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG800bTemp(); // real on ]0,1[ interval
+                }
+            }
             break;
             
         case 19937:
@@ -459,41 +572,159 @@ void WELLrng(double *u, int nb, int dim, int order, int temper)
             if(!isInitByArray) 
                 randSeedByArray(624); 
             
-            //init SFMT parameters
-            InitWELLRNG19937a( seedArray );        
-            initWELL19937( temper );
-            
-            // compute u_ij
-            for(j = 0; j < dim; j++)
-                for(i = 0; i < nb; i++) 
-                    u[i + j * nb] = WELLRNG19937a(); // real on ]0,1[ interval
+            if(temper == 0)
+            {
+                if(version == 1)
+                {
+                    //init SFMT parameters
+                    InitWELLRNG19937a( seedArray );       
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG19937a(); // real on ]0,1[ interval
+                }
+                else
+                {
+                    //init SFMT parameters
+                    InitWELLRNG19937b( seedArray );        
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG19937b(); // real on ]0,1[ interval
+                }
+            }
+            else
+            {
+                if(version == 1)
+                {
+                    //init SFMT parameters
+                    InitWELLRNG19937aTemp( seedArray );       
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG19937aTemp(); // real on ]0,1[ interval
+                }
+                else
+                {
+                    //init SFMT parameters
+                    InitWELLRNG19937bTemp( seedArray );        
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG19937bTemp(); // real on ]0,1[ interval
+                }
+            }
             break;
         
+        case 21701:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(679); 
+            
+            if(temper == 0)
+            {                
+                //init SFMT parameters
+                InitWELLRNG21701a( seedArray );       
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG21701a(); // real on ]0,1[ interval
+            }
+            else
+            {
+               
+                //init SFMT parameters
+                InitWELLRNG21701aTemp( seedArray );       
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG21701aTemp(); // real on ]0,1[ interval
+            }
+            break;
+            
+        case 23209:
+            //initiate the seed with the machine time
+            // and ensure it is positive
+            if(!isInitByArray) 
+                randSeedByArray(726); 
+            
+            if(temper == 0)
+            {
+                if(version == 1)
+                {
+                    //init SFMT parameters
+                    InitWELLRNG23209a( seedArray );       
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG23209a(); // real on ]0,1[ interval
+                }
+                else
+                {
+                    //init SFMT parameters
+                    InitWELLRNG23209b( seedArray );        
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG23209b(); // real on ]0,1[ interval
+                }
+            }
+            else
+            {
+                if(version == 1)
+                {
+                    //init SFMT parameters
+                    InitWELLRNG23209aTemp( seedArray );       
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG23209aTemp(); // real on ]0,1[ interval
+                }
+                else
+                {
+                    //init SFMT parameters
+                    InitWELLRNG23209bTemp( seedArray );        
+                    // compute u_ij
+                    for(j = 0; j < dim; j++)
+                        for(i = 0; i < nb; i++) 
+                            u[i + j * nb] = WELLRNG23209bTemp(); // real on ]0,1[ interval
+                }
+            }
+            break;    
+            
         case 44497:
             //initiate the seed with the machine time
             // and ensure it is positive
             if(!isInitByArray) 
                 randSeedByArray(1391); 
             
-            //init SFMT parameters
-            InitWELLRNG44497a( seedArray );        
-            initWELL44497( temper );
-            
-            // compute u_ij
-            for(j = 0; j < dim; j++)
-                for(i = 0; i < nb; i++) 
-                    u[i + j * nb] = WELLRNG44497a(); // real on ]0,1[ interval
-            break;        
+            if(temper == 0)
+            {                
+                //init SFMT parameters
+                InitWELLRNG44497a( seedArray );       
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG44497a(); // real on ]0,1[ interval
+            }
+            else
+            {
+                
+                //init SFMT parameters
+                InitWELLRNG44497aTemp( seedArray );       
+                // compute u_ij
+                for(j = 0; j < dim; j++)
+                    for(i = 0; i < nb; i++) 
+                        u[i + j * nb] = WELLRNG44497aTemp(); // real on ]0,1[ interval
+            }
+            break;
             
         default:
             error(_("error wrong exponent in WELL generator\n"));
     }
     
-   // Rprintf("fin du case\n");
-    
     isInitByArray = 0;	          
-    
-    //Rprintf("isinitbyarray fait\n");
 }
 
 //main function used .Call()

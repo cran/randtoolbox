@@ -1,6 +1,5 @@
-\name{randtoolbox}
-\alias{randtoolbox}
-\alias{torus}
+\name{pseudo.randtoolbox}
+\alias{pseudo.randtoolbox}
 \alias{congruRand}
 \alias{SFMT}
 \alias{WELL}
@@ -15,22 +14,16 @@
 	generation).
 }
 \usage{
-torus(n, dim = 1, prime, mixed = FALSE, usetime = FALSE)
 congruRand(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
 SFMT(n, dim = 1, mexp = 19937, usepset = TRUE, withtorus = FALSE, usetime = FALSE)
-WELL(n, dim = 1, order = 512, temper = FALSE)
+WELL(n, dim = 1, order = 512, temper = FALSE, version = "a")
 knuthTAOCP(n, dim = 1)
 setSeed(seed)
 }
 \arguments{
   \item{n}{number of observations. If length(n) > 1, 
-  		  the length is taken to be the number required.}
+  		  the length is taken to be the required number.}
   \item{dim}{dimension of observations (must be <=100 000, default 1).}
-  \item{prime}{a single prime number or a vector of prime numbers to be used
-  		 in the Torus sequence. (optional argument).}
-  \item{mixed}{a logical to use the mixed Torus algorithm, default FALSE.}
-  \item{usetime}{a logical to use the machine time to start the Torus sequence, 
-  		   default TRUE. if FALSE, the Torus sequence start from the first term.}
   \item{seed}{a single value, interpreted as a positive integer for the seed. e.g.
   		append your day, your month and your year of birth.}
   \item{mod}{an integer defining the modulus of the linear congruential generator.}
@@ -42,25 +35,16 @@ setSeed(seed)
                     sequence appended to the SFMT sequence; 
                     or a logical equals to FALSE (default).}
   \item{usepset}{a logical to use a set of 12 parameters set for SFMT. default TRUE.}
+  \item{usetime}{a logical to use the machine time to start the Torus sequence, 
+  		   default TRUE. if FALSE, the Torus sequence start from the first term.}
   \item{order}{a positive integer for the order of the characteristic polynomial. see details}
   \item{temper}{a logical if you want to do a tempering stage. see details}
+  \item{version}{a character either 'a' or 'b'. see details}
 }
 \details{
 
 The currently available generator are given below.
 \describe{
-    \item{\bold{Torus algorithm:}}{
-	The \eqn{k}th term of the Torus algorithm in d dimension is given by
-	    	\deqn{u_k = \left(frac(k \sqrt{p_1}), ..., frac(k \sqrt{p_d}) \right)}{%
-			    u_k = (frac(k sqrt(p_1)), ..., frac(k sqrt(p_d)) )}
-	where \eqn{p_i} denotes the ith prime number, \eqn{frac} the fractional part
-	(i.e. \eqn{frac(x) = x-floor(x)}). We use the 100 000 first prime numbers
-	from \url{http://primes.utm.edu/}.
-	The Torus sequence starts from \eqn{k=1} if
-	\code{usetime = FALSE} otherwise it uses the machine time
-	 \eqn{k= [ 2^16 * second ] xor [ microsecond ]} when microseconds
-	are available.}
-
     \item{\bold{Linear congruential generators:}}{	
 	The \eqn{k}th term of a linear congruential generator is defined as
 	   \deqn{u_k = \frac{ ( a * u_{k-1} + c ) \textrm{~mod~} m }{m}}{%
@@ -112,8 +96,12 @@ The currently available generator are given below.
 	The \code{order} argument of \code{WELL}
 	generator is the order of the characteristic polynomial, which is denoted by \eqn{k} in 
 	Paneton F., L'Ecuyer P. and Matsumoto M. (2006). Possible values for \code{order} 	
-	are 512, 1024, 19937, 44497. Furthermore a tempering stage is possible for
-	the last two values through the \code{temper} argument. 
+	are 512, 521, 607, 1024 where no tempering are needed (thus possible).
+ 	Order can also be 800, 19937, 21071, 23209, 44497 where a tempering stage
+	is possible through the \code{temper} argument. 
+	Furthermore a possible 'b' version of WELL RNGs are possible for the 
+	following order 521, 607, 1024, 800, 19937, 23209 with the \code{version}
+	argument.
 	
 	All the C code for WELL generator used in this 
 	package is the code of P. L'Ecuyer (cf. 
@@ -140,13 +128,13 @@ The currently available generator are given below.
 	}
 
 }%end of describe
-See the vignette for details.
+See the pdf vignette for details.
 }
 \value{
-  \code{torus}, \code{SFMT}, \code{WELL} and \code{congruRand} generates random variables in ]0,1[, ]0,1[, [0,1[ and [0,1[ respectively. It returns a \eqn{n}x\eqn{dim} matrix, when \code{dim}>1 otherwise a vector of length \code{n}.
+  \code{SFMT}, \code{WELL}, \code{congruRand} and \code{knuthTAOCP} generates random variables in ]0,1[,  [0,1[ and [0,1[ respectively. It returns a \eqn{n}x\eqn{dim} matrix, when \code{dim}>1 otherwise a vector of length \code{n}.
 
   \code{setSeed} set the seed of the \code{randtoolbox} package 
-(i.e. both for the \code{torus}, \code{SFMT}, \code{WELL} and \code{congruRand} functions).
+(i.e. both for the \code{knuthTAOCP}, \code{SFMT}, \code{WELL} and \code{congruRand} functions).
 }
 \references{
 Knuth D. (1997), \emph{The Art of Computer Programming V2 Seminumerical Algorithms}, Third Edition, Massachusetts: Addison-Wesley.
@@ -163,10 +151,6 @@ available online)
 Park S. K., Miller K. W. (1988), \emph{Random number generators: good
 ones are hard to find}. Association for Computing Machinery, vol. 31, 10, pp 1192-2001. (available online) 
 
-Planchet F., Jacquemin J. (2003), \emph{L'utilisation de methodes de 
-simulation en assurance}. Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
-
-
 Wikipedia (2008), \emph{a linear congruential generator}.
 }
 \seealso{
@@ -176,37 +160,9 @@ Wikipedia (2008), \emph{a linear congruential generator}.
  Christophe Dutang.
 }
 \examples{
-# (1) the Torus algorithm
+# (1) the Park Miller sequence
 #
-torus(100)
 
-# example of setting the seed
-setSeed(1)
-torus(5)
-setSeed(6)
-torus(5)
-#the same
-setSeed(1)
-torus(10)
-
-#no use of the machine time
-torus(10, use=FALSE)
-
-#Kolmogorov Smirnov test
-#KS statistic should be around 0.0019
-ks.test(torus(1000), punif) 
-	
-#KS statistic should be around 0.0003
-ks.test(torus(10000), punif) 
-
-#the mixed Torus sequence
-torus(10, mix=TRUE)
-par(mfrow = c(1,2))
-acf(torus(10^6))
-acf(torus(10^6, mix=TRUE))
-
-# (2) the Park Miller sequence
-#
 # Park Miller sequence, i.e. mod = 2^31-1, mult = 16807, incr=0
 # the first 10 seeds used in Park Miller sequence
 # 16807          1
@@ -231,7 +187,7 @@ congruRand(10, echo=TRUE)
 setSeed(1614852353) #seed for the 9997th term
 congruRand(5, echo=TRUE)
 
-# (3) the SF Mersenne Twister algorithm
+# (2) the SF Mersenne Twister algorithm
 SFMT(1000)
 
 #Kolmogorov Smirnov test
@@ -270,7 +226,7 @@ setSeed(08082008)
 SFMT(1, usepset = FALSE)
 
 
-# (4) withtorus argument
+# (3) withtorus argument
 # 
 
 # one third of outputs comes from Torus algorithm
@@ -278,7 +234,7 @@ u <- SFMT(1000, with=1/3)
 # the third term of the following code is the first term of torus sequence
 print(u[666:670] )
 
-# (5) WELL generator
+# (4) WELL generator
 #
 
 # 'basic' calls
@@ -301,26 +257,22 @@ WELL(10, order =19937)
 setSeed(08082008)
 WELL(10, order =19937, temper=TRUE)
 
-# (6) Knuth TAOCP generator
+# (5) Knuth TAOCP generator
 #
 knuthTAOCP(10)
 knuthTAOCP(10, 2) 
 
-# (7) computation times on my macbook, mean of 1000 runs
+# (6) computation times on my macbook, mean of 1000 runs
 #
 
 \dontrun{
 # algorithm			time in seconds for n=10^6
-# Torus algo					0.058 
-# mixed Torus algo 	       			0.087 
 # classical Mersenne Twister  			0.066 
 # SF Mersenne Twister  	       			0.044 
 # WELL generator				0.065
 # Knuth TAOCP					0.046
 # Park Miller  		      			0.174 
 n <- 1e+06
-mean( replicate( 1000, system.time( torus(n), gcFirst=TRUE)[3]) )
-mean( replicate( 1000, system.time( torus(n, mixed=TRUE), gcFirst=T)[3]) )
 mean( replicate( 1000, system.time( runif(n), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( SFMT(n), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( WELL(n), gcFirst=TRUE)[3]) )
@@ -330,3 +282,4 @@ mean( replicate( 1000, system.time( congruRand(n), gcFirst=TRUE)[3]) )
 
 }
 \keyword{distribution}
+

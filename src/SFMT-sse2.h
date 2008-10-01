@@ -1,151 +1,75 @@
-/** 
- * @file  SFMT-sse2.h
- * @brief SIMD oriented Fast Mersenne Twister(SFMT) for Intel SSE2
+/**********************************************************************************************
+ *   Copyright (c) 2008 Christophe Dutang                                                                    *
+ *                                                                                                                                           *
+ *   This program is free software; you can redistribute it and/or modify                 *
+ *   it under the terms of the GNU General Public License as published by           *
+ *   the Free Software Foundation; either version 2 of the License, or                     *
+ *   (at your option) any later version.                                                                              *
+ *                                                                                                                                           *
+ *   This program is distributed in the hope that it will be useful,                               *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the   *
+ *   GNU General Public License for more details.                                                      *
+ *                                                                                                                                           *
+ *   You should have received a copy of the GNU General Public License             *
+ *   along with this program; if not, write to the                                                             *
+ *   Free Software Foundation, Inc.,                                                                                *
+ *   59 Temple Place, Suite 330, Boston, MA 02111-1307, USA                               *
+ *                                                                                                                                           *
+ **********************************************************************************************/
+/*
+ *  call headers of Matsumoto and Saito
  *
- * @author Mutsuo Saito (Hiroshima University)
- * @author Makoto Matsumoto (Hiroshima University)
+ *		header
  *
- * @note We assume LITTLE ENDIAN in this file
- *
- * Copyright (C) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
- * University. All rights reserved.
- *
- * The new BSD License is applied to this software.
- * Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
- *  University. All rights reserved.
- *
- *      Redistribution and use in source and binary forms, with or without
- *      modification, are permitted provided that the following conditions are
- *      met:
- *      
- *          - Redistributions of source code must retain the above copyright
- *          notice, this list of conditions and the following disclaimer.
- *          - Redistributions in binary form must reproduce the above
- *          copyright notice, this list of conditions and the following
- *          disclaimer in the documentation and/or other materials provided
- *          with the distribution.
- *          - Neither the name of the Hiroshima University nor the names of
- *          its contributors may be used to endorse or promote products
- *          derived from this software without specific prior written
- *          permission.
- *     
- *      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *      "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *      A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *      OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *      SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *      LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *      DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *      THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
  */
 
 #ifndef SFMT_SSE2_H
 #define SFMT_SSE2_H
 
-PRE_ALWAYS static __m128i mm_recursion(__m128i *a, __m128i *b, __m128i c,
-				   __m128i d, __m128i mask) ALWAYSINLINE;
+#include "SFMT-sse2-607-1.h"
+#include "SFMT-sse2-607-2.h"
+#include "SFMT-sse2-607-3.h"
+#include "SFMT-sse2-607-4.h"
+#include "SFMT-sse2-607-5.h"
+#include "SFMT-sse2-607-6.h"
+#include "SFMT-sse2-607-7.h"
+#include "SFMT-sse2-607-8.h"
+#include "SFMT-sse2-607-9.h"
+#include "SFMT-sse2-607-10.h"
+#include "SFMT-sse2-607-11.h"
+#include "SFMT-sse2-607-12.h"
+#include "SFMT-sse2-607-13.h"
+#include "SFMT-sse2-607-14.h"
+#include "SFMT-sse2-607-15.h"
+#include "SFMT-sse2-607-16.h"
+#include "SFMT-sse2-607-17.h"
+#include "SFMT-sse2-607-18.h"
+#include "SFMT-sse2-607-19.h"
+#include "SFMT-sse2-607-20.h"
+#include "SFMT-sse2-607-21.h"
+#include "SFMT-sse2-607-22.h"
+#include "SFMT-sse2-607-23.h"
+#include "SFMT-sse2-607-24.h"
+#include "SFMT-sse2-607-25.h"
+#include "SFMT-sse2-607-26.h"
+#include "SFMT-sse2-607-27.h"
+#include "SFMT-sse2-607-28.h"
+#include "SFMT-sse2-607-29.h"
+#include "SFMT-sse2-607-30.h"
+#include "SFMT-sse2-607-31.h"
+#include "SFMT-sse2-607-32.h"
 
-/**
- * This function represents the recursion formula.
- * @param a a 128-bit part of the internal state array
- * @param b a 128-bit part of the internal state array
- * @param c a 128-bit part of the internal state array
- * @param d a 128-bit part of the internal state array
- * @param mask 128-bit mask
- * @return output
- */
-PRE_ALWAYS static __m128i mm_recursion(__m128i *a, __m128i *b, 
-				   __m128i c, __m128i d, __m128i mask) {
-    __m128i v, x, y, z;
-    
-    x = _mm_load_si128(a);
-    y = _mm_srli_epi32(*b, SR1);
-    z = _mm_srli_si128(c, SR2);
-    v = _mm_slli_epi32(d, SL1);
-    z = _mm_xor_si128(z, x);
-    z = _mm_xor_si128(z, v);
-    x = _mm_slli_si128(x, SL2);
-    y = _mm_and_si128(y, mask);
-    z = _mm_xor_si128(z, x);
-    z = _mm_xor_si128(z, y);
-    return z;
-}
+#include "SFMT-sse2-1279-1.h"
+#include "SFMT-sse2-2281-1.h"
+#include "SFMT-sse2-4253-1.h"
+#include "SFMT-sse2-11213-1.h"
+#include "SFMT-sse2-19937-1.h"
 
-/**
- * This function fills the internal state array with pseudorandom
- * integers.
- */
-inline static void gen_rand_all(void) {
-    int i;
-    __m128i r, r1, r2, mask;
-    mask = _mm_set_epi32(MSK4, MSK3, MSK2, MSK1);
+#include "SFMT-sse2-44497-1.h"
+#include "SFMT-sse2-86243-1.h"
+#include "SFMT-sse2-132049-1.h"
+#include "SFMT-sse2-216091-1.h"
 
-    r1 = _mm_load_si128(&sfmt[N - 2].si);
-    r2 = _mm_load_si128(&sfmt[N - 1].si);
-    for (i = 0; i < N - POS1; i++) {
-	r = mm_recursion(&sfmt[i].si, &sfmt[i + POS1].si, r1, r2, mask);
-	_mm_store_si128(&sfmt[i].si, r);
-	r1 = r2;
-	r2 = r;
-    }
-    for (; i < N; i++) {
-	r = mm_recursion(&sfmt[i].si, &sfmt[i + POS1 - N].si, r1, r2, mask);
-	_mm_store_si128(&sfmt[i].si, r);
-	r1 = r2;
-	r2 = r;
-    }
-}
+#endif 
 
-/**
- * This function fills the user-specified array with pseudorandom
- * integers.
- *
- * @param array an 128-bit array to be filled by pseudorandom numbers.  
- * @param size number of 128-bit pesudorandom numbers to be generated.
- */
-inline static void gen_rand_array(w128_t *array, int size) {
-    int i, j;
-    __m128i r, r1, r2, mask;
-    mask = _mm_set_epi32(MSK4, MSK3, MSK2, MSK1);
-
-    r1 = _mm_load_si128(&sfmt[N - 2].si);
-    r2 = _mm_load_si128(&sfmt[N - 1].si);
-    for (i = 0; i < N - POS1; i++) {
-	r = mm_recursion(&sfmt[i].si, &sfmt[i + POS1].si, r1, r2, mask);
-	_mm_store_si128(&array[i].si, r);
-	r1 = r2;
-	r2 = r;
-    }
-    for (; i < N; i++) {
-	r = mm_recursion(&sfmt[i].si, &array[i + POS1 - N].si, r1, r2, mask);
-	_mm_store_si128(&array[i].si, r);
-	r1 = r2;
-	r2 = r;
-    }
-    /* main loop */
-    for (; i < size - N; i++) {
-	r = mm_recursion(&array[i - N].si, &array[i + POS1 - N].si, r1, r2,
-			 mask);
-	_mm_store_si128(&array[i].si, r);
-	r1 = r2;
-	r2 = r;
-    }
-    for (j = 0; j < 2 * N - size; j++) {
-	r = _mm_load_si128(&array[j + size - N].si);
-	_mm_store_si128(&sfmt[j].si, r);
-    }
-    for (; i < size; i++) {
-	r = mm_recursion(&array[i - N].si, &array[i + POS1 - N].si, r1, r2,
-			 mask);
-	_mm_store_si128(&array[i].si, r);
-	_mm_store_si128(&sfmt[j++].si, r);
-	r1 = r2;
-	r2 = r;
-    }
-}
-
-#endif

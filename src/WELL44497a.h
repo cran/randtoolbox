@@ -6,7 +6,11 @@
 /*                 please contact P. L'Ecuyer at: lecuyer@iro.UMontreal.ca       */
 /* ***************************************************************************** */
 
+#ifndef WELL44497a_H
+#define WELL44497a_H
+
 void InitWELLRNG44497a(unsigned int *);
 extern double (*WELLRNG44497a)(void);
 
-extern void initWELL44497(int tempering);
+#endif
+

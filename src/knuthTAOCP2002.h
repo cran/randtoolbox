@@ -20,6 +20,9 @@
 /* function definitions, the first in ANSI syntax and the second in K&R syntax
     K&R stands for Kernighan and Ritchie ;-) */
 
+#ifndef knuthTAOCP2002_H
+#define knuthTAOCP2002_H
+
 #ifdef __STDC__
 void ranf_array(double aa[], int n);
 #else
@@ -36,4 +39,5 @@ void ranf_start(seed)    /* do this before using ranf_array */
 long seed;            /* selector for different streams */
 #endif
 
+#endif
 

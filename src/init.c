@@ -34,13 +34,13 @@
 //table of registration
 static const R_CallMethodDef callMethods[] = 
 {
-        {"doTorus", (DL_FUNC) &doTorus, 5},
+        {"doTorus", (DL_FUNC) &doTorus, 6},
         {"doSetSeed", (DL_FUNC) &doSetSeed, 1},
         {"doCongruRand", (DL_FUNC) &doCongruRand, 6},
         {"doSFMersenneTwister", (DL_FUNC) &doSFMersenneTwister, 4},
         {"doPokerTest", (DL_FUNC) &doPokerTest, 3},
         {"doCollisionTest", (DL_FUNC) &doCollisionTest, 3},
-        {"doWELL", (DL_FUNC) &doWELL, 4},
+        {"doWELL", (DL_FUNC) &doWELL, 5},
         {"doKnuthTAOCP", (DL_FUNC) &doKnuthTAOCP, 2},
         {NULL, NULL, 0}
 };

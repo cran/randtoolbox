@@ -510,7 +510,9 @@ The selection of recursion and parameters was carried out to find
 a good dimension of equidistribution for a given a period. This step is done by
 studying the characteristic polynomial of $f$. 
 SFMT allow periods of $2^{p}-1$ with
-$p$ a (prime) Mersenne exponent. 
+$p$ a (prime) Mersenne exponent\footnote{a Mersenne exponent is a prime 
+number $p$ such that $2^p-1$ is prime. Prime numbers of the form $2^p-1$
+have the special designation Mersenne numbers.}. 
 \cite{matsumoto08} proposes the following set of exponents
 607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049 and 216091.
 

@@ -68,19 +68,22 @@
  */
 /* ===================  my code  =================== */
 
-//to have pre-processors definition such as HAVE_SSE2 update
-//#include "config.h"
+
+#include "config.h"
+
+/* 1234 = LIL_ENDIAN, 4321 = BIGENDIAN */
+#ifdef BYTEORDER
+  #if BYTEORDER == 4321
+    #define BIG_ENDIAN64 1
+  #elif BYTEORDER == 1234
+    #define LIL_ENDIAN 1
+  #else
+    #error wrong endianness!
+  #endif
+#endif
 
 //added to have _() error message in R
 #include "locale.h"
-
-#if (!HAVE_STDINT_H) && (!HAVE_INTTYPES_H) && (!defined(PRIu64))
-    typedef unsigned int uint32_t;
-    typedef unsigned long long uint64_t;  
-#   define PRIu64 "llu"
-#   define PRIx64 "llx"
-#endif
-
 
 //init SFMT parameters
 void init_SFMT(int mersennexponent, int useparamset);
@@ -89,15 +92,18 @@ void init_SFMT(int mersennexponent, int useparamset);
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
   #include <inttypes.h>
+  #define HAVE_INT32_64_DEFINED 1
 #elif defined(_MSC_VER) || defined(__BORLANDC__)
   typedef unsigned int uint32_t;
   typedef unsigned __int64 uint64_t;
   #define inline __inline
+  #define HAVE_INT32_64_DEFINED 1
 #else
   #include <inttypes.h>
   #if defined(__GNUC__)
     #define inline __inline__
   #endif
+  #define HAVE_INT32_64_DEFINED 1
 #endif
 
 #ifndef PRIu64
@@ -111,9 +117,9 @@ void init_SFMT(int mersennexponent, int useparamset);
 #endif
 
 #if defined(__GNUC__)
-#define ALWAYSINLINE __attribute__((always_inline))
+  #define ALWAYSINLINE __attribute__((always_inline))
 #else
-#define ALWAYSINLINE
+  #define ALWAYSINLINE
 #endif
 
 #if defined(_MSC_VER)
@@ -127,6 +133,29 @@ void init_SFMT(int mersennexponent, int useparamset);
 #endif
 
 
+
+/*
+ * code of Christophe Dutang 
+ * added to interface with R 
+ */
+/* ===================  my code  =================== */
+
+#if (!HAVE_INTTYPES_H) && defined(HAVE_INTTYPES_H) && !defined(HAVE_INT32_64_DEFINED)
+  typedef unsigned int uint32_t;
+  #ifdef SIZEOF_UNSIGNED_LONG_LONG
+    typedef unsigned long long uint64_t;  
+  #else
+    typedef unsigned long uint64_t;  
+  #endif
+#endif
+
+#if !defined(PRIu64)
+  #define PRIu64 "llu"
+  #define PRIx64 "llx"
+#endif
+
+
+/* =================== end of my code =============== */
 
 uint32_t gen_rand32(void);
 uint64_t gen_rand64(void);
@@ -211,3 +240,4 @@ inline static double genrand_res53_mix(void)
     return to_res53_mix(x, y);
 } 
 #endif
+
