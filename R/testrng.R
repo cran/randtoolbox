@@ -401,6 +401,7 @@ order.test <- function(u, d = 3, echo = TRUE)
         
     }
     
+    #when d is greather than 5, compute all the permutation recursively
     if(d > 5 && d <= 8)
     {
         mypermut <- permut(d)
@@ -599,6 +600,7 @@ stirlingDividedByK <- function(n, cmax, cste)
     }
     return(res)    
 }
+
 
 #compute permutation
 # e.g. 

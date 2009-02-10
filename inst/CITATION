@@ -5,7 +5,7 @@ citEntry(entry="Manual",
          title = "randtoolbox: Generating and Testing Random Numbers",
          author = "Christophe Dutang",
 	 year = 2009,
-         note = "R package version 1.06",
+         note = "R package version 1.07",
 
          textVersion =
 	 paste(	"C. Dutang",
