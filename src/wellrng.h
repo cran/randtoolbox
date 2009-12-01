@@ -1,15 +1,17 @@
 /** 
- * @file  SFMT-sse2.h
- * @brief header file for SFMT algorithm
+ * @file  randtoolbox.h
+ * @brief header file for all RNGs
  *
  * @author Christophe Dutang
+ * @author Petr Savicky 
  *
  *
- * Copyright (C) 2009, Christophe Dutang. 
+ * Copyright (C) 2009, Christophe Dutang, 
+ * Petr Savicky, Academy of Sciences of the Czech Republic. 
  * All rights reserved.
  *
  * The new BSD License is applied to this software.
- * Copyright (c) 2009 Christophe Dutang. 
+ * Copyright (c) 2009 Christophe Dutang, Petr Savicky. 
  * All rights reserved.
  *
  *      Redistribution and use in source and binary forms, with or without
@@ -22,7 +24,8 @@
  *          copyright notice, this list of conditions and the following
  *          disclaimer in the documentation and/or other materials provided
  *          with the distribution.
- *          - Neither the names of its contributors may be used to endorse or promote 
+ *          - Neither the name of the Academy of Sciences of the Czech Republic
+ *          nor the names of its contributors may be used to endorse or promote 
  *          products derived from this software without specific prior written
  *          permission.
  *     
@@ -40,58 +43,25 @@
  *  
  */
 /*****************************************************************************
- *  call headers of Matsumoto and Saito
- *
- *		header
+ *  Random number generators algorithms
+ *  
+ *			header file
  *
  */
 
-#ifndef SFMT_SSE2_H
-#define SFMT_SSE2_H
+//R header files
+#include <R.h>
+#include <Rinternals.h>
+#include <Rdefines.h>
+#include <Rmath.h>
+#include <R_ext/Error.h>
 
-#include "SFMT-sse2-607-1.h"
-#include "SFMT-sse2-607-2.h"
-#include "SFMT-sse2-607-3.h"
-#include "SFMT-sse2-607-4.h"
-#include "SFMT-sse2-607-5.h"
-#include "SFMT-sse2-607-6.h"
-#include "SFMT-sse2-607-7.h"
-#include "SFMT-sse2-607-8.h"
-#include "SFMT-sse2-607-9.h"
-#include "SFMT-sse2-607-10.h"
-#include "SFMT-sse2-607-11.h"
-#include "SFMT-sse2-607-12.h"
-#include "SFMT-sse2-607-13.h"
-#include "SFMT-sse2-607-14.h"
-#include "SFMT-sse2-607-15.h"
-#include "SFMT-sse2-607-16.h"
-#include "SFMT-sse2-607-17.h"
-#include "SFMT-sse2-607-18.h"
-#include "SFMT-sse2-607-19.h"
-#include "SFMT-sse2-607-20.h"
-#include "SFMT-sse2-607-21.h"
-#include "SFMT-sse2-607-22.h"
-#include "SFMT-sse2-607-23.h"
-#include "SFMT-sse2-607-24.h"
-#include "SFMT-sse2-607-25.h"
-#include "SFMT-sse2-607-26.h"
-#include "SFMT-sse2-607-27.h"
-#include "SFMT-sse2-607-28.h"
-#include "SFMT-sse2-607-29.h"
-#include "SFMT-sse2-607-30.h"
-#include "SFMT-sse2-607-31.h"
-#include "SFMT-sse2-607-32.h"
 
-#include "SFMT-sse2-1279-1.h"
-#include "SFMT-sse2-2281-1.h"
-#include "SFMT-sse2-4253-1.h"
-#include "SFMT-sse2-11213-1.h"
-#include "SFMT-sse2-19937-1.h"
 
-#include "SFMT-sse2-44497-1.h"
-#include "SFMT-sse2-86243-1.h"
-#include "SFMT-sse2-132049-1.h"
-#include "SFMT-sse2-216091-1.h"
+//well RNG function coming from rngWELL package
+void (*WELLrng)(double *u, int nb, int dim, int order, int temper, int version);
 
-#endif 
+//well RNG function coming from rngWELL package
+void (*setSeed4WELL)(double *u, int nb, int dim, int order, int temper, int version);
+
 

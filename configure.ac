@@ -291,7 +291,7 @@ fi
 
 
 ### initialize
-AC_INIT([randtoolbox], 1.07, [christophe.dutang@ensimag.fr])
+AC_INIT([randtoolbox], 1.09, [christophe.dutang@ensimag.fr])
 
 ### check header (1st arg), preprocessor @DEFS@ (2nd arg) if found, nothing if not found (3rd arg) 
 AC_CHECK_HEADER([sys/time.h], 
@@ -326,7 +326,7 @@ AC_OUTPUT
 ### http://www.gnu.org/software/autoconf/manual/autoconf-2.57/html_node/autoconf.html
 ### http://www.gnu.org/software/autoconf/manual/html_node/Autoconf-Language.html
 ###
-### to check the config file, use in this order the 3 following command in the top directory
+### to check the config file, use in this order the 3 following commands in the top directory
 ### >autoheader
 ### >autoconf
 ### >./configure

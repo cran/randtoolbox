@@ -131,9 +131,9 @@ The currently available generator are given below.
 See the pdf vignette for details.
 }
 \value{
-  \code{SFMT}, \code{WELL}, \code{congruRand} and \code{knuthTAOCP} generates random variables in ]0,1[,  [0,1[ and [0,1[ respectively. It returns a \eqn{n}x\eqn{dim} matrix, when \code{dim}>1 otherwise a vector of length \code{n}.
+  \code{SFMT}, \code{WELL}, \code{congruRand} and \code{knuthTAOCP} generate random variables in ]0,1[,  [0,1[ and [0,1[ respectively. It returns a \eqn{n}x\eqn{dim} matrix, when \code{dim}>1 otherwise a vector of length \code{n}.
 
-  \code{setSeed} set the seed of the \code{randtoolbox} package 
+  \code{setSeed} sets the seed of the \code{randtoolbox} package 
 (i.e. both for the \code{knuthTAOCP}, \code{SFMT}, \code{WELL} and \code{congruRand} functions).
 }
 \references{
@@ -154,12 +154,14 @@ ones are hard to find}. Association for Computing Machinery, vol. 31, 10, pp 119
 Wikipedia (2008), \emph{a linear congruential generator}.
 }
 \seealso{
-    \code{\link{.Random.seed}} for what is done in R about random number generation. 
+    \code{\link{.Random.seed}} for what is done in R about random number generation and \code{\link{runifInterface}} for the \code{runif} interface.
 }
 \author{
- Christophe Dutang.
+ Christophe Dutang and Petr Savicky
 }
 \examples{
+require(rngWELL)
+
 # (1) the Park Miller sequence
 #
 
@@ -252,9 +254,9 @@ WELL(10, order = 19937, temper = TRUE)
 WELL(10, order = 44497, temper = TRUE)
 
 # tempering vs no tempering
-setSeed(08082008)
+setSeed4WELL(08082008)
 WELL(10, order =19937)
-setSeed(08082008)
+setSeed4WELL(08082008)
 WELL(10, order =19937, temper=TRUE)
 
 # (5) Knuth TAOCP generator
