@@ -47,6 +47,7 @@
  *
  */
 
-void user_unif_set_generator(int gener, void * selected_init, void * selected_rand);
-extern void (*WELL_get_set_entry_point)(void * user_unif_set_generator);
+void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), double (*selected_rand)());
+
+void (*WELL_get_set_entry_point)(void (* user_unif_set_generator)());
 

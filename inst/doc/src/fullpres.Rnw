@@ -1,3 +1,4 @@
+
 {\raggedright  
 \vspace{-1cm}
 	\textit{ 
@@ -395,11 +396,7 @@ from the fifties, and have also been used for interpolation problems and integra
 
 
 In the following, we consider a sequence
-$(u_i)_{1\leq i\leq n}$ of points in $I^d$, that are \textbf{not} random. As $n$ increases, we want
-$$
-\frac{1}{n} \sum_{i=1}^n f(u_i) \underset{n\rightarrow +\infty}{ \longrightarrow} \int_{I^d} f(x)dx.
-$$
-Furthermore the convergence condition on the sequence $(u_i)_i$ 
+'''Furthermore the convergence condition on the sequence $(u_i)_i$ 
 is to be uniformly distributed in the unit cube $I^d$
 with the following sense:
 $$
@@ -1775,11 +1772,11 @@ and parameters implying the use of the exact distribution (i.e. $n<2^8$ and
 $\lambda>1/32$).
 %%% R code
 <<coll1, fig=FALSE, echo=TRUE, eval=FALSE>>=
-coll.test(runif, 2^7, 2^10)
+coll.test(runif, 2^7, 2^10, 1)
 @
 <<coll2, fig=FALSE, echo=FALSE>>=
 options( width =40)
-res <- coll.test(runif, 2^7, 2^10, echo=FALSE)
+res <- coll.test(runif, 2^7, 2^10, 1, echo=FALSE)
 	stat <- res$statistic
 	pvalue <- res$p.value
 	df <- res$parameter
@@ -1800,11 +1797,11 @@ the Poisson approximation (i.e. $\lambda<1/32$). For example with \code{congruRa
 generator we have
 %%% R code
 <<coll3, fig=FALSE, echo=TRUE, eval=FALSE>>=
-coll.test(congruRand, 2^8, 2^14)
+coll.test(congruRand, 2^8, 2^14, 1)
 @
 <<coll4, fig=FALSE, echo=FALSE>>=
 options( width =40)
-res <- coll.test(congruRand, 2^8, 2^14, echo=FALSE)
+res <- coll.test(congruRand, 2^8, 2^14, 1, echo=FALSE)
 	stat <- res$statistic
 	pvalue <- res$p.value
 	df <- res$parameter
@@ -1819,6 +1816,7 @@ res <- coll.test(congruRand, 2^8, 2^14, echo=FALSE)
               cat(" ", i-1,"    ", obsnum[i],"    ", expnum[i],"\n")
 @
 %%%
+Note that the Normal approximation is not yet implemented and those two approximations are not valid when some expected collision numbers are below 5. 
 
 \subsubsection{The poker test}
 Finally the function \code{poker.test} implements
@@ -2015,3 +2013,4 @@ with the WELL RNG functions.
 The definitive reference for these matters remains the \emph{Writing R
 Extensions} manual, page 20 in sub-section ``specifying imports
 exports'' and page 64 in sub-section ``registering native routines''.
+

@@ -1,0 +1,12 @@
+SFMT.c:#include <assert.h>
+SFMT.c:    assert(initialized);
+SFMT.c:    assert(initialized);
+SFMT.c:    assert(idx % 2 == 0);
+SFMT.c:    assert(initialized);
+SFMT.c:    assert(idx == N32);
+SFMT.c:    assert(size % 4 == 0);
+SFMT.c:    assert(size >= N32);
+SFMT.c:    assert(initialized);
+SFMT.c:    assert(idx == N32);
+SFMT.c:    assert(size % 2 == 0);
+SFMT.c:    assert(size >= N64);

@@ -5,13 +5,14 @@
   The Collision test for testing random number generators.
 }
 \usage{
-coll.test(rand, lenSample = 2^14, nbCell = 2^20, nbSample = 1000, echo = TRUE, ...)
+coll.test(rand, lenSample = 2^14, segments = 2^10, tdim = 2, nbSample = 1000, echo = TRUE, ...)
 }
 \arguments{
   \item{rand}{a function generating random numbers. its first argument must be
     the 'number of observation' argument as in \code{runif}.}
   \item{lenSample}{numeric for the length of generated samples.}
-  \item{nbCell}{numeric for the number of cells in which to put random numbers.}
+  \item{segments}{numeric for the number of segments to which the interval \code{[0, 1]} is split.}
+  \item{tdim}{numeric for the length of the disjoint t-tuples.}
   \item{nbSample}{numeric for the overall sample number.}
   \item{echo}{logical to plot detailed results, default \code{TRUE}}
   \item{...}{further arguments to pass to function rand}
@@ -78,7 +79,7 @@ random number generators.} ACM Trans. on Mathematical
 Software 33(4), 22.
 }
 \seealso{
-    other tests of this package \code{\link{freq.test}}, \code{\link{serial.test}}, \code{\link{poker.test}},
+    other tests of this package \code{\link{coll.test.sparse}}, \code{\link{freq.test}}, \code{\link{serial.test}}, \code{\link{poker.test}},
     \code{\link{order.test}} and \code{\link{gap.test}}
 
     \code{\link{ks.test}} for the Kolmogorov Smirnov test and \code{\link{acf}} for
@@ -94,7 +95,7 @@ coll.test(runif)
 
 # (2) exact distribution
 #
-coll.test(SFMT, 2^7, 2^10, 10000)
+coll.test(SFMT, 2^7, 2^10, 1, 10000)
 
 }
 \keyword{htest}

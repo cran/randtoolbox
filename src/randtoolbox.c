@@ -57,7 +57,7 @@
 /*              constants               */
 //the seed
 static unsigned long seed; 
-static unsigned long torusoffset;
+//static unsigned long torusoffset;
 //a pseudo boolean to initiate the seed
 static int isInit=0;
 //the length (maximal) of the internal seed array for WELL44497
@@ -319,9 +319,12 @@ void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset)
     //init the seed of SFMT
     SFMT_init_gen_rand(seed);
     
+#if defined(HAVE_SSE2)	
     //size of internal array
     int blocksize = get_min_array_size32();
-    //number of blocks to generate
+#endif
+    
+	//number of blocks to generate
     //int nbblock = nb / blocksize; 
     //last variates to generate
     //int rest = nb % blocksize;
