@@ -6,12 +6,12 @@
  * @author Petr Savicky 
  *
  *
- * Copyright (C) 2009, Christophe Dutang, 
+ * Copyright (C) 2013, Christophe Dutang, 
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
  * All rights reserved.
  *
  * The new BSD License is applied to this software.
- * Copyright (c) 2009 Christophe Dutang, Petr Savicky. 
+ * Copyright (c) 2013 Christophe Dutang, Petr Savicky. 
  * All rights reserved.
  *
  *      Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ void R_init_randtoolbox(DllInfo *info)
         //register method accessed with .Call
         R_registerRoutines(info, NULL, callMethods, NULL, NULL); 
 		
-        //make randtoolbox C functions available from other packages
+        //make randtoolbox C functions available for other packages
         R_RegisterCCallable("randtoolbox", "torus", (DL_FUNC) torus);
         R_RegisterCCallable("randtoolbox", "setSeed", (DL_FUNC) setSeed);
         R_RegisterCCallable("randtoolbox", "congruRand", (DL_FUNC) congruRand);
@@ -90,5 +90,8 @@ void R_init_randtoolbox(DllInfo *info)
 		//retrieve WELL rng entry point in the rngWELL pkg
 		WELLrng = (void (*) (double *, int, int, int, int, int)) R_GetCCallable("rngWELL", "WELLrng");
 		WELL_get_set_entry_point =(void (*) (void (*)())) R_GetCCallable("rngWELL", "WELL_get_set_entry_point");
+		/*getRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "getRngWELL");
+		putRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "putRngWELL");
+		initMT2002 = (void (*) (unsigned int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "initMT2002");*/
 }
 
