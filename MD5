@@ -1,4 +1,4 @@
-18902818af8fda88428bfcfcbaa989a8 *DESCRIPTION
+686be1a9e353a121253b5e5f38ef59ab *DESCRIPTION
 8efd98a0e40c267143c8747deea4a3d9 *LICENSE
 6730624674eb21facfc974b2532acf95 *NAMESPACE
 99b6602ff9b8df7d57b356d6f8d5e781 *R/pseudoRNG.R
@@ -16,14 +16,14 @@ df4e35ea172a37477199014f6cca33d6 *cleanup
 8004e1ea8c02f7a7c784f6bf886c0d8c *configure
 9d3eec3c52106a06dec8d69d4d01929a *configure.ac
 798ae240f1e83ca0c2335e74984b13ef *configure.win
-d2f6f6518d337c5dc2055cc4821c23ee *inst/CITATION
-51720a0d3abecb84f141406cd688980a *inst/NEWS
+16eef10b606f97739cf4e4c0af634142 *inst/CITATION
+bb21368119a2bab3c4d166be08c82059 *inst/NEWS
 3d453821408f1b6fa15e6f1ffd026380 *inst/doc/fullpres.R
-ba6fbef89c0eb16b08b6d5351662f166 *inst/doc/fullpres.Rnw
-d4e846fd636390f354ff48b3aaeadab0 *inst/doc/fullpres.pdf
+13333eb47ab4836eeb26b5002a799504 *inst/doc/fullpres.Rnw
+89eeb19242244848b8d5793cbfaf7abf *inst/doc/fullpres.pdf
 d1910bc75f0baa76461eb2a424cd5154 *inst/doc/shortintro.R
-8406a13b90b9e3abb6691a4ede01d18e *inst/doc/shortintro.Rnw
-eb38d3c06ad1d79e98fd05731d5b3932 *inst/doc/shortintro.pdf
+d4d0a6e4fc6508cce603ac72cc9fd190 *inst/doc/shortintro.Rnw
+5258e57874eec004ce226f758f98fbb9 *inst/doc/shortintro.pdf
 2970f61af6d82a352186cf543ca9ca3b *man/auxfun.Rd
 4726de3452853144c8dbd7ddacba094c *man/colltest.Rd
 74b9c4e5318c176084ca53f9f198ba90 *man/colltestsparse.Rd
@@ -103,7 +103,7 @@ c790effc5c6b60923db80e86ae65a230 *src/randtoolbox.h
 7f80c3a75e65b579843df0a00b440f00 *src/runifInterface.h
 961dd085e7add863909e3a00b4f5adaf *src/testrng.c
 a760b5861af297943465dadb73e0050c *src/testrng.h
-5ef66b44175805d4247ad5641a85b115 *src/version.c
+ff651b7669f52c8a8da67d05eec4a658 *src/version.c
 982a83d91aaf01da29e65176967ea563 *src/wellrng.h
 3a3ee7dd028ce5039b1c8b79288ae218 *tests/testHalton.R
 8b7871d65e9471aac1ded4a82451da77 *tests/testTorus.R
@@ -111,7 +111,7 @@ d508c7fc09ce223b00e171dea17e86ab *tests/testWELL.R
 56046663cfd8aff6fc6c9759600bf284 *tests/testenvir.R
 1a39e1ba5e9bc60fffe8c365a9cabf11 *tools/ax_ext.m4
 6bb087fe718351fb221a0864d48b1626 *vignettes/DOC1e5.pdf
-ba6fbef89c0eb16b08b6d5351662f166 *vignettes/fullpres.Rnw
+13333eb47ab4836eeb26b5002a799504 *vignettes/fullpres.Rnw
 786885b18bf3bd7d3adac0a35b5883a3 *vignettes/randtoolbox.bib
-8406a13b90b9e3abb6691a4ede01d18e *vignettes/shortintro.Rnw
+d4d0a6e4fc6508cce603ac72cc9fd190 *vignettes/shortintro.Rnw
 cb3914e94cdeee8dfd057cba082c9d7a *vignettes/vanilla.pdf
