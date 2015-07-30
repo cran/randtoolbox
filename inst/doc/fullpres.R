@@ -1,5 +1,5 @@
 ### R code from vignette source 'fullpres.Rnw'
-### Encoding: ASCII
+### Encoding: UTF-8
 
 ###################################################
 ### code chunk number 1: wh.predict
