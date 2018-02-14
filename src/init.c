@@ -58,6 +58,42 @@
 #include "testrng.h"
 
 //table of registration
+
+/* .C calls */
+extern void current_generator(int *pgener);
+extern void getMersenneTwister(int *init, int *res, int *state);
+extern void initMersenneTwister(int *type, int *nseed, unsigned int *iseed, unsigned int *state);
+extern void putMersenneTwister(int *init, int *res, int *state);
+extern void put_user_unif_set_generator();
+extern void set_noop();
+extern void version_randtoolbox(char **s);
+extern double *user_unif_rand(void);
+
+/* .Fortran calls */
+extern void F77_NAME(halton)(void *, void *, void *, void *, void *, void *, void *);
+extern void F77_NAME(sobol)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+
+static const R_CMethodDef CEntries[] = {
+    {"current_generator",           (DL_FUNC) &current_generator,           1},
+    {"getMersenneTwister",          (DL_FUNC) &getMersenneTwister,          3},
+    {"get_primes",                  (DL_FUNC) &get_primes,                  2},
+    {"get_state_congru",            (DL_FUNC) &get_state_congru,            2},
+    {"initMersenneTwister",         (DL_FUNC) &initMersenneTwister,         4},
+    {"putMersenneTwister",          (DL_FUNC) &putMersenneTwister,          3},
+    {"put_state_congru",            (DL_FUNC) &put_state_congru,            3},
+    {"put_user_unif_set_generator", (DL_FUNC) &put_user_unif_set_generator, 0},
+    {"set_noop",                    (DL_FUNC) &set_noop,                    0},
+    {"version_randtoolbox",         (DL_FUNC) &version_randtoolbox,         1},
+    {"user_unif_rand",		    (DL_FUNC) &user_unif_rand,		    0},
+    {NULL, NULL, 0}
+};
+
+static const R_FortranMethodDef FortranEntries[] = {
+    {"F_halton", (DL_FUNC) &F77_NAME(halton),  7},
+    {"F_sobol",  (DL_FUNC) &F77_NAME(sobol),  11},
+    {NULL, NULL, 0}
+};
+
 static const R_CallMethodDef callMethods[] = 
 {
         {"doTorus", (DL_FUNC) &doTorus, 6},
@@ -75,8 +111,7 @@ static const R_CallMethodDef callMethods[] =
 //table of registered routines
 void R_init_randtoolbox(DllInfo *info)
 {
-        //register method accessed with .Call
-        R_registerRoutines(info, NULL, callMethods, NULL, NULL); 
+        R_registerRoutines(info, CEntries, callMethods, FortranEntries, NULL); 
 		
         //make randtoolbox C functions available for other packages
         R_RegisterCCallable("randtoolbox", "torus", (DL_FUNC) torus);
@@ -93,5 +128,7 @@ void R_init_randtoolbox(DllInfo *info)
 		/*getRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "getRngWELL");
 		putRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "putRngWELL");
 		initMT2002 = (void (*) (unsigned int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "initMT2002");*/
+
+	R_useDynamicSymbols(info, FALSE);
 }
 

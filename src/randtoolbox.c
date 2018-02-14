@@ -231,7 +231,7 @@ SEXP doCongruRand(SEXP n, SEXP d, SEXP modulus, SEXP multiplier, SEXP increment,
 void congruRand(double *u, int nb, int dim, unsigned long long mod, unsigned long long mult, unsigned long long incr, int show)
 {
     int i, j, err;
-    unsigned long long temp;
+    uint64_t temp;
 
     if (!R_FINITE(nb) || !R_FINITE(dim))
         error(_("non finite argument"));
