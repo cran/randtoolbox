@@ -8,6 +8,7 @@
  *
  * Copyright (C) 2009, Christophe Dutang, 
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
+ * Christophe Dutang, see http://dutangc.free.fr
  * All rights reserved.
  *
  * The new BSD License is applied to this software.
@@ -53,14 +54,25 @@
 #include <R.h>
 #include <Rmath.h>
 
+#include "locale.h"
 
-/* same as SFMT.h. see http://en.wikibooks.org/wiki/C_Programming/C_Reference/stdint.h */
+
+/* 
+ * 64-bit int size type
+ * similar to SFMT.h: see http://en.wikibooks.org/wiki/C_Programming/C_Reference/stdint.h 
+ * and p150 of Write Portable Code by Brian Hook
+ */
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
  #include <inttypes.h>
  #define HAVE_INT32_64_DEFINED 1
-#elif defined(_MSC_VER) || defined(__BORLANDC__)
+#elif defined(_MSC_VER) || defined(__BORLANDC__) || defined(__WATCOMC__)
  typedef unsigned int uint32_t;
  typedef unsigned __int64 uint64_t;
+ #define inline __inline
+ #define HAVE_INT32_64_DEFINED 1
+#elif defined(__LP64__) || defined(__powerpc64__)
+ typedef unsigned int uint32_t;
+ typedef unsigned long uint64_t;
  #define inline __inline
  #define HAVE_INT32_64_DEFINED 1
 #else
@@ -71,13 +83,23 @@
  #define HAVE_INT32_64_DEFINED 1
 #endif
 
+/*64-bit int size specification for printf family*/
 #ifndef PRIu64
  #if defined(_MSC_VER) || defined(__BORLANDC__)
- #define PRIu64 "I64u"
- #define PRIx64 "I64x"
-#else
- #define PRIu64 "llu"
- #define PRIx64 "llx"
+  #define PRIu64 "I64u"
+  #define PRIx64 "I64x"
+ #else
+  #define PRIu64 "llu"
+  #define PRIx64 "llx"
+ #endif
+#endif
+
+/*64-bit int size specification for scanf family*/
+#ifndef SCNu64
+ #if defined(_MSC_VER) || defined(__BORLANDC__)
+  #define SCNu64 "I64u"
+ #else
+  #define SCNu64 "llu"
  #endif
 #endif
 
@@ -86,9 +108,10 @@ void user_unif_init_congru(uint32_t seed);
 
 double get_congruRand();
 int check_congruRand(uint64_t mod, uint64_t mask, uint64_t mult, uint64_t incr, uint64_t seed);
-void set_congruRand(uint64_t inp_mod, uint64_t inp_mult, uint64_t inp_incr, uint64_t inp_seed);
+void set_congruRand(uint64_t inp_mod, uint64_t inp_mult, uint64_t inp_incr, uint64_t inp_seed, uint64_t inp_mask);
 void get_seed_congruRand(uint64_t *out_seed);
 
+/* Functions accessed from .C() */
 void get_state_congru(char **params, char **seed);
 void check_state_congru(char **params, char **seed, int *err);
 void put_state_congru(char **params, char **seed, int *err);

@@ -10,6 +10,7 @@
 #
 # The new BSD License is applied to this software.
 # Copyright (c) 2009 Christophe Dutang. 
+# Christophe Dutang, see http://dutangc.free.fr
 # All rights reserved.
 #
 #      Redistribution and use in source and binary forms, with or without
@@ -52,7 +53,8 @@
 .onLoad <- function(lib, pkg)
 {
 	library.dynam("randtoolbox", pkg, lib)
-	.C("put_user_unif_set_generator", PACKAGE="randtoolbox")
+  #implemented in src/runifInterface.c
+	.C(CF_put_user_unif_set_generator, PACKAGE="randtoolbox")
 }
 
 .onAttach <- function(lib, pkg)
@@ -67,9 +69,9 @@
 		
 		packageStartupMessage("<<-- randtoolbox - version ", PkgVersion, " - building date ", BuildDate)
 		packageStartupMessage("with ",Rversion, " on the platform ", OStype) 
-		packageStartupMessage("-->> For overview, type 'help(\"randtoolbox\")'.")
+		packageStartupMessage("-->> For an overview, type 'help(\"randtoolbox\")'.")
 	}else
-		packageStartupMessage("This is randtoolbox. For overview, type 'help(\"randtoolbox\")'.")
+		packageStartupMessage("This is randtoolbox. For an overview, type 'help(\"randtoolbox\")'.")
 	
 }
 

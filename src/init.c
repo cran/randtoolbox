@@ -6,8 +6,9 @@
  * @author Petr Savicky 
  *
  *
- * Copyright (C) 2013, Christophe Dutang, 
+ * Copyright (C) 2017, Christophe Dutang, 
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
+ * Christophe Dutang, see http://dutangc.free.fr 
  * All rights reserved.
  *
  * The new BSD License is applied to this software.
@@ -51,84 +52,97 @@
  *
  */
 
+#include <stdlib.h> //for NULL
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 #include "randtoolbox.h"
 #include "runifInterface.h"
+#include "mt19937ar.h"
 #include "testrng.h"
+#include "version.h"
 
-//table of registration
-
-/* .C calls */
-extern void current_generator(int *pgener);
-extern void getMersenneTwister(int *init, int *res, int *state);
-extern void initMersenneTwister(int *type, int *nseed, unsigned int *iseed, unsigned int *state);
-extern void putMersenneTwister(int *init, int *res, int *state);
-extern void put_user_unif_set_generator();
-extern void set_noop();
-extern void version_randtoolbox(char **s);
-extern double *user_unif_rand(void);
-
-/* .Fortran calls */
-extern void F77_NAME(halton)(void *, void *, void *, void *, void *, void *, void *);
-extern void F77_NAME(sobol)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-
+//table of registration routines accessed with .C()
 static const R_CMethodDef CEntries[] = {
-    {"current_generator",           (DL_FUNC) &current_generator,           1},
-    {"getMersenneTwister",          (DL_FUNC) &getMersenneTwister,          3},
-    {"get_primes",                  (DL_FUNC) &get_primes,                  2},
-    {"get_state_congru",            (DL_FUNC) &get_state_congru,            2},
-    {"initMersenneTwister",         (DL_FUNC) &initMersenneTwister,         4},
-    {"putMersenneTwister",          (DL_FUNC) &putMersenneTwister,          3},
-    {"put_state_congru",            (DL_FUNC) &put_state_congru,            3},
-    {"put_user_unif_set_generator", (DL_FUNC) &put_user_unif_set_generator, 0},
-    {"set_noop",                    (DL_FUNC) &set_noop,                    0},
-    {"version_randtoolbox",         (DL_FUNC) &version_randtoolbox,         1},
-    {"user_unif_rand",		    (DL_FUNC) &user_unif_rand,		    0},
-    {NULL, NULL, 0}
+  {"set_noop",                    (DL_FUNC) &set_noop, 0}, //runifInterface.h
+  {"current_generator",           (DL_FUNC) &current_generator, 1}, //runifInterface.h
+  {"put_user_unif_set_generator", (DL_FUNC) &put_user_unif_set_generator, 0}, //runifInterface.h
+  {"get_state_congru",            (DL_FUNC) &get_state_congru, 2}, //congruRand.h
+  {"put_state_congru",            (DL_FUNC) &put_state_congru, 3}, //congruRand.h
+  {"initMersenneTwister",         (DL_FUNC) &initMersenneTwister, 4}, //mt19937ar.h
+  {"putMersenneTwister",          (DL_FUNC) &putMersenneTwister, 3}, //mt19937ar.h 
+  {"getMersenneTwister",          (DL_FUNC) &getMersenneTwister, 3}, //mt19937ar.h 
+  {"get_primes",                  (DL_FUNC) &get_primes, 2}, //randtoolbox.h
+  {"version_randtoolbox",         (DL_FUNC) &version_randtoolbox, 1}, //version.h
+  {NULL, NULL, 0}
 };
 
+
+//table of registration routines accessed with .Call()
+static const R_CallMethodDef CallEntries[] = 
+{
+  {"doCongruRand",        (DL_FUNC) &doCongruRand, 6}, //randtoolbox.h
+  {"doHalton",            (DL_FUNC) &doHalton, 6}, //randtoolbox.h
+  {"doKnuthTAOCP",        (DL_FUNC) &doKnuthTAOCP, 2}, //randtoolbox.h
+  {"doSetSeed",           (DL_FUNC) &doSetSeed, 1}, //randtoolbox.h
+  {"doSFMersenneTwister", (DL_FUNC) &doSFMersenneTwister, 4}, //randtoolbox.h
+  {"doSobol",             (DL_FUNC) &doSobol, 6}, //randtoolbox.h
+  {"doTorus",             (DL_FUNC) &doTorus, 7}, //randtoolbox.h
+  {"doWELL",              (DL_FUNC) &doWELL, 5}, //randtoolbox.h
+  {"doPokerTest",         (DL_FUNC) &doPokerTest, 3}, //testrng.h
+  {"doCollisionTest",     (DL_FUNC) &doCollisionTest, 3}, //testrng.h
+  {NULL, NULL, 0}
+};
+
+
+/* .Fortran calls defined LowDiscrepancy.f 
+ * C version of these Fortran routines are halton_c() and sobol_c() in randtoolbox.c
+ */
+/* DOES NOT WORK*/
+extern void F77_NAME(halton_f)(void *, void *, void *, void *, void *, void *, void *);
+extern void F77_NAME(sobol_f)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+
+//table of registration routines accessed with .Fortran()
 static const R_FortranMethodDef FortranEntries[] = {
-    {"F_halton", (DL_FUNC) &F77_NAME(halton),  7},
-    {"F_sobol",  (DL_FUNC) &F77_NAME(sobol),  11},
-    {NULL, NULL, 0}
-};
-
-static const R_CallMethodDef callMethods[] = 
-{
-        {"doTorus", (DL_FUNC) &doTorus, 6},
-        {"doSetSeed", (DL_FUNC) &doSetSeed, 1},
-        {"doCongruRand", (DL_FUNC) &doCongruRand, 6},
-        {"doSFMersenneTwister", (DL_FUNC) &doSFMersenneTwister, 4},
-        {"doPokerTest", (DL_FUNC) &doPokerTest, 3},
-        {"doCollisionTest", (DL_FUNC) &doCollisionTest, 3},
-        {"doWELL", (DL_FUNC) &doWELL, 5},
-        {"doKnuthTAOCP", (DL_FUNC) &doKnuthTAOCP, 2},
-        {NULL, NULL, 0}
+  {"halton_f", (DL_FUNC) &F77_NAME(halton_f),  7}, //LowDiscrepancy.f
+  {"sobol_f", (DL_FUNC) &F77_NAME(sobol_f),  11}, //LowDiscrepancy.f
+  {NULL, NULL, 0}
 };
 
 
-//table of registered routines
-void R_init_randtoolbox(DllInfo *info)
-{
-        R_registerRoutines(info, CEntries, callMethods, FortranEntries, NULL); 
-		
-        //make randtoolbox C functions available for other packages
-        R_RegisterCCallable("randtoolbox", "torus", (DL_FUNC) torus);
-        R_RegisterCCallable("randtoolbox", "setSeed", (DL_FUNC) setSeed);
-        R_RegisterCCallable("randtoolbox", "congruRand", (DL_FUNC) congruRand);
-        R_RegisterCCallable("randtoolbox", "SFmersennetwister", (DL_FUNC) SFmersennetwister);
-        R_RegisterCCallable("randtoolbox", "pokerTest", (DL_FUNC) pokerTest);
-        R_RegisterCCallable("randtoolbox", "collisionTest", (DL_FUNC) collisionTest);
-        R_RegisterCCallable("randtoolbox", "knuthTAOCP", (DL_FUNC) knuthTAOCP); 
-		 
-		//retrieve WELL rng entry point in the rngWELL pkg
-		WELLrng = (void (*) (double *, int, int, int, int, int)) R_GetCCallable("rngWELL", "WELLrng");
-		WELL_get_set_entry_point =(void (*) (void (*)())) R_GetCCallable("rngWELL", "WELL_get_set_entry_point");
-		/*getRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "getRngWELL");
-		putRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "putRngWELL");
-		initMT2002 = (void (*) (unsigned int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "initMT2002");*/
+//there is no routine accessed with .External()
 
-	R_useDynamicSymbols(info, FALSE);
+//table of all registered routines
+void R_init_randtoolbox(DllInfo *dll)
+{
+  //register method accessed with .C, .Call, .Fortran, .External respectively
+  R_registerRoutines(dll, CEntries, CallEntries, FortranEntries, NULL); 
+  
+  /*dynamic lookup only for
+  double *user_unif_rand(void);
+  void user_unif_init(unsigned int seed);
+  in src/runifInterface.h*/
+  R_useDynamicSymbols(dll, TRUE);
+  
+  
+  //make randtoolbox C functions available for other packages
+  R_RegisterCCallable("randtoolbox", "torus", (DL_FUNC) torus);
+  R_RegisterCCallable("randtoolbox", "halton_c", (DL_FUNC) halton_c);
+  R_RegisterCCallable("randtoolbox", "sobol_c", (DL_FUNC) sobol_c);
+  R_RegisterCCallable("randtoolbox", "setSeed", (DL_FUNC) setSeed);
+  R_RegisterCCallable("randtoolbox", "congruRand", (DL_FUNC) congruRand);
+  R_RegisterCCallable("randtoolbox", "SFmersennetwister", (DL_FUNC) SFmersennetwister);
+  R_RegisterCCallable("randtoolbox", "pokerTest", (DL_FUNC) pokerTest);
+  R_RegisterCCallable("randtoolbox", "collisionTest", (DL_FUNC) collisionTest);
+  R_RegisterCCallable("randtoolbox", "knuthTAOCP", (DL_FUNC) knuthTAOCP); 
+  
+  //retrieve RNG function coming from rngWELL package, see files rngWELL.c(h) in that pkg
+  WELLrng = (void (*) (double *, int, int, int, int, int)) R_GetCCallable("rngWELL", "WELLrng");
+  WELL_get_set_entry_point =(void (*) (void (*)())) R_GetCCallable("rngWELL", "WELL_get_set_entry_point");
+  /* // well RNG function coming from rngWELL package, see files runifInterface.c(h) in that pkg
+  getRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "getRngWELL");
+  putRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "putRngWELL");
+  initMT2002 = (void (*) (unsigned int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "initMT2002");*/
+  
+  
 }
 

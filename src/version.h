@@ -1,16 +1,15 @@
 /** 
- * @file  locale.h
- * @brief header file for error messages
+ * @file  version.c
+ * @brief define the version
  *
- * @author Christophe Dutang
+ * @author Petr Savicky 
  *
  *
- * Copyright (C) 2009, Christophe Dutang. 
- * Christophe Dutang, see http://dutangc.free.fr 
+ * Copyright (C) 2009, Petr Savicky, Academy of Sciences of the Czech Republic. 
  * All rights reserved.
  *
  * The new BSD License is applied to this software.
- * Copyright (c) 2009 Christophe Dutang. 
+ * Copyright (c) 2009 Petr Savicky, Academy of Sciences of the Czech Republic. 
  * All rights reserved.
  *
  *      Redistribution and use in source and binary forms, with or without
@@ -23,7 +22,8 @@
  *          copyright notice, this list of conditions and the following
  *          disclaimer in the documentation and/or other materials provided
  *          with the distribution.
- *          - Neither the names of its contributors may be used to endorse or promote 
+ *          - Neither the name of the Academy of Sciences of the Czech Republic
+ *          nor the names of its contributors may be used to endorse or promote 
  *          products derived from this software without specific prior written
  *          permission.
  *     
@@ -41,21 +41,12 @@
  *  
  */
 /*****************************************************************************
- *  randtoolbox to generate pseudo and quasi random sequences
- *
- *		locale file
- *  
- *	'make' error messages
+ *  version file
+ *    
+ *      C file
  *
  */
- 
 
-/* Localization */
-#include <R.h>
-#ifdef ENABLE_NLS
-#include <libintl.h>
-#define _(String) dgettext ("randtoolbox", String)
-#else
-#define _(String) (String)
-#endif
+/* Functions accessed from .C() */
+void version_randtoolbox(char **s);
 

@@ -6,12 +6,13 @@
  * @author Petr Savicky 
  *
  *
- * Copyright (C) 2014, Christophe Dutang,
+ * Copyright (C) 2019, Christophe Dutang,
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
+ * Christophe Dutang, see http://dutangc.free.fr
  * All rights reserved.
  *
  * The new BSD License is applied to this software.
- * Copyright (c) 2014 Christophe Dutang, Petr Savicky. 
+ * Copyright (c) 2019 Christophe Dutang, Petr Savicky. 
  * All rights reserved.
  *
  *      Redistribution and use in source and binary forms, with or without
@@ -66,6 +67,7 @@
 uint64_t mod, mask, mult, incr, congru_seed;
 
 // possible value of user_unif_rand_selected in runifInterface.c
+// when mask == 0LL
 double user_unif_rand_congru_0()
 {
 	double x;
@@ -78,6 +80,7 @@ double user_unif_rand_congru_0()
 }
 
 // possible value of user_unif_rand_selected in runifInterface.c
+// when mask > 0LL and mask != two_64m1_h
 double user_unif_rand_congru_1()
 {
 	double x;
@@ -90,6 +93,8 @@ double user_unif_rand_congru_1()
 }
 
 // possible value of user_unif_rand_selected in runifInterface.c
+// when mask > 0LL and mask == two_64m1_h 
+// NB: the recursion mult * congru_seed + incr is automatically truncated by conversion to uint64_t
 double user_unif_rand_congru_2()
 {
 	double x;
@@ -107,12 +112,21 @@ void user_unif_init_congru(uint32_t seed)
 	congru_seed = (uint64_t) seed;
 }
 
-// called from randtoolbox.c from congruRand function
+// called from randtoolbox.c by congruRand function
 double get_congruRand()
 {
 	double x;
-	congru_seed  = (mult * congru_seed + incr) % mod;
-	x = (double) congru_seed / (double) mod;
+  if(mask == 0) //mask == 0x0
+  {  congru_seed  = (mult * congru_seed + incr) % mod; 
+  }else if(mask == two_64m1_h) //mask == 0xffffffffffffffff 
+  {  congru_seed  = (mult * congru_seed + incr); 
+  }else //0x0 < mask < 0xffffffffffffffff
+    congru_seed  = (mult * congru_seed + incr) & mask;
+  if(mod == 0)
+    x = (double) congru_seed / two_64_d;
+  else //mod != 0
+    x = (double) congru_seed / (double) mod;
+	
 	if (x == 0.0) {
 		x = 1.0;
 	}
@@ -142,12 +156,13 @@ int check_congruRand(uint64_t mod, uint64_t mask,
 
 // set parameters
 void set_congruRand(uint64_t inp_mod, uint64_t inp_mult,
-		uint64_t inp_incr, uint64_t inp_seed)
+		uint64_t inp_incr, uint64_t inp_seed, uint64_t inp_mask)
 {
 	mod = inp_mod;
 	mult = inp_mult;
 	incr = inp_incr;
 	congru_seed = inp_seed;
+	mask = inp_mask;
 }
 
 // get seed
@@ -172,23 +187,27 @@ void get_state_congru(char **params, char **seed)
 // .C entry point used by put.description
 void put_state_congru(char **params, char **seed, int *err)
 {
+  error(_("temporarily disabled function"));
+  
+  /*
 	uint64_t inp_mod, inp_mask, inp_mult, inp_incr, inp_seed;
-	if (strcmp(params[0], two_64_s) == 0) {
+  if (strcmp(params[0], two_64_s) == 0) {
 		inp_mod = 0;
 		inp_mask = two_64m1_h;
 	} else {
-		sscanf(params[0], "%" PRIu64 "\n", &inp_mod);
+		sscanf(params[0], "%" SCNu64 "\n", &inp_mod);
 		if ((inp_mod & (inp_mod - 1)) == 0) {
 			inp_mask = inp_mod - 1;
 		} else {
 			inp_mask = 0;
 		}
 	}
-	sscanf(params[1], "%" PRIu64 "\n", &inp_mult);
-	sscanf(params[2], "%" PRIu64 "\n", &inp_incr);
-	sscanf(seed[0], "%" PRIu64 "\n", &inp_seed);
+	sscanf(params[1], "%" SCNu64 "\n", &inp_mult);
+	sscanf(params[2], "%" SCNu64 "\n", &inp_incr);
+	sscanf(seed[0], "%" SCNu64 "\n", &inp_seed);
+	
 	*err = check_congruRand(inp_mod, inp_mask, inp_mult, inp_incr, inp_seed);
-
+	
 	if (*err < 0) return;
 	mod = inp_mod;
 	mask = inp_mask;
@@ -206,5 +225,6 @@ void put_state_congru(char **params, char **seed, int *err)
 		user_unif_set_generator(1, user_unif_init_congru, user_unif_rand_congru_2);
 	}
 	*err = 0;
+	*/
 }
 

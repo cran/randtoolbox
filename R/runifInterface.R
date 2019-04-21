@@ -2,14 +2,16 @@
 # @file  runifInterface.R
 # @brief R file for runif interface
 #
-# @author Petr Savicky
+# @author Petr Savicky, Christophe Dutang
 #
 #
-# Copyright (C) 2009, Petr Savicky, Academy of Sciences of the Czech Republic.
+# Copyright (C) 2019, Christophe Dutang, 
+# Petr Savicky, Academy of Sciences of the Czech Republic. 
+# Christophe Dutang, see http://dutangc.free.fr
 # All rights reserved.
 #
 # The new BSD License is applied to this software.
-# Copyright (c) 2009 Petr Savicky. 
+# Copyright (c) 2019 Christophe Dutang, Petr Savicky. 
 # All rights reserved.
 #
 #      Redistribution and use in source and binary forms, with or without
@@ -47,31 +49,34 @@
 ### 
 
 
-set.generator <- function(name=c("congruRand", "WELL", "MersenneTwister", "default"), parameters=NULL, seed=NULL, ...,
+set.generator <- function(name=c("WELL", "MersenneTwister", "default"), parameters=NULL, seed=NULL, ...,
 	only.dsc=FALSE)
 {
 	name <- match.arg(name)
 	dots <- list(...)
 	if (name == "congruRand")
-	{
-		if (is.null(parameters))
-			parameters <- c(mod=dots$mod, mult=dots$mult, incr=dots$incr)
-		if (length(parameters) == 0)
-			parameters <- c(mod="2147483647", mult="16807", incr="0")
-		if (!identical(names(parameters), c("mod", "mult", "incr")))
-		{
-			param.names <- paste(names(parameters),collapse=" ")
-			stop("parameter list \"", param.names, "\" is not correct for congruRand")
-		}
-		if (is.null(seed))
-			seed <- floor(as.double(parameters["mod"]) * runif(1))
-		if (is.numeric(parameters))
-			parameters <- formatC(parameters, format="f", digits=0)
-		if (is.numeric(seed))
-			seed <- formatC(seed, format="f", digits=0)
-		state <- c(seed=seed)
-		description <- list(name=name, parameters=parameters, state=state)
-	} else if (name == "WELL")
+	  stop("the use of linear congruential generator is temporarily disabled, use congruRand() instead.")
+	# if (name == "congruRand")
+	# {
+	# 	if (is.null(parameters))
+	# 		parameters <- c(mod=dots$mod, mult=dots$mult, incr=dots$incr)
+	# 	if (length(parameters) == 0)
+	# 		parameters <- c(mod="2147483647", mult="16807", incr="0")
+	# 	if (!identical(names(parameters), c("mod", "mult", "incr")))
+	# 	{
+	# 		param.names <- paste(names(parameters),collapse=" ")
+	# 		stop("parameter list \"", param.names, "\" is not correct for congruRand")
+	# 	}
+	# 	if (is.null(seed))
+	# 		seed <- floor(as.double(parameters["mod"]) * runif(1))
+	# 	if (is.numeric(parameters))
+	# 		parameters <- formatC(parameters, format="f", digits=0)
+	# 	if (is.numeric(seed))
+	# 		seed <- formatC(seed, format="f", digits=0)
+	# 	state <- c(seed=seed)
+	# 	description <- list(name=name, parameters=parameters, state=state)
+	# } else 
+	  if (name == "WELL")
 	{
 		if (is.null(parameters))
 		{
@@ -98,12 +103,13 @@ set.generator <- function(name=c("congruRand", "WELL", "MersenneTwister", "defau
 		if (is.null(seed))
 			seed <- floor(2^31 * runif(1))
 		size <- ceiling(as.numeric(parameters["order"])/32)
+		
+		#implemented in rngWELL package, see NAMESPACE
 		state <- doinitMT2002(seed, size, size)[[3]]
-#		state <- .C("initMT2002",
-#					as.integer(seed),
-#					as.integer(size),
-#					integer(size),
-#					PACKAGE="rngWELL")[[3]]
+
+		#old call was
+		#		state <- .C("initMT2002", as.integer(seed), as.integer(size), integer(size), PACKAGE="rngWELL")[[3]]
+		
 		description <- list(name=name, parameters=parameters, state=state)
 	} else if (name == "MersenneTwister")
 	{
@@ -121,7 +127,9 @@ set.generator <- function(name=c("congruRand", "WELL", "MersenneTwister", "defau
 			stop("resolution \"", parameters["resolution"], "\" is not in c(\"32\", \"53\")")
 		if (is.null(seed))
 			seed <- floor(2^31 * runif(1))
-		state <- .C("initMersenneTwister",
+		
+		#implemented in src/mt19937ar.c
+		state <- .C(CF_initMersenneTwister,
 					as.integer(type),
 					length(seed),
 					as.integer(seed),
@@ -147,31 +155,37 @@ put.description <- function(description)
 	name <- description$name
 	parameters <- description$parameters
 	state <- description$state
-	if (name == "congruRand")
+	# if (name == "congruRand")
+	# {
+	#   #implemented in src/congruRand.c
+	# 	aux <- .C(CF_put_state_congru,
+	# 		parameters,
+	# 		state,
+	# 		err = integer(1),
+	# 		PACKAGE="randtoolbox")
+	# 	if (aux$err != 0)
+	# 		stop("check congruRand error: ", aux$err)
+	# 	if (RNGkind()[1] != "user-supplied")
+	# 	{
+	# 	  #implemented in src/runifInterface.c
+	# 		.C(CF_set_noop, PACKAGE="randtoolbox")
+	# 		RNGkind("user-supplied")
+	# 		#implemented in src/congruRand.c
+	# 		aux <- .C(CF_put_state_congru,
+	# 			parameters,
+	# 			state,
+	# 			err = integer(1),
+	# 			PACKAGE="randtoolbox")
+	# 		if (aux$err != 0)
+	# 			stop("check congruRand error: ", aux$err)
+	# 	}
+	# } else 
+	  if (name == "WELL")
 	{
-		aux <- .C("put_state_congru",
-			parameters,
-			state,
-			err = integer(1),
-			PACKAGE="randtoolbox")
-		if (aux$err != 0)
-			stop("check congruRand error: ", aux$err)
-		if (RNGkind()[1] != "user-supplied")
-		{
-			.C("set_noop", PACKAGE="randtoolbox")
-			RNGkind("user-supplied")
-			aux <- .C("put_state_congru",
-				parameters,
-				state,
-				err = integer(1),
-				PACKAGE="randtoolbox")
-			if (aux$err != 0)
-				stop("check congruRand error: ", aux$err)
-		}
-	} else if (name == "WELL")
-	{
-		.C("set_noop", PACKAGE="randtoolbox")
+	  #implemented in src/runifInterface.c
+		.C(CF_set_noop, PACKAGE="randtoolbox")
 		RNGkind("user-supplied")
+		#implemented in rngWELL package, see NAMESPACE
 		doputRngWELL(parameters["order"], parameters["version"], state)
 #		.C("putRngWELL",
 #			as.integer(parameters["order"]),
@@ -180,9 +194,11 @@ put.description <- function(description)
 #			PACKAGE="rngWELL")
 	} else if (name == "MersenneTwister")
 	{
-		.C("set_noop", PACKAGE="randtoolbox")
+	  #implemented in src/runifInterface.c
+		.C(CF_set_noop, PACKAGE="randtoolbox")
 		RNGkind("user-supplied")
-		.C("putMersenneTwister",
+		#implemented in src/mt19937ar.c
+		.C(CF_putMersenneTwister,
 			match(parameters["initialization"], c("init2002", "array2002"), nomatch=0),
 			as.integer(parameters["resolution"]),
 			as.integer(state),
@@ -197,36 +213,42 @@ get.description <- function()
 {
 	if (RNGkind(NULL)[1] != "user-supplied")
 		stop("For R base generators, use .Random.seed, not get.description()")
-	generator <- .C("current_generator",
+  
+  #implemented in src/runifInterface.c
+	generator <- .C(CF_current_generator,
 		integer(1),
 		PACKAGE="randtoolbox")[[1]]
-	if (generator == 1)
-	{
-		name <- "congruRand"
-		outspace <- "18446744073709551616" # 2^64
-		aux <- .C("get_state_congru",
-			parameters=rep(outspace, times=3),
-			seed=outspace,
-			PACKAGE="randtoolbox")
-		parameters <- aux$parameters
-		names(parameters) <- c("mod", "mult", "incr")
-		seed <- aux$seed
-		state <- c(seed=aux$seed)
-		if(parameters[1] == "4294967296" && parameters[2] == "1664525" && parameters[3] == "1013904223")
-			literature <- "Knuth - Lewis"
-		else if(parameters[1] == "281474976710656" && parameters[2] == "31167285" && parameters[3] == "1")
-			literature <- "Lavaux - Jenssens"
-		else if(parameters[1] == "18446744073709551616" && parameters[2] == "636412233846793005" && parameters[3] == "1")
-			literature <- "Haynes"
-		else if(parameters[1] == "4294967296" && parameters[2] == "69069" && parameters[3] == "0") 
-			literature <- "Marsaglia"
-		else if(parameters[1] == "4294967295" && parameters[2] == "16807" && parameters[3] == "0") 
-			literature <- "Park - Miller"
-		else 
-			literature <- "Unknown"
-	} else if (generator == 2)
+	cat("generator", generator, "\n")
+	# if (generator == 1)
+	# {
+	# 	name <- "congruRand"
+	# 	outspace <- "18446744073709551616" # 2^64
+	# 	#implemented in src/congruRand.c
+	# 	aux <- .C(CF_get_state_congru,
+	# 		parameters=rep(outspace, times=3),
+	# 		seed=outspace,
+	# 		PACKAGE="randtoolbox")
+	# 	parameters <- aux$parameters
+	# 	names(parameters) <- c("mod", "mult", "incr")
+	# 	seed <- aux$seed
+	# 	state <- c(seed=aux$seed)
+	# 	if(parameters[1] == "4294967296" && parameters[2] == "1664525" && parameters[3] == "1013904223")
+	# 		literature <- "Knuth - Lewis"
+	# 	else if(parameters[1] == "281474976710656" && parameters[2] == "31167285" && parameters[3] == "1")
+	# 		literature <- "Lavaux - Jenssens"
+	# 	else if(parameters[1] == "18446744073709551616" && parameters[2] == "636412233846793005" && parameters[3] == "1")
+	# 		literature <- "Haynes"
+	# 	else if(parameters[1] == "4294967296" && parameters[2] == "69069" && parameters[3] == "0") 
+	# 		literature <- "Marsaglia"
+	# 	else if(parameters[1] == "4294967295" && parameters[2] == "16807" && parameters[3] == "0") 
+	# 		literature <- "Park - Miller"
+	# 	else 
+	# 		literature <- "Unknown"
+	# } else 
+	  if (generator == 2)
 	{
 		name <- "WELL"
+		#implemented in rngWELL package, see NAMESPACE
 		tmp <- dogetRngWELL(1, 1, 2000)
 #		tmp <- .C("getRngWELL",
 #			order = integer(1),
@@ -234,7 +256,6 @@ get.description <- function()
 #			state = integer(2000),
 #			PACKAGE="rngWELL")
 		order <- as.character(tmp$order)
-		print(tmp)
 		version <- letters[tmp$version]
 		parameters <- c(order=order, version=version)
 		size <- ceiling(tmp$order/32)
@@ -243,7 +264,8 @@ get.description <- function()
 	} else if (generator == 3)
 	{
 		name <- "MersenneTwister"
-		tmp <- .C("getMersenneTwister",
+		#implemented in src/mt19937.c
+		tmp <- .C(CF_getMersenneTwister,
 			initialization = integer(1),
 			resolution = integer(1),
 			state = integer(625),

@@ -5,13 +5,13 @@
  * @author Christophe Dutang
  * @author Petr Savicky 
  *
- *
- * Copyright (C) 2009, Christophe Dutang, 
+ * Copyright (C) 2019, Christophe Dutang, 
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
+ * Christophe Dutang, see http://dutangc.free.fr 
  * All rights reserved.
  *
  * The new BSD License is applied to this software.
- * Copyright (c) 2009 Christophe Dutang, Petr Savicky. 
+ * Copyright (c) 2019 Christophe Dutang, Petr Savicky. 
  * All rights reserved.
  *
  *      Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,12 @@
 #include "config.h"
 #include "locale.h"
 
+//Halton
+#include "LowDiscrepancy-halton.h"
+
+//Sobol
+#include "LowDiscrepancy-sobol.h"
+
 //congruRand
 #include "congruRand.h"
 
@@ -70,6 +76,12 @@
 
 //WELL RNGs
 #include "wellrng.h"
+
+//the first 100 000 prime numbers taken from http://primes.utm.edu/ is included 
+//in randtoolbox.c by #include "primes.h"
+
+
+
 
 
 //time header files
@@ -91,7 +103,9 @@
 
 
 /* Functions accessed from .Call() */
-SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP offset, SEXP ismixed, SEXP timedseed);
+SEXP doTorus(SEXP n, SEXP d, SEXP p, SEXP offset, SEXP ismixed, SEXP timedseed, SEXP mersexpo);
+SEXP doHalton(SEXP n, SEXP d, SEXP offset, SEXP ismixed, SEXP timedseed, SEXP mersexpo);
+SEXP doSobol(SEXP n, SEXP d, SEXP offset, SEXP ismixed, SEXP timedseed, SEXP mersexpo);
 SEXP doSetSeed(SEXP s);
 SEXP doCongruRand(SEXP n, SEXP d, SEXP modulus, SEXP multiplier, SEXP increment, SEXP echo);
 SEXP doSFMersenneTwister(SEXP n, SEXP d, SEXP mersexpo, SEXP paramset);
@@ -99,8 +113,10 @@ SEXP doWELL(SEXP n, SEXP d, SEXP order, SEXP tempering, SEXP version);
 SEXP doKnuthTAOCP(SEXP n, SEXP d);
 
 /* utility functions */
-void torus(double *u, int nb, int dim, int *prime, int offset, int ismixed, int usetime);
-void congruRand(double *u, int nb, int dim, unsigned long long mod, unsigned long long mult, unsigned long long incr, int show);
+void torus(double *u, int nb, int dim, int *prime, int offset, int ismixed, int usetime, int mexp);
+void halton_c(double *u, int nb, int dim, int offset, int ismixed, int usetime, int mexp);
+void sobol_c(double *u, int nb, int dim, int offset, int ismixed, int usetime, int mexp);
+void congruRand(double *u, int nb, int dim, uint64_t mod, uint64_t mult, uint64_t incr, uint64_t mask, int show);
 void SFmersennetwister(double *u, int nb, int dim, int mexp, int usepset);
 void knuthTAOCP(double *u, int nb, int dim);
 
@@ -109,5 +125,7 @@ void randSeedByArray(int length);
 void randSeed();
 
 void reconstruct_primes();
+
+/* Functions accessed from .C() */
 void get_primes(int *n, int *pri);
 

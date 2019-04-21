@@ -153,7 +153,7 @@ C     INCREASE THE COUNTER BY ONE:
 C-------------------------------------------------------------------------------   
 
 
-      SUBROUTINE HALTON(QN, N, DIMEN, BASE, OFFSET, INIT, TRANSFORM)
+      SUBROUTINE HALTON_F(QN, N, DIMEN, BASE, OFFSET, INIT, TRANSFORM)
 
 C     THIS IS AN INTERFACE TO CREATE "N" POINTS IN "DIMEN" DIMENSIONS
 C     ARGUMENTS:
@@ -394,7 +394,7 @@ C       NEXTSOBOL (DIMEN, QUASI, LL, COUNT, SV)
 C-------------------------------------------------------------------------------
 
 
-      SUBROUTINE SOBOL(QN, N, DIMEN, QUASI, LL, COUNT, SV,
+      SUBROUTINE SOBOL_F(QN, N, DIMEN, QUASI, LL, COUNT, SV,
      &   IFLAG, iSEED, INIT, TRANSFORM)
 
 C     THIS IS AN INTERFACE TO CREATE "N" POINTS IN "DIMEN" DIMENSIONS
@@ -1657,7 +1657,8 @@ C     >>> remove implicit type declaration <<<
 C     CALCULATE THE NEW COMPONENTS OF QUASI,
 C     FIRST THE NUMERATORS, THEN NORMALIZED
       DO I = 1, DIMEN
-         QUASI(I) = REAL(IEOR(INT(QUASI(I)*LL), SV(I, L)))/LL
+C     >>> use a double precision number: REAL() replaced by DBLE() <<<      
+         QUASI(I) = DBLE(IEOR(INT(QUASI(I)*LL), SV(I, L)))/LL
       ENDDO
 
       COUNT = COUNT + 1
