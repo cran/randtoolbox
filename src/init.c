@@ -55,8 +55,10 @@
 #include <stdlib.h> //for NULL
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
+#define define_here
 #include "randtoolbox.h"
 #include "runifInterface.h"
+#undef define_here
 #include "mt19937ar.h"
 #include "testrng.h"
 #include "version.h"

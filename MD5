@@ -1,4 +1,4 @@
-8db08db25619ac1c6be68bac0e570db7 *DESCRIPTION
+8116dfcbd3f0bb4598a6079cb2d95ae0 *DESCRIPTION
 79e084b3f4a2ee14fc54cc75eff3356b *LICENSE
 e93b062d83441dea4ad126b0814cfa93 *NAMESPACE
 ca25c06e142aaa058e0b9cb6073c4a93 *R/pseudoRNG.R
@@ -95,7 +95,7 @@ f4334cc81440089dc6e51c562a6fc071 *src/config.h.in
 a2d0085606bb1dc087ec45b1170f1b3d *src/config.h.win
 ca549c2467d1bec040d40a9dc53dd25e *src/congruRand.c
 9d49a1e4da2066962fcc2409adb47472 *src/congruRand.h
-e6c93d07deb0c1c517e65a597ad67e95 *src/init.c
+6da85ce21106f70674fe5d3af42aa063 *src/init.c
 4a0ca8ce9293ae7115b134f72eec8ace *src/knuthTAOCP2002.c
 5cdf17903fc3678e6bce4874f08803c1 *src/knuthTAOCP2002.h
 5647a6bd617b029bc0c99f0eb0af1fe1 *src/locale.h
@@ -106,12 +106,12 @@ b9c7e476bcb51262786a16c28ace4ecd *src/old-Makevars.win.old
 9ba8541d1d23fa23003e1eb9cff3c917 *src/randtoolbox.c
 feada12a2d77ea43c3fae05d77552968 *src/randtoolbox.h
 436b41242c22c4f065f3466a56715213 *src/runifInterface.c
-e5b2dd83914c2a9e3a6cdd66c2b004f6 *src/runifInterface.h
+7e4e61ffe31119c0876f20d9806fa95f *src/runifInterface.h
 0c55a81aa3c38e71f5e1ce2149b0724c *src/testrng.c
 937c0607e7960e43ea60696b375773bc *src/testrng.h
 054625645cf43bfb371d6a49635977d2 *src/version.c
 e9a4a1ecd3776742abf0931382ddf86c *src/version.h
-f4edb4632f9098290d7eda56f49e49a8 *src/wellrng.h
+6943070d2fe48aef4fc7b0fea260b31f *src/wellrng.h
 cc68725e442f26cf9017174c79bfa612 *tests/test-SFMT.R
 ddd2b7d5f420d9904fa9fcb21c3a5eb8 *tests/test-parallel-qmc.R
 34f9dacfbc7bc3daada044152519e5f5 *tests/test-permut.R
