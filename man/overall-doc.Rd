@@ -21,15 +21,16 @@
   
   The stable version is available on CRAN 
   \url{https://CRAN.R-project.org/package=randtoolbox},
-  while the development version is hosted on R-forge in the rmetric project.
+  while the development version is hosted on R-forge in the rmetrics project
+  at \url{https://r-forge.r-project.org/projects/rmetrics/}.
   
 } 
 \details{
 \tabular{ll}{
 Package: \tab randtoolbox\cr
 Type: \tab Package\cr
-Version: \tab 1.30.0\cr
-Date: \tab 2019\cr
+Version: \tab 1.31.0\cr
+Date: \tab 2021\cr
 License: \tab BSD_3_clause + file LICENSE\cr
 }
 }

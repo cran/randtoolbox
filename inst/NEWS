@@ -1,9 +1,46 @@
 === randtoolbox: an R package for random number generation and testing ===
 
-Version 1.30.0
+Version 1.31.0
 =============
-- disable the use of set.generator(name="congruRand",...)
-- clean up C code
+
+NEW FEATURES
+- add new test files.
+- increase argument checks in QRNG.
+- allows to start QRNG from 0, see https://arxiv.org/abs/2008.08051 by Art Owen,
+a warning is not raised when start != 0.
+- update vignettes.
+
+WARNING FIXES
+- fix warnings of autoconf for configure files showed by 
+> autoreconf --warnings=obsolete (previous output)
+configure.ac:310: warning: The macro `AC_TRY_COMPILE' is obsolete.
+configure.ac:310: warning: The macro `AC_TRY_RUN' is obsolete.
+configure.ac:310: warning: The macro `AC_FD_MSG' is obsolete.
+configure.ac:321: warning: The macro `AC_CONFIG_HEADER' is obsolete.
+- fix invalid URLs (from http to https)
+
+BUG FIX
+- correctly generate a seed for Sobol mixed sequences.
+
+Version 1.30.1
+=============
+- update the man page for quasi random sequences.
+- allow the use of randomized seed for Sobol sequences (either from
+scrambling argument or mixed argument).
+
+BUGS FIX
+- bug fixes on array limit issues in Fortran code (in INITSOBOL).
+- warning fix on unused variable in Fortran code (in SGENSCRMU).
+- bug fixes on multiple defintion issues (for WELL_get_set_entry_point, 
+WELLrng, setSeed4WELL) in C header files, thanks to Brian Ripley.
+- scrambling = 1, 3 for Sobol sequences may generate 0.0, so randomizing
+the seed is performed in that case.
+
+
+Version 1.30.0 (Version in Memoriam of Diethelm and Barbara Wuertz)
+=============
+- disable the use of set.generator(name="congruRand",...).
+- clean up C code.
 
 Version 1.20 (never released on CRAN)
 =============
@@ -24,7 +61,7 @@ NOTE FIX
 NOTEs, better registration of native routines and reduced
 symbol visibility.
 
-Version 1.17 and 1.17.1
+Versions 1.17 and 1.17.1
 =============
 - change DESCRIPTION file.
 - update NAMESPACE for R 3.3.0.
@@ -63,19 +100,16 @@ package rngWELL >= 0.11-0.
 - change licence from BSD to BSD_2_clause.
 
 NOTE FIX
-
 - remove NOTES appearing in R CMD check.
 
 Version 1.12
 =============
 
 NEW FEATURES
-
 - add new test files.
 - increase the possible dimension of Halton sequences.
 
 WARNING FIX in Fortran files
-
 - remove an array over-run (reported by Brian Ripley) and tab 
 characters in LowDiscrepancy.f.
 
@@ -87,13 +121,11 @@ Version 1.11
 package rngWELL == 0.10-x.
 
 NOTES FIXES
-
 - this version use packageStartupMessage function for the .onAttach
 rather than the cat function. 
 - remove a printf in KnuthTAOCP2002.c
 
 WARNING FIXES in C files
-
 - remove warnings with Wall and pedantic gcc options. For this
 purpose, files randtoolbox/src/Makevars and rngWELL/src/Makevars
 now contain a line, uncommenting which includes Wall and pedantic.
@@ -110,19 +142,16 @@ Version 1.10
 =============
 
 NEW FEATURES
-
 - update the man page pseudoRNG.Rd and quasiRNG.Rd with MT19937
 and other minor improvements.
 - on loading, the package print the overview man page.
 
 WARNING FIXES
-
 - fix some warnings following the release of R 2.13.0: 
 the Makefile and the man page of runifInterface.
 - fix a warning in the MT19937 file.
 
 BUG FIX
-
 - remove implicit type declaration in the LowDiscrepancy fortran file,
 which causes errors with GCC 4.6 compilers.
 
@@ -131,14 +160,12 @@ Version 1.09
 =============
 
 NEW FEATURES
-
 - start runif interface for congruential generator and WELL RNG,
 - vignette contains two chapters,
 - start to test true randomness (not included in this version),
 - increase the speed and accuracy of Halton and Sobol sequences.
 
 STRUCTURAL CHANGE
-
 - Before version 1.09, there was a lot of different (and incompatible) 
 licences in this package, namely, GPL, BSD, public domain, etc... 
 (cf. 1.08-version DESCRIPTION file of this package). 
@@ -150,7 +177,6 @@ put it in a dedicated package rngWELL,
 - depends now on rngWELL.
 
 AUTHORS
-
 - all the code of this package except the ones listed below was written by Yohan Chalabi,
 Christophe Dutang, Petr Savicky and Diethelm Wuertz.
 - the code for SF-Mersenne Twister belongs to M. Matsumoto and M. Saito, 
@@ -159,11 +185,9 @@ which is under the new BSD licence.
 This code is in the public domain and freely copyable.
 
 BUG FIX
-
 - normal transformation of Halton and Sobol sequences is correct.
 
 BUG REPORT
-
 - Halton and Sobol sequences did not work on 64bit architecture when
 using normal transformation reported by Anirban Mukherjee,
 - Sobol sequences for dimension > 2 need to be tested.
@@ -172,7 +196,6 @@ Version 1.08 (never released on CRAN)
 =============
 
 NEW FEATURES
-
 - add function get.primes,
 - table of primes moved from randtoolbox.c to primes.h and compressed
   by storing half difference from the previous prime instead of each
@@ -183,18 +206,15 @@ Version 1.07
 =============
 
 NEW FEATURES
-
 - integrate code for Halton, Sobol sequence from fBasics (Rmetrics),
 - randoolbox is now part of Rmetrics project (available on R-forge),
 - increase the speed of congruRand.
 
 BUG FIXES
-
 - fix setSeed function,
 - a warning shows up on 64 bit architecture.
 
 BUG REPORT
-
 - setting the seed with WELL's RNGs was not correct, 
 reported by Petr Savicky.
 
@@ -202,11 +222,9 @@ Version 1.06
 =============
 
 BUG FIX
-
 - the degree of freedom is now correct for the order test.
 
 BUG REPORT
-
 - Astley Lin reports that the degree-of-freedom(df) of 
 chi-square test is wrong for the order test.
 
@@ -214,19 +232,16 @@ Version 1.05
 =============
 
 NEW FEATURES
-
 - add new WELL generators based on L'Ecuyer's code,
 - add the Sobol and Halton sequences from fOptions package.
 
 BUG FIX
-
-- Yes, it compiles on 64bit linux both on CRAN and R-forge.
+- it compiles on 64bit linux both on CRAN and R-forge.
 
 Version 1.04
 =============
 
 BUG REPORT
-
 - the package does not compil on Fedora 8 x86_64 boxes,
 reported by Brian Ripley.
 
@@ -235,7 +250,6 @@ Version 1.03
 =============
 
 NEW FEATURES
-
 - add the WELL generator thanks to the code of P. L'Ecuyer,
 - SFMT now allows for different mersenne exponents as well as parameter sets,
 - increase the possible dimension for Torus algorithm from 1000 to 100 000,
@@ -248,14 +262,12 @@ Version 1.02
 =============
 
 NEW FEATURES
-
 - more random generation tests such as collision test and order test,
 - poker test is generalized to any dimension,
 - some auxiliary functions,
 - a detailed vignette on generating and testing random generation.
 
 BUG FIXES
-
 - on windows, when the seed was not fixed by the user, we use the machine
 time. But we use only seconds of machine time not micro second like on 
 unix-like system. Hence a call like this
@@ -266,7 +278,6 @@ Version 1.01 (never released on CRAN)
 =============
 
 NEW FEATURES
-
 - add withtorus option for SFMT function,
 - improve output of tests.
 

@@ -13,13 +13,16 @@ C
 C @author Diethelm Wuertz 
 C @author Christophe Dutang
 C
-C Copyright (C) Apr. 2011, Christophe Dutang, remove implicit declaration: the code now pass
-C > gfortran -c -fsyntax-only -fimplicit-none LowDiscrepancy.f 
-C without error.
+C Copyright (C) Jan-2020, Christophe Dutang, remove array limit issues and unused variables
+C gfortran -S -fimplicit-none -mtune=native -Wall -pedantic -Wlto-type-mismatch LowDiscrepancy.f
+C gfortran -c -fsyntax-only -fimplicit-none -mtune=native -Wall -pedantic -Wlto-type-mismatch LowDiscrepancy.f
 C
-C Copyright (C) Oct. 2009, Christophe Dutang, slightly modified (better accuracy and speed).
+C Copyright (C) Apr-2011, Christophe Dutang, remove implicit declaration: the code passes without error.
+C "gfortran -c -fsyntax-only -fimplicit-none LowDiscrepancy.f" .
 C
-C Copyright (C) Sept. 2002, Diethelm Wuertz, ETH Zurich. All rights reserved.
+C Copyright (C) Oct-2009, Christophe Dutang, slightly modified (better accuracy and speed).
+C
+C Copyright (C) Sep-2002, Diethelm Wuertz, ETH Zurich. All rights reserved.
 C
 C The new BSD License is applied to this software.
 C Copyright (c) Diethelm Wuertz, ETH Zurich. All rights reserved.
@@ -387,7 +390,7 @@ C           IFLAG, iSEED, INIT, TRANSFORM)
 C         REAL*8 FUNCTION SQNORM (P)
 C       INITSOBOL (DIMEN, QUASI, LL, COUNT, SV, IFLAG, iSEED)
 C         SGENSCRML (MAX, LSM, SHIFT, S, MAXCOL, iSEED)
-C         SGENSCRMU (USM, USHIFT, S, MAXCOL, iSEED)
+C         SGENSCRMU (USM, USHIFT, MAXCOL, iSEED)
 C           REAL*8 FUNCTION UNIS (iSEED)
 C       NEXTSOBOL (DIMEN, QUASI, LL, COUNT, SV)
 
@@ -529,17 +532,17 @@ C                   3 - OWEN + FAURE-TEZUKA TYPE SCRAMBLING
 C       iSEED     - SCRAMBLING iSEED
       
       INTEGER MAXDIM,MAXDEG,MAXBIT,IFLAG
-CC      DW ADDED FOLLOWING LINE:
+CC    D.W. ADDED FOLLOWING LINE:
       INTEGER P,PP
       PARAMETER (MAXDIM=1111,MAXDEG=13,MAXBIT=30)
       INTEGER ATMOST,DIMEN,TAUS,COUNT,MAXCOL,S
+C     >>> use parameter to declare large arrays <<<
+      INTEGER SHIFT(MAXDIM),LSM(MAXDIM,31),TV(MAXDIM,31,31)
       INTEGER POLY(2:MAXDIM),VINIT(2:MAXDIM,MAXDEG)
       INTEGER SV(DIMEN,MAXBIT),V(DIMEN,MAXBIT)
       INTEGER I,J,K,L,M,NEWV,TAU(MAXDEG)
       INTEGER USM(31,31),USHIFT(31)
-CC      INTEGER TEMP1,TEMP2,TEMP4
       INTEGER TEMP1,TEMP2,TEMP3,TEMP4
-      INTEGER SHIFT(1111),LSM(1111,31),TV(1111,31,31)
       DOUBLE PRECISION QUASI(DIMEN),RECIPD
       INTEGER iSEED
       LOGICAL INCLUD(MAXDEG)
@@ -1462,7 +1465,7 @@ C>>> SCRAMBLING START
          LL= 2**MAX
       ENDIF
          IF ((IFLAG .EQ. 2) .OR. (IFLAG .EQ. 3)) THEN
-            CALL SGENSCRMU(USM, USHIFT, S, MAXCOL, iSEED) 
+            CALL SGENSCRMU(USM, USHIFT, MAXCOL, iSEED) 
             IF (IFLAG .EQ. 2) THEN
                MAXX = MAXCOL
             ELSE
@@ -1524,6 +1527,7 @@ C     SET UP FIRST VECTOR AND VALUES FOR "GOSOBL"
       DO I = 1, S
          QUASI(I) = SHIFT(I)*RECIPD
       ENDDO
+      
       RETURN
       END
 
@@ -1568,12 +1572,12 @@ C     GENERATING LOWER TRIANGULAR SCRAMBLING MATRICES AND SHIFT VECTORS.
 C ------------------------------------------------------------------------------
 
 
-      SUBROUTINE SGENSCRMU(USM, USHIFT, S, MAXCOL, iSEED)
+      SUBROUTINE SGENSCRMU(USM, USHIFT, MAXCOL, iSEED)
 
 C     GENERATING UPPER TRIANGULAR SCRMABLING MATRICES AND SHIFT VECTORS.
       DOUBLE PRECISION UNIS
       INTEGER USM(31,31),MAXCOL,I,J
-      INTEGER USHIFT(31),S,TEMP,STEMP
+      INTEGER USHIFT(31),TEMP,STEMP
       INTEGER iSEED
       
       DO I = 1, MAXCOL

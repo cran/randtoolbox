@@ -1,5 +1,4 @@
 ### R code from vignette source 'shortintro.Rnw'
-### Encoding: UTF-8
 
 ###################################################
 ### code chunk number 1: check
@@ -13,7 +12,7 @@ RNGkind()
 RNGkind()
 library(randtoolbox)
 set.generator("MersenneTwister", initialization="init2002", resolution=53, seed=1)
-get.description()
+str(get.description())
 RNGkind()
 runif(10)
 

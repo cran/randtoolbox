@@ -1,5 +1,4 @@
 ### R code from vignette source 'fullpres.Rnw'
-### Encoding: UTF-8
 
 ###################################################
 ### code chunk number 1: wh.predict
@@ -302,9 +301,12 @@ plot(sobol(10^3, 2, scram=2), xlab ="u", ylab="v", main="Sobol (Faure-Tezuka)")
 ## ans <- NULL
 ## for(i in 1:3)
 ## {
-## 	tij <- sobol(nb[i], dim=25, scramb=2, norm=TRUE )
-## 	Icos <- mean(cos(sqrt( apply( tij^2/2, 1, sum ) ))) * pi^(25/2)
-## 	ans <- rbind(ans, c(n=nb[i], I25=Icos, Delta=(Icos-I25)/I25 ))
+##  tij <- sobol(nb[i], dim=25, 
+##   scrambling=2, normal=TRUE)
+##  Icos <- sqrt(rowSums(tij^2/2))
+##  Icos <- mean(cos(Icos)) * pi^(25/2)
+##  ans <- rbind(ans, c(n=nb[i], 
+##   I25=Icos, Delta=(Icos-I25)/I25))
 ## }
 ## data.frame(ans)
 
@@ -539,10 +541,11 @@ wh.predict <- function(x)
 RNGkind("Wichmann-Hill")
 xnew <- runif(1)
 err <- 0
-for (i in 1:1000) {
-    xold <- xnew
-    xnew <- runif(1)
-    err <- max(err, abs(wh.predict(xold) - xnew))
+for (i in 1:1000) 
+{
+ xold <- xnew
+ xnew <- runif(1)
+ err <- max(err, abs(wh.predict(xold)-xnew))
 }
 print(err)
 

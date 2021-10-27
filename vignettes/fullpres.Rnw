@@ -45,7 +45,7 @@
 %%% 
 
 
-\documentclass[11pt, twocolumn]{article}
+\documentclass[11pt, a4paper, twocolumn]{article}
 
 %\VignetteIndexEntry{A note on random number generation}
 %\VignettePackage{randtoolbox}
@@ -58,16 +58,14 @@
 \usepackage{amsfonts,amssymb,amsmath}
 %english typography
 \usepackage[english]{babel}
-\usepackage{courier,newlfont}
 
 % 8 bit accents 
 %\usepackage[applemac]{inputenc} %MAC encoding
 \usepackage[utf8]{inputenc} %UNIX encoding
 %\usepackage[ansinew]{inputenc} %WINDOWS encoding
 
-%graph
-\usepackage[dvips]{graphicx}
-\usepackage{color,graphics}
+%graphique
+\usepackage{color, graphicx, wrapfig, subcaption}
 
 %citation
 \usepackage{natbib}
@@ -95,17 +93,8 @@
 
 
 % layout
-\normalsize\setlength{\parskip}{\baselineskip}
-\setlength{\oddsidemargin}{25mm}
-\setlength{\evensidemargin}{25mm}
-\setlength{\voffset}{-2.54cm}
-\setlength{\hoffset}{-3.8cm}
-\setlength{\textwidth}{180mm}
-\setlength{\topmargin}{0mm}
-\setlength{\headheight}{15mm}
-\setlength{\headsep}{11mm}
-\setlength{\topskip}{0mm}
-\setlength{\textheight}{230mm}
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+
 
 % two column config from http://blog.robfelty.org/2007/03/20/latex-two-column-layouts-and-rubber-lengths/
 
@@ -164,8 +153,6 @@
 
 
 \author{Christophe Dutang and Diethelm Wuertz}
-
-\date{September 2009}
 
 
 
@@ -1467,9 +1454,12 @@ nb <- c(1200, 14500, 214000)
 ans <- NULL
 for(i in 1:3)
 {
-	tij <- sobol(nb[i], dim=25, scramb=2, norm=TRUE )
-	Icos <- mean(cos(sqrt( apply( tij^2/2, 1, sum ) ))) * pi^(25/2)
-	ans <- rbind(ans, c(n=nb[i], I25=Icos, Delta=(Icos-I25)/I25 ))
+ tij <- sobol(nb[i], dim=25, 
+  scrambling=2, normal=TRUE)
+ Icos <- sqrt(rowSums(tij^2/2))
+ Icos <- mean(cos(Icos)) * pi^(25/2)
+ ans <- rbind(ans, c(n=nb[i], 
+  I25=Icos, Delta=(Icos-I25)/I25))
 }
 data.frame(ans)
 @
@@ -2092,10 +2082,11 @@ wh.predict <- function(x)
 RNGkind("Wichmann-Hill")
 xnew <- runif(1)
 err <- 0
-for (i in 1:1000) {
-    xold <- xnew
-    xnew <- runif(1)
-    err <- max(err, abs(wh.predict(xold) - xnew))
+for (i in 1:1000) 
+{
+ xold <- xnew
+ xnew <- runif(1)
+ err <- max(err, abs(wh.predict(xold)-xnew))
 }
 print(err)
 @

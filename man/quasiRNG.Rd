@@ -11,19 +11,20 @@
 	the Torus algorithm, the Sobol and Halton sequences.
 }
 \usage{
-halton(n, dim = 1, init = TRUE, normal = FALSE, usetime = FALSE, 
-                    mixed = FALSE, method="C", mexp = 19937)
-sobol(n, dim = 1, init = TRUE, scrambling = 0, seed = 4711, normal = FALSE,
-                   mixed = FALSE, method="Fortran", mexp = 19937)
 torus(n, dim = 1, prime, init = TRUE, mixed = FALSE, usetime = FALSE, 
-                  normal=FALSE, mexp = 19937)
+                  normal = FALSE, mexp = 19937, start = 1)
+sobol(n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal = FALSE,
+                   mixed = FALSE, method = "Fortran", mexp = 19937, start = 1,
+                   maxit = 10)
+halton(n, dim = 1, init = TRUE, normal = FALSE, usetime = FALSE, 
+                    mixed = FALSE, method = "C", mexp = 19937, start = 1)
 }
 \arguments{
   \item{n}{number of observations. If length(n) > 1, 
   	the length is taken to be the required number.}
   \item{dim}{dimension of observations default 1.}
-  \item{init}{a logical, if TRUE the sequence is initialized and 
-	restarts, otherwise not. By default \code{TRUE}.}
+  \item{init}{a logical, if \code{TRUE} the sequence is initialized and 
+	restarts to the \code{start} value, otherwise not. By default \code{TRUE}.}
   \item{normal}{a logical if normal deviates are needed, default \code{FALSE}.}
   \item{scrambling}{
 	    an integer value, if 1, 2 or 3 the sequence is scrambled
@@ -33,12 +34,12 @@ torus(n, dim = 1, prime, init = TRUE, mixed = FALSE, usetime = FALSE,
        scrambling is applied. By default 0.}
   \item{seed}{
         an integer value, the random seed for initialization
-        of the scrambling process. By default \code{4711}. On effective
-        if \code{scrambling>0}.
-        }
+        of the scrambling process (only for \code{sobol}
+        with \code{scrambling>0}). 
+        If \code{NULL}, set to \code{4711}. }
   \item{prime}{a single prime number or a vector of prime numbers to be used
   		 in the Torus sequence. (optional argument).}
-  \item{mixed}{a logical to combine the Torus algorithm with SFMT algorithm, default \code{FALSE}.}
+  \item{mixed}{a logical to combine the QMC algorithm with the SFMT algorithm, default \code{FALSE}.}
   \item{usetime}{a logical to use the machine time to start the Torus sequence, 
   		   default \code{FALSE}, i.e. when \code{usetime=FALSE} the Torus sequence start from the first term.
   		   \code{usetime} is only used when \code{mixed=FALSE}.}
@@ -46,10 +47,24 @@ torus(n, dim = 1, prime, init = TRUE, mixed = FALSE, usetime = FALSE,
       Note that \code{mixed=TRUE} is only available when \code{method="C"}.}		 
   \item{mexp}{an integer for the Mersenne exponent of SFMT algorithm,
       only used when \code{mixed=TRUE}.}    
+  \item{start}{an integer to initiliaze the sequence, default to 1,
+      only used when \code{init=TRUE}.}
+  \item{maxit}{a positive integer used to control inner loops both
+      for generating randomized seed and for controlling
+      outputs (when needed).}    
 }
 \details{
 
 The currently available generator are given below.
+Whatever the sequence, when \code{normal=TRUE}, outputs are transformed with
+the quantile of the standard normal distribution \code{\link{qnorm}}.
+If \code{init=TRUE}, the default, unscrambled and unmixed-SFMT quasi-random 
+sequences start from \code{start}.
+If \code{start != 0} and \code{normal=FALSE}, 
+we suggest to use 0 as recommended by Owen (2020). 
+One must handle the starting value (0) correctly if a quantile
+function of a not-lower-bounded distribution is used.
+
 \describe{
     \item{\bold{Torus algorithm:}}{
 	The \eqn{k}th term of the Torus algorithm in d dimension is given by
@@ -57,24 +72,29 @@ The currently available generator are given below.
 			    u_k = (frac(k sqrt(p_1)), ..., frac(k sqrt(p_d)) )}
 	where \eqn{p_i} denotes the ith prime number, \eqn{frac} the fractional part
 	(i.e. \eqn{frac(x) = x-floor(x)}). We use the 100 000 first prime numbers
-	from \url{http://primes.utm.edu/}, thus the dimension is limited to 100 000. 
+	from \url{https://primes.utm.edu/}, thus the dimension is limited to 100 000. 
 	If the user supplys prime numbers through
 	the argument \code{prime}, we do NOT check for primality and we cast numerics
 	to integers, (i.e. \code{prime=7.1234} will be cast to \code{prime=7} before
 	computing Torus sequence).
 	The Torus sequence starts from \eqn{k=1} when initialized with 
-	\code{init = TRUE} and no not depending on machine time 
-	\code{usetime = FALSE}. This is the default. When {init = FALSE}, the sequence
-	is not initialized (to 1) and starts from the last term. We can also use the
-	machine time to start the sequence with \code{usetime = TRUE}, which overrides
-	\code{init}.}
+	\code{init = TRUE} and so not depending on machine time 
+	\code{usetime = FALSE}. This is the default. When \code{init = FALSE}, the sequence
+	is not initialized (to 1) and starts from the last term. 
+	We can also use the machine time to start the sequence with \code{usetime = TRUE}, 
+	which overrides \code{init} or a randomized when \code{mixed = TRUE}.}
 
-    \item{\bold{scrambled Sobol sequences}}{
-	Calculates a matrix of uniform and normal deviated Sobol low 
-    	discrepancy numbers. Optional scrambling of the sequence can 
-    	be selected.
-	The Sobol sequence restarts and is initialized when 
-	\code{init = TRUE} and otherwise not.
+    \item{\bold{(scrambled) Sobol sequences}}{
+	Computes uniform Sobol low discrepancy numbers. 
+	The sequence starts from \eqn{k=1} when initialized with 
+	\code{init = TRUE} (default).
+	When \code{scrambling > 0}, a scrambling is performed
+	or when \code{mixed = TRUE}, a randomized seed is performed.
+  If some number of Sobol sequences are generated outside [0,1) with scrambling,
+  the seed is randomized until we obtain all numbers in [0,1).
+  One version of Sobol sequences is available the current version in 
+	Fortran (\code{method = "Fortran"}) since \code{method = "C"} is under development.
+	
 	}
 
     \item{\bold{Halton sequences}}{
@@ -82,36 +102,47 @@ The currently available generator are given below.
     	discrepancy numbers. Let us note that Halton sequence in dimension is the
 	Van Der Corput sequence.
 	The Halton sequence starts from \eqn{k=1} when initialized with 
-	\code{init = TRUE} and no not depending on machine time 
-	\code{usetime = FALSE}. This is the default. When {init = FALSE}, the sequence
+	\code{init = TRUE} (default) and no not depending on machine time 
+	\code{usetime = FALSE}. 
+	When \code{init = FALSE}, the sequence
 	is not initialized (to 1) and starts from the last term. We can also use the
 	machine time to start the sequence with \code{usetime = TRUE}, which overrides
 	\code{init}.
+	Two versions of Halton sequences are available the historical version in 
+	Fortran (\code{method = "Fortran"}) and the new version in C (\code{method = "C"}).
+  If \code{method = "C"}, \code{mixed} argument can be used to randomized
+  the Halton sequences.
 	}	
 
 }%end of describe
 See the pdf vignette for details.
 }
 \value{
-  \code{torus}, \code{halton} and \code{sobol} generates random variables in ]0,1[. It returns a \eqn{n}x\eqn{dim} matrix, when \code{dim}>1 otherwise a vector of length \code{n}.
+  \code{torus}, \code{halton} and \code{sobol} generates random variables in [0,1). 
+  It returns a \eqn{n}x\eqn{dim} matrix, when \code{dim>1} 
+  otherwise a vector of length \code{n}.
 }
 \references{
 
-Bratley P., Fox B.L. (1988);
+Bratley P., Fox B.L. (1988),
     \emph{Algorithm 659: Implementing Sobol's Quasirandom
     Sequence Generator},
     ACM Transactions on Mathematical Software 14, 88--100.
 
-Joe S., Kuo F.Y. (1998);
+Joe S., Kuo F.Y. (1998),
     \emph{Remark on Algorithm 659: Implementing Sobol's Quaisrandom
     Seqence Generator}.
+
+Owen A.B. (2020), \emph{On dropping the first Sobol' point},
+\url{https://arxiv.org/abs/2008.08051}.
 
 Planchet F., Jacquemin J. (2003), \emph{L'utilisation de methodes de 
 simulation en assurance}. Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
 
 }
 \seealso{
-    \code{\link{pseudoRNG}} for pseudo random number generation, \code{\link{.Random.seed}} for what is done in R about random number generation. 
+    \code{\link{pseudoRNG}} for pseudo random number generation, 
+    \code{\link{.Random.seed}} for what is done in R about random number generation. 
 }
 \author{
  Christophe Dutang and Diethelm Wuertz
