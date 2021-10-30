@@ -2,7 +2,7 @@ Package: randtoolbox
 Type: Package
 Title: Toolbox for Pseudo and Quasi Random Number Generation and Random
         Generator Tests
-Version: 1.31.0
+Version: 1.31.1
 Author: R port by Yohan Chalabi, Christophe Dutang, Petr Savicky and Diethelm Wuertz with some underlying C codes of (i) the SFMT algorithm from M. Matsumoto and M. Saito, (ii) the Knuth-TAOCP RNG from D. Knuth. 
 Maintainer: Christophe Dutang <christophe.dutang@ensimag.fr>
 Description: Provides (1) pseudo random generators - general linear congruential generators, 
@@ -17,6 +17,6 @@ Description: Provides (1) pseudo random generators - general linear congruential
 Depends: rngWELL (>= 0.10-1)
 License: BSD_3_clause + file LICENSE
 NeedsCompilation: yes
-Packaged: 2021-10-27 19:07:50 UTC; dutang
+Packaged: 2021-10-29 14:10:32 UTC; dutang
 Repository: CRAN
-Date/Publication: 2021-10-27 21:20:02 UTC
+Date/Publication: 2021-10-30 04:30:02 UTC

@@ -329,16 +329,16 @@ knuthTAOCP(1)
 
 
 
-# (7) computation times on my macbook, mean of 1000 runs
+# (7) computation times on my 2017 macbook (my 2007 macbook), mean of 1000 runs
 #
 
 \dontrun{
 # algorithm			time in seconds for n=10^6
-# classical Mersenne Twister  			0.066 
-# SF Mersenne Twister  	       			0.044 
-# WELL generator				0.065
-# Knuth TAOCP					0.046
-# Park Miller  		      			0.108
+# classical Mersenne Twister  0.028155 (0.066) 
+# SF Mersenne Twister  	      0.008223 (0.044) 
+# WELL generator				      0.006407 (0.065)
+# Knuth TAOCP				        	0.002923 (0.046)
+# Park Miller  		      			0.015635 (0.108)
 n <- 1e+06
 mean( replicate( 1000, system.time( runif(n), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( SFMT(n), gcFirst=TRUE)[3]) )

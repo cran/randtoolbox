@@ -1,10 +1,10 @@
 library(randtoolbox)
-RNGkind()
 
 #see e.g. https://en.wikipedia.org/wiki/Linear_congruential_generator
 
-if(FALSE)
+if(FALSE) #to be updated once congruRand back to runifInterface
 {
+  RNGkind()
   
   
   #Park Miller congruential generator

@@ -76,7 +76,7 @@ Software 33(4), 22.
 # (1) 
 #
 freq.test(runif(1000))
-print( freq.test( runif(1000000), echo=FALSE) )
+print( freq.test( runif(10000), echo=FALSE) )
 
 # (2) 
 #

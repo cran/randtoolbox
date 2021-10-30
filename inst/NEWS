@@ -1,5 +1,12 @@
 === randtoolbox: an R package for random number generation and testing ===
 
+Version 1.31.1
+=============
+- clean up test files because tests/test-sobol-scram.R failed 
+on i386-pc-solaris2.10 (32-bit). Output was
+ > umat <- sobol(n=1e5, dim=1111)
+  Error: cannot allocate vector of size 423.8 Mb
+
 Version 1.31.0
 =============
 
@@ -12,7 +19,7 @@ a warning is not raised when start != 0.
 
 WARNING FIXES
 - fix warnings of autoconf for configure files showed by 
-> autoreconf --warnings=obsolete (previous output)
+> autoreconf --warnings=obsolete (previous output was)
 configure.ac:310: warning: The macro `AC_TRY_COMPILE' is obsolete.
 configure.ac:310: warning: The macro `AC_TRY_RUN' is obsolete.
 configure.ac:310: warning: The macro `AC_FD_MSG' is obsolete.
@@ -35,7 +42,6 @@ BUGS FIX
 WELLrng, setSeed4WELL) in C header files, thanks to Brian Ripley.
 - scrambling = 1, 3 for Sobol sequences may generate 0.0, so randomizing
 the seed is performed in that case.
-
 
 Version 1.30.0 (Version in Memoriam of Diethelm and Barbara Wuertz)
 =============
@@ -113,7 +119,6 @@ WARNING FIX in Fortran files
 - remove an array over-run (reported by Brian Ripley) and tab 
 characters in LowDiscrepancy.f.
 
-
 Version 1.11
 =============
 
@@ -137,7 +142,6 @@ BUG FIX
 - the package crashes when the dimension was 0 in RNG functions, 
 reported by David LeBauer.
 
-
 Version 1.10
 =============
 
@@ -154,7 +158,6 @@ the Makefile and the man page of runifInterface.
 BUG FIX
 - remove implicit type declaration in the LowDiscrepancy fortran file,
 which causes errors with GCC 4.6 compilers.
-
 
 Version 1.09
 =============
@@ -245,7 +248,6 @@ BUG REPORT
 - the package does not compil on Fedora 8 x86_64 boxes,
 reported by Brian Ripley.
 
-
 Version 1.03
 =============
 
@@ -256,7 +258,6 @@ NEW FEATURES
 - add the RAN_ARRAY generator of Knuth TAOCP (2002),
 - the function setRandSeed has be renamed by setSeed,
 - update the vignette.
-
 
 Version 1.02
 =============
@@ -280,7 +281,6 @@ Version 1.01 (never released on CRAN)
 NEW FEATURES
 - add withtorus option for SFMT function,
 - improve output of tests.
-
 
 Version 1.00
 =============

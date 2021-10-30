@@ -172,10 +172,12 @@ ks.test(torus(1000), punif)
 ks.test(torus(10000), punif) 
 
 #the mixed Torus sequence
-torus(10, mix=TRUE)
-par(mfrow = c(1,2))
-acf(torus(10^6))
-acf(torus(10^6, mix=TRUE))
+torus(10, mixed=TRUE)
+\dontrun{
+  par(mfrow = c(1,2))
+  acf(torus(10^6))
+  acf(torus(10^6, mixed=TRUE))
+}
 
 #usage of the init argument
 torus(5)
@@ -204,10 +206,10 @@ halton(10)
 
 # some plots
 par(mfrow = c(2, 2), cex = 0.75)
-hist(halton(n = 5000, dim = 1), main = "Uniform Halton", 
+hist(halton(n = 500, dim = 1), main = "Uniform Halton", 
   xlab = "x", col = "steelblue3", border = "white")
 
-hist(halton(n = 5000, dim = 1, norm = TRUE), main = "Normal Halton", 
+hist(halton(n = 500, dim = 1, norm = TRUE), main = "Normal Halton", 
   xlab = "x", col = "steelblue3", border = "white")
    
 # (3) Sobol sequences
@@ -220,10 +222,10 @@ sobol(n = 10, dim = 5, scrambling = 3)
 sobol(n = 10, dim = 5, scrambling = 3, normal = TRUE)
 
 # some plots
-hist(sobol(5000, 1, scrambling = 2), main = "Uniform Sobol", 
+hist(sobol(500, 1, scrambling = 2), main = "Uniform Sobol", 
   xlab = "x", col = "steelblue3", border = "white")
 
-hist(sobol(5000, 1, scrambling = 2, normal = TRUE), main = "Normal Sobol", 
+hist(sobol(500, 1, scrambling = 2, normal = TRUE), main = "Normal Sobol", 
   xlab = "x", col = "steelblue3", border = "white")
 
 #usage of the init argument
@@ -234,15 +236,15 @@ sobol(5, init=FALSE)
 #previous call
 sobol(10)
 
-# (4) computation times on my macbook, mean of 1000 runs
+# (4) computation times on my 2017 macbook (my 2007 macbook), mean of 1000 runs
 #
 
 \dontrun{
 # algorithm			time in seconds for n=10^6
-# Torus algo					0.058 
-# mixed Torus algo 	       			0.087 
-# Halton sequence				0.878
-# Sobol sequence				0.214
+# Torus algo					  0.012 (0.058)
+# mixed Torus algo 	    0.018 (0.087)
+# Halton sequence				0.180 (0.878)
+# Sobol sequence				0.027 (0.214)
 n <- 1e+06
 mean( replicate( 1000, system.time( torus(n), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( torus(n, mixed=TRUE), gcFirst=T)[3]) )

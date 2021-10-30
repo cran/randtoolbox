@@ -6,7 +6,7 @@ f <- function(n)
 {
   res <- numeric(n+1)
   res[1:2] <- c(0,1)   
-
+  
   for(i in 1:(n-1))
   {
     # i <- 1
@@ -34,11 +34,19 @@ g <- function(n)
   return(res)    
 }
 
-cbind(stirling(10) , f(10))
-cbind(stirling(12) , f(12))
-system.time(f(2000))
-system.time(stirling(2000))
- 
-# library(microbenchmark)
-# microbenchmark(f(1000), g(1000))
-# microbenchmark(f(2000), g(2000))
+cbind(stirling(3) , f(3))
+cbind(stirling(4) , f(4))
+
+if(FALSE)
+{
+  cbind(stirling(10) , f(10))
+  cbind(stirling(12) , f(12))
+  
+  system.time(f(2000))
+  system.time(stirling(2000))
+  
+  # library(microbenchmark)
+  # microbenchmark(f(1000), g(1000))
+  # microbenchmark(f(2000), g(2000))
+  
+}
