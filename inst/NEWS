@@ -1,5 +1,15 @@
 === randtoolbox: an R package for random number generation and testing ===
 
+Version 2.0.0
+=============
+- remove Fortran code for Halton and Sobol sequences 
+(the latter was under the ACM licence).
+- scrambling for Sobol sequences is temporarily disabled.
+
+Version 1.31.2
+=============
+- last version with both Fortran and C code (not on CRAN).
+
 Version 1.31.1
 =============
 - clean up test files because tests/test-sobol-scram.R failed 

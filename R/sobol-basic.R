@@ -1,12 +1,9 @@
 ## 
 # @file  sobol-basic.R
-# @brief R file implementing the basic Sobol recurrence without Gray code
+# @brief R file implementing the Sobol recurrence
 #
 # @author Christophe Dutang
 #
-#
-# Copyright (C) 2017, Christophe Dutang, 
-# All rights reserved.
 #
 # The new BSD License is applied to this software.
 # Copyright (c) 2017 Christophe Dutang. 
@@ -42,110 +39,271 @@
 #  
 #
 #############################################################################
-### Sobol
+### Sobol and auxiliary functions
 ###
 ###			R functions
 ### 
+  
 
-int2bit <- function(x)
-  as.numeric(intToBits(x))
-bit2int <- function(x)
-  sum(x * 2^(1:length(x)-1))
-bit2unitreal <- function(x) #radical inverse function in base 2
-  sum(x / 2^(1:length(x)))
 
+#get degree
+degprimitpoly <- function(x, input="real") #associated
+{
+  input <- match.arg(input, c("binary", "real"))
+  if(input == "real")
+    x <- int2bit(x)
+  stopifnot(all(x >= 0 & x <= 1))
+  max(x*(1:length(x)-1))
+}
+
+
+
+# prevmj a matrix with binary decomposition of mj
+# polycoef a binary decomposition of primtive polynomial
+# i.e. (cq, cq-1,..., c1, c0)
+# make mj recursion for one term
+# i.e. (mj-q, .. mj-1)
+mjrec <- function(prevmj, polycoef, echo=FALSE)
+{
+  stopifnot(all(prevmj >= 0 & prevmj <= 1))
+  stopifnot(all(polycoef >= 0 & polycoef <= 1))
+  
+  deg <- degprimitpoly(polycoef, input="binary")
+  stopifnot(deg >= 0)
+  
+  if(deg == 0)
+    return(c(1, rep(0,31)))
+  
+  if(!is.matrix(prevmj))
+    prevmj <- as.matrix(prevmj)
+    
+  if(NCOL(prevmj) < deg && deg > 0)
+    while(NCOL(prevmj) < deg)
+      prevmj <- cbind(1, prevmj)
+  if(NCOL(prevmj) > deg && deg > 0)
+    prevmj <- prevmj[, (NCOL(prevmj)-deg+1):NCOL(prevmj)]
+  
+  if(!is.matrix(prevmj))
+    prevmj <- as.matrix(prevmj)
+  
+  #only keep coefficients c1,..., cq as c0=1 coefficient for x^q
+  if(length(polycoef) > deg)
+    polycoef <- polycoef[1:deg]
+  
+  if(echo)
+  {
+    cat("prevmj\n")
+    print(prevmj)
+    if(NCOL(prevmj) > 1)
+      print(apply(prevmj, 2, bit2int))
+    else
+      print(bit2int(prevmj))
+    cat("polycoef\n")
+    print(polycoef)
+    cat("degree", deg, "\n")
+  }
+  
+  #mj-q
+  mj <- prevmj[, 1]
+  
+  #compute c_k 2^k, from k=q-1,..,1
+  ck2k <- rev(polycoef) * 2^(1:length(polycoef))
+  #compute c_k 2^k, from k=1,..,q-1
+  ck2k <- rev(ck2k)
+  if(echo)
+  {
+    cat("c_k 2^k\n")
+    print(ck2k)
+  }
+  
+  if(echo)
+  {
+    cat("\nmj before recursion\n\n")
+    print(mj)
+  }
+  
+  for(k in 1:deg)
+  {
+    if(ck2k[k] != 0)
+    {
+      ck2kmjk <- int2bit(bit2int(prevmj[,k]) * ck2k[k])
+      if(echo)
+      {
+        cat("k", k, "ck2k[k]\n")
+        print(ck2k[k])
+        cat("bit2int(prevmj[,k])\n")
+        print(bit2int(prevmj[,k]))
+        cat("bit2int(prevmj[,k] * ck2k[k])\n")
+        print(bit2int(prevmj[,k] * ck2k[k]))
+        cat("ck2kmjk\n")
+        print(ck2kmjk)
+      }
+      mj <- oplus(mj, ck2kmjk)
+      if(echo)
+      {
+        cat("mj\n")
+        print(mj)
+        cat("\n")
+      }
+    }
+  }
+  mj
+}
 
 #polycoef = (c_q, c_q-1, ..., c_2, c_1, 1) for q=deg with c_q=1 (always)
 #prevmj = (m_j-1, m_j-2,..., m_j-q)
-sobol.directions <- function(polycoef, deg, prevmj, nbpoint, echo=FALSE)
+sobol.directions.mj <- function(prevmj, polycoef, nbpoint, 
+                                echo=FALSE, input="real", output="real")
 {
+  input <- match.arg(input, c("binary", "real"))
+  output <- match.arg(output, c("binary", "real"))
+  
+  if(input == "real")
+  {
+    stopifnot(is.vector(prevmj))
+    prevmj <- sapply(prevmj, int2bit)
+  }
+  
+  #binary representation
+  if(!is.matrix(prevmj))
+  {
+    #it is already a binary vector for a single mj
+    if(all(prevmj >= 0 & prevmj <= 1))
+      prevmj <- as.matrix(prevmj)
+    else 
+      stop("wrong matrix prevmj")
+  }
+  
   stopifnot(is.matrix(prevmj))
   stopifnot(all(prevmj <= 1 & prevmj >= 0))
   
-  mjrec <- function(prevmj)
+  if(!all(polycoef <= 1 & polycoef >= 0))
+    polycoef <- int2bit(polycoef)
+  if(echo)
   {
-    if(echo)
-      print(prevmj)
-    if(deg > 0)
-      stopifnot(NCOL(prevmj) == deg)
-    mj <- prevmj[, 1]
-    if(deg > 0)
-      for(k in 1:deg)
-      {
-        if(polycoef[k] != 0)
-        {
-          if(echo)
-          {
-            cat("k", k, "2^(deg - k + 1)", 2^(deg - k + 1), "m_j-k",  bit2int(prevmj[,k]))
-            cat(" 2^q-k", 2^(deg - k + 1), "\n")  
-            cat("integer in rec", 2^(deg - k + 1) * polycoef[k] * bit2int(prevmj[,k]), "\n")
-          }
-          #mj = mj + m_j-k*2^(deg-k+1)*c_deg
-          mj <- mj + int2bit(2^(deg - k + 1) * polycoef[k] * bit2int(prevmj[,k]))
-          #modulo 2
-          mj <- mj %% 2 
-        }
-      }
-    mj
+    cat("primitive polynomial\n")
+    print(bit2int(polycoef))
   }
+  
+  deg <- degprimitpoly(polycoef, input="binary")
+  
   allmj <- prevmj
+  if(echo)
+  {
+    cat("prevmj\n")
+    if(NCOL(prevmj) > 1)
+      print(apply(prevmj, 2, bit2int))
+    else
+      print(bit2int(prevmj))
+  }
   if(nbpoint > 0)
     for(n in 1:nbpoint)
     {
       d <- NCOL(allmj)
-      if(echo)
-        print(allmj)
+      #if(echo)
+      #  print(allmj)
       if(deg > 0)
       {
-        prevmj <- allmj[, (d-deg+1):d]
-        nextmj <- mjrec(as.matrix(prevmj))
+        nextmj <- mjrec(prevmj, polycoef)
       }else
         nextmj <- allmj[,d]
-      if(echo) cat("\n")
+      if(echo) 
+      {
+        cat("n", n, "mj", bit2int(nextmj), "\n")
+      }
       allmj <- cbind(allmj, nextmj)
+      prevmj <- allmj[, -1]
     }
-  colnames(allmj) <- apply(allmj, 2, bit2int)
+  #remove name
+  colnames(allmj) <- NULL
+  #reverse binary expansion
+  if(output == "real")
+    allmj <- as.numeric(apply(allmj, 2, bit2int))
+  allmj
+}
+
+#polycoef = (c_q, c_q-1, ..., c_2, c_1, 1) for q=deg with c_q=1 (always)
+#prevmj = (m_j-1, m_j-2,..., m_j-q)
+sobol.directions.vj <- function(prevmj, polycoef, nbpoint, 
+                                echo=FALSE, input="real", output="binary")
+{
+  output <- match.arg(output, c("binary", "real"))
+  input <- match.arg(input, c("binary", "real"))
   
-  if(NROW(allmj) < NCOL(allmj))
-    print(allmj)
-    
-  #M contains m1,..., mj
-  M <- allmj[1:NCOL(allmj), ]
+  M <- sobol.directions.mj(prevmj, polycoef, nbpoint, echo,
+                               output="binary", input=input)
+  if(echo)
+    print(M)
   
-  #compute direction numbers vj (in place)
-  for(j in 2:NCOL(M))
-    M[1:j, j] <- rev(M[1:j, j])
-  return(M)
+  if(NCOL(M) > 1)
+  {
+    #compute direction numbers vj (in place): dividing by 2 means reversing
+    for(j in 2:NCOL(M))
+      M[1:j, j] <- rev(M[1:j, j])
+    colnames(M) <- paste0("v",1:NCOL(M))
+  }
+  
+  #reverse binary expansion
+  if(output == "real" && NCOL(M) > 1)
+    M <- as.numeric(apply(M, 2, bit2int))
+  if(output == "real" && NCOL(M) == 1)
+    M <- as.numeric(bit2int(M))
+  M
+}
+
+  
+
+#vecpoly = (p1, ..., pd) (interger form)
+#listmj = list( (m_j-1, m_j-2,..., m_j-q),..., (m_j-1, m_j-2,..., m_j-q) )
+sobol.V <- function(listmj, vecpoly, bitnb=32, echo=FALSE)
+{
+  stopifnot(length(listmj) == length(vecpoly))
+  stopifnot(length(listmj) > 0)
+ 
+  d <- length(listmj)
+  V <- lapply(1:d, function(i)
+  {
+    q <- degprimitpoly(vecpoly[i])
+    r <- length(listmj[[i]])
+    nbpoint <- bitnb - r
+    if(echo)
+      cat("nbpoint", nbpoint, "\n")
+    Vi <- sobol.directions.vj(listmj[[i]], vecpoly[i], nbpoint=nbpoint, echo=echo, 
+                        input="real", output="binary")
+    Vi[1:bitnb,]
+  })
+  V
 }
 
 
 #output = real : x_j in [0,1)
 #output = integer : y_j on which to compute the radical inverse
-sobol.basic <- function(n, polycoef, deg, prevmj, echo=FALSE, output=c("real", "integer"))
+sobol.basic <- function(n, V, bitnb=32, echo=FALSE, output=c("real", "integer"),
+                        start=1)
 {
   output <- match.arg(output, c("real", "integer"))
   
-  if(is.vector(prevmj))
-    prevmj <- sapply(prevmj, int2bit)
-  else if(is.matrix(prevmj))
-    stopifnot(all(prevmj <= 1 & prevmj >= 0))
-  else
-    stop("wrong prevmj")
-  #maximum number of components for the binary representation
-  r <- ceiling(log(n)/log(2)) 
-  #compute direction numbers
-  V <- sobol.directions(polycoef, deg, prevmj, r-deg, echo=FALSE)
+  stopifnot(is.matrix(V))
+  stopifnot(V >= 0 & V <= 1)
+  stopifnot(NCOL(V) == bitnb && NROW(V) == bitnb)
+  stopifnot(is.numeric(n))
+  
+  nb <- ifelse(length(n)>1, length(n), n)
+  if(nb < 0) stop("invalid argument 'n'")
+  if(nb == 0) return(numeric(0))
+  
   if(echo) print(V)
   #computer output reals or integers
-  x <- numeric(n)
-  for(i in 1:n)
+  x <- numeric(nb)
+  for(i in start+0:(nb-1))
   {
     #current integer by rec (modulo 2)
-    y <- (V %*% int2bit(i)[1:r]) %% 2
+    y <- (V %*% int2bit(i)[1:bitnb]) %% 2
     if(echo) 
     {
-      cat("i\n")
+      cat("i", i, "\n")
       print(y)
+      print(bit2int(y))
     }
     if(output == "real") #convert in [0,1)
     {
@@ -159,7 +317,7 @@ sobol.basic <- function(n, polycoef, deg, prevmj, echo=FALSE, output=c("real", "
 
 sobol.R <- function(n, d, echo=FALSE)
 {
-  stopifnot(d <= 20)
+  stopifnot(d <= 10)
   #see LowDiscrepancy.f, line 550
   polynomvect <- c(1,3,7,11,13,19,25,37,59,47,61,55,41,67,97,91,
                    109,103,115,131,193,137,145,143,241,157,185,167,229,171,213,
@@ -177,46 +335,33 @@ sobol.R <- function(n, d, echo=FALSE)
                    2257,2273,2279,2283,2293,2317,2323,2341,2345,2363,2365,2373,
                    2377,2385,2395,2419,2421,2431,2435,2447,2475,2477,2489,2503,
                    2521,2533,2551,2561,2567,2579,2581,2601,2633,2657,2669)
+  polynomvect <- polynomvect[1:10]
   #see Glasserman, page 311
-  mjmatrix <- cbind(1, #m1 
-                    c(1,3), #m2 
-                    c(1,5,7,7,5,1,3,3,7,5,5,7,7,1,3,3,7,5,1,1), #m3
-                    c(1,15,11,5,3,1,7,9,13,11,1,3,7,9,5,13,13,11,3,15), #m4
-                    c(1,17,13,7,15,9,31,9,3,27,15,29,21,23,19,11,25,7,13,17), #m5
-                    c(1,51,61,43,51,59,47,57,35,53,19,51,61,37,33,7,5,11,39,63), #m6
-                    c(1,85,67,49,125,25,109,43,89,69,113,47,55,97,3,37,83,103,27,13), #m7
-                    c(1,255,79,147,141,89,173,43,9,25,115,97,19,97,197,101,255,29,203,65) #m8
-                    )
+  initmj <- list(
+    1, 
+    1,
+    c(1 , 1 ),
+    c(1 , 3 , 7 ),
+    c(1 , 1 , 5 ),
+    c(1 , 3 , 1 , 1 ),
+    c(1 , 1 , 3 , 7 ),
+    c(1 , 3 , 3 , 9 , 9 ),
+    c(1 , 3 , 7 , 13 , 3 ),
+    c(1 , 1 , 5 , 11 , 27  ))
+ 
   #maximum number of components for the binary representation
-  r <- ceiling(log(n)/log(2)) 
-  #compute direction numbers V
-  V <- array(0, dim=c(r, r, d))
-  for(i in 1:d)
-  {
-    pi <- int2bit(polynomvect[i])
-    degpi <- max(pi * 0:31)
-    if(degpi > 0)
-      mji <- sapply(mjmatrix[i, 1:degpi], int2bit)
-    else
-      mji <- int2bit(1)
-    mji <- as.matrix(mji)
-    if(echo)
-    { 
-      cat("i=", i, "pi=", polynomvect[i], "deg", degpi, "\n")
-      print(head(mji))
-    }
-    
-    Vi <- sobol.directions(pi, degpi, mji, r-NCOL(mji), echo=FALSE)
-    V[,,i] <- Vi
-  }
-  #compute reals
+  bitnb <- ceiling(log(n)/log(2)) 
   
+  #compute direction numbers V
+  listV <- sobol.V(initmj, polynomvect, bitnb=bitnb, echo=FALSE)
+  
+  #compute reals
   x <- matrix(nrow=n, ncol=d)
   for(i in 1:d)
   for(j in 1:n)
   {
     #current integer by rec (modulo 2)
-    y <- (V[,,i] %*% int2bit(j)[1:r]) %% 2
+    y <- (listV[[i]] %*% int2bit(j)[1:bitnb]) %% 2
     x[j,i] <- bit2unitreal(y)
   }
   x

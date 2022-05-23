@@ -1,16 +1,14 @@
 ## 
-# @file  randtoolboxEnv.R
-# @brief R file for environment of randtoolbox
+# @file  binary-operator.R
+# @brief R file implementing binary operators
 #
-# @author Yohann Chalabi
-# @author Diethelm Wuertz 
+# @author Christophe Dutang
 #
 #
-# Copyright (C) 2022, Yohann Chalabi, Diethelm Wuertz, ETH Zurich. 
-# All rights reserved.
 #
 # The new BSD License is applied to this software.
-# Copyright (c) 2022 Yohann Chalabi, Diethelm Wuertz. 
+# Copyright (c) 2022 Christophe Dutang. 
+# Christophe Dutang, see http://dutangc.free.fr
 # All rights reserved.
 #
 #      Redistribution and use in source and binary forms, with or without
@@ -40,32 +38,27 @@
 #      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  
-#                                                                                                                                         #
+#
 #############################################################################
-### environment functions
+### binary operators
 ###
 ###			R functions
 ### 
 
-.randtoolboxEnv <- new.env(hash = TRUE)
-
-.setrandtoolboxEnv <- function(...)
+int2bit <- function(x)
+  as.numeric(intToBits(x))
+bit2int <- function(x)
+  sum(x * 2^(1:length(x)-1))
+bit2unitreal <- function(x) #radical inverse function in base 2
+  sum(x / 2^(1:length(x)))
+oplus <- function(x,y)
 {
-    x <- list(...)
-    nm <- names(x)
-     if (is.null(nm) || "" %in% nm)
-        stop("all arguments must be named")
-    sapply(nm, function(nm) assign(nm, x[[nm]],
-                                 envir = .randtoolboxEnv))
-    invisible()
-}
-
-.getrandtoolboxEnv <- function(x, unset = "")
-{
-    if (is.null(x))
-        x <- ls(all.names = TRUE, envir = .randtoolboxEnv)
-###     unlist(mget(x, envir = .randtoolboxEnv, mode = "any",
-###                 ifnotfound = as.list(unset)), recursive = FALSE)
-    get(x, envir = .randtoolboxEnv, mode = "any")
+  stopifnot(NCOL(x)==1)
+  stopifnot(NCOL(y)==1)
+  if(length(x) > length(y))
+    y <- c(y, rep(0, length(x)-length(y)))
+  if(length(x) < length(y))
+    x <- c(x, rep(0, length(y)-length(x)))           
+  (x+y) %% 2
 }
 

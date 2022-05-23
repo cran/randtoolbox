@@ -8,11 +8,12 @@ importFrom("rngWELL", doinitMT2002, doputRngWELL, dogetRngWELL, setSeed4WELL, WE
 ### Other imports
 importFrom("graphics", hist)
 importFrom("stats", dpois, pchisq, qnorm, runif)
-importFrom("utils", packageDescription, head)
+importFrom("utils", packageDescription, head, tail)
 
 ### Exports
 export(torus, runif.halton, halton, runif.sobol, sobol)
-export(sobol.directions, int2bit, bit2int, bit2unitreal, sobol.basic, sobol.R)
+export(int2bit, bit2int, bit2unitreal)
+export(sobol.R)
 
 export(setSeed, congruRand, SFMT, WELL, knuthTAOCP)
 

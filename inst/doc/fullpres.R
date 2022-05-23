@@ -166,7 +166,6 @@ halton(5, init=FALSE)
 ### code chunk number 20: sobol (eval = FALSE)
 ###################################################
 ## sobol(10)
-## sobol(10, scramb=3)
 
 
 ###################################################
@@ -174,23 +173,22 @@ halton(5, init=FALSE)
 ###################################################
 options( width =40)
 sobol(10)
-sobol(10, scramb=3)
 
 
 ###################################################
 ### code chunk number 22: unitsquare1 (eval = FALSE)
 ###################################################
-## par(mfrow = c(2,1))
+## par(mfrow = c(1,2))
 ## plot(sobol(1000, 2))
-## plot(sobol(10^3, 2, scram=1))
+## plot(sobol(10^3, 2, scrambling=1))
 
 
 ###################################################
 ### code chunk number 23: unitsquare2
 ###################################################
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 plot(sobol(1000, 2), xlab ="u", ylab="v", main="Sobol (no scrambling)")
-plot(sobol(10^3, 2, scram=1), xlab ="u", ylab="v", main="Sobol (Owen)")
+plot(sobol(10^3, 2, scrambling=1), xlab ="u", ylab="v", main="Sobol (Owen)")
 
 
 ###################################################
@@ -248,7 +246,7 @@ torus(5,  mixed =TRUE)
 ###################################################
 ### code chunk number 32: torus9 (eval = FALSE)
 ###################################################
-## par(mfrow = c(2,1))
+## par(mfrow = c(1,2))
 ## acf(torus(10^5))
 ## acf(torus(10^5, mix=TRUE))
 
@@ -256,7 +254,7 @@ torus(5,  mixed =TRUE)
 ###################################################
 ### code chunk number 33: torusacf
 ###################################################
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 acf(torus(10^5))
 acf(torus(10^5, mix=TRUE))
 
@@ -264,7 +262,7 @@ acf(torus(10^5, mix=TRUE))
 ###################################################
 ### code chunk number 34: unitsquare3 (eval = FALSE)
 ###################################################
-## par(mfrow = c(2,1))
+## par(mfrow = c(1,2))
 ## plot(SFMT(1000, 2))
 ## plot(torus(10^3, 2))
 
@@ -272,7 +270,7 @@ acf(torus(10^5, mix=TRUE))
 ###################################################
 ### code chunk number 35: unitsquare4
 ###################################################
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 plot(SFMT(1000, 2), xlab ="u", ylab="v", main="SFMT")
 plot(torus(1000, 2), xlab ="u", ylab="v", main="Torus")
 
@@ -280,17 +278,17 @@ plot(torus(1000, 2), xlab ="u", ylab="v", main="Torus")
 ###################################################
 ### code chunk number 36: unitsquare5 (eval = FALSE)
 ###################################################
-## par(mfrow = c(2,1))
+## par(mfrow = c(1,2))
 ## plot(WELL(1000, 2))
-## plot(sobol(10^3, 2, scram=2))
+## plot(sobol(10^3, 2, scrambling=2))
 
 
 ###################################################
 ### code chunk number 37: unitsquare6
 ###################################################
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 plot(WELL(1000, 2), xlab ="u", ylab="v", main="WELL 512a")
-plot(sobol(10^3, 2, scram=2), xlab ="u", ylab="v", main="Sobol (Faure-Tezuka)")
+plot(sobol(10^3, 2, scrambling=2), xlab ="u", ylab="v", main="Sobol (Faure-Tezuka)")
 
 
 ###################################################
@@ -302,7 +300,7 @@ plot(sobol(10^3, 2, scram=2), xlab ="u", ylab="v", main="Sobol (Faure-Tezuka)")
 ## for(i in 1:3)
 ## {
 ##  tij <- sobol(nb[i], dim=25, 
-##   scrambling=2, normal=TRUE)
+##   scrambling=0, normal=TRUE)
 ##  Icos <- sqrt(rowSums(tij^2/2))
 ##  Icos <- mean(cos(Icos)) * pi^(25/2)
 ##  ans <- rbind(ans, c(n=nb[i], 
@@ -320,7 +318,7 @@ nb <- c(1200, 14500, 214000)
 ans <- NULL
 for(i in 1:3)
 {
-	tij <- sobol(nb[i], dim=25, scramb=2, norm=TRUE )
+	tij <- sobol(nb[i], dim=25, scramb=0, norm=TRUE )
 	Icos <- mean(cos(sqrt( apply( tij^2/2, 1, sum ) ))) * pi^(25/2)
 	ans <- rbind(ans, c(n=nb[i], I25=Icos, Delta=(Icos-I25)/I25 ))
 }
@@ -330,7 +328,7 @@ data.frame(ans)
 ###################################################
 ### code chunk number 40: hist (eval = FALSE)
 ###################################################
-## par(mfrow = c(2,1))
+## par(mfrow = c(1,2))
 ## hist(SFMT(10^3), 100)
 ## hist(torus(10^3), 100)
 
@@ -338,7 +336,7 @@ data.frame(ans)
 ###################################################
 ### code chunk number 41: hist
 ###################################################
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 hist(SFMT(10^3), 100)
 hist(torus(10^3), 100)
 

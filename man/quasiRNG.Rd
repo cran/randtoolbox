@@ -14,7 +14,7 @@
 torus(n, dim = 1, prime, init = TRUE, mixed = FALSE, usetime = FALSE, 
                   normal = FALSE, mexp = 19937, start = 1)
 sobol(n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal = FALSE,
-                   mixed = FALSE, method = "Fortran", mexp = 19937, start = 1,
+                   mixed = FALSE, method = "C", mexp = 19937, start = 1,
                    maxit = 10)
 halton(n, dim = 1, init = TRUE, normal = FALSE, usetime = FALSE, 
                     mixed = FALSE, method = "C", mexp = 19937, start = 1)
@@ -43,17 +43,19 @@ halton(n, dim = 1, init = TRUE, normal = FALSE, usetime = FALSE,
   \item{usetime}{a logical to use the machine time to start the Torus sequence, 
   		   default \code{FALSE}, i.e. when \code{usetime=FALSE} the Torus sequence start from the first term.
   		   \code{usetime} is only used when \code{mixed=FALSE}.}
-  \item{method}{a character string either \code{"C"} or \code{"Fortran"}.
+  \item{method}{a character string either \code{"C"}.
       Note that \code{mixed=TRUE} is only available when \code{method="C"}.}		 
   \item{mexp}{an integer for the Mersenne exponent of SFMT algorithm,
       only used when \code{mixed=TRUE}.}    
-  \item{start}{an integer to initiliaze the sequence, default to 1,
+  \item{start}{an integer 0 or 1 to initiliaze the sequence, default to 1,
       only used when \code{init=TRUE}.}
   \item{maxit}{a positive integer used to control inner loops both
       for generating randomized seed and for controlling
       outputs (when needed).}    
 }
 \details{
+
+Scrambling is temporarily disabled and will be reintroduced in a future release.
 
 The currently available generator are given below.
 Whatever the sequence, when \code{normal=TRUE}, outputs are transformed with
@@ -63,7 +65,7 @@ sequences start from \code{start}.
 If \code{start != 0} and \code{normal=FALSE}, 
 we suggest to use 0 as recommended by Owen (2020). 
 One must handle the starting value (0) correctly if a quantile
-function of a not-lower-bounded distribution is used.
+function of a non-lower-bounded distribution is used.
 
 \describe{
     \item{\bold{Torus algorithm:}}{
@@ -129,15 +131,22 @@ Bratley P., Fox B.L. (1988),
     Sequence Generator},
     ACM Transactions on Mathematical Software 14, 88--100.
 
-Joe S., Kuo F.Y. (1998),
+Joe S., Kuo F.Y. (2003),
     \emph{Remark on Algorithm 659: Implementing Sobol's Quaisrandom
-    Seqence Generator}.
+    Seqence Generator},
+    ACM Transactions on Mathematical Software 29, 49--57.
+
+Joe S., Kuo F.Y. (2008),
+    \emph{Constructing Sobol sequences with better two-dimensional projections},
+    SIAM J. Sci. Comput. 30, 2635--2654,
+\url{https://web.maths.unsw.edu.au/~fkuo/sobol/index.html}.    
 
 Owen A.B. (2020), \emph{On dropping the first Sobol' point},
 \url{https://arxiv.org/abs/2008.08051}.
 
-Planchet F., Jacquemin J. (2003), \emph{L'utilisation de methodes de 
-simulation en assurance}. Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
+Planchet F., Jacquemin J. (2003), 
+  \emph{L'utilisation de methodes de simulation en assurance}. 
+  Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
 
 }
 \seealso{
@@ -216,16 +225,16 @@ hist(halton(n = 500, dim = 1, norm = TRUE), main = "Normal Halton",
 #
 
 # uniform variate
-sobol(n = 10, dim = 5, scrambling = 3)
+sobol(n = 10, dim = 5)
 
 # normal variate
-sobol(n = 10, dim = 5, scrambling = 3, normal = TRUE)
+sobol(n = 10, dim = 5, normal = TRUE)
 
 # some plots
-hist(sobol(500, 1, scrambling = 2), main = "Uniform Sobol", 
+hist(sobol(500, 1), main = "Uniform Sobol", 
   xlab = "x", col = "steelblue3", border = "white")
 
-hist(sobol(500, 1, scrambling = 2, normal = TRUE), main = "Normal Sobol", 
+hist(sobol(500, 1, normal = TRUE), main = "Normal Sobol", 
   xlab = "x", col = "steelblue3", border = "white")
 
 #usage of the init argument
@@ -236,7 +245,7 @@ sobol(5, init=FALSE)
 #previous call
 sobol(10)
 
-# (4) computation times on my 2017 macbook (my 2007 macbook), mean of 1000 runs
+# (4) computation times on my 2017 macbook (on my 2007 macbook), mean of 1000 runs
 #
 
 \dontrun{
@@ -247,7 +256,7 @@ sobol(10)
 # Sobol sequence				0.027 (0.214)
 n <- 1e+06
 mean( replicate( 1000, system.time( torus(n), gcFirst=TRUE)[3]) )
-mean( replicate( 1000, system.time( torus(n, mixed=TRUE), gcFirst=T)[3]) )
+mean( replicate( 1000, system.time( torus(n, mixed=TRUE), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( halton(n), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( sobol(n), gcFirst=TRUE)[3]) )
 	}

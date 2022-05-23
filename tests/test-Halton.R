@@ -46,11 +46,8 @@ halton(n, init=FALSE, mixed=TRUE)
 n <- 5
 d <- 4
 halton(n, d, method="C")
-halton(n, d, method="Fortran", start=0)
-halton(n, d, method="Fortran", start=1)
 randtoolbox:::.getrandtoolboxEnv(".halton.seed")
 halton(n, d, method="C", start=5)
-halton(n, d, method="Fortran", start=5)
 
 #### normal argument ####
 halton(n, normal=TRUE)
@@ -67,18 +64,3 @@ try(halton(3, start="3"))
 halton(n, start=0)
 halton(n, start=1)
 
-
-#### testing time ####
-
-if(FALSE)
-{
-  n <- 10
-  d <- 10000
-  check <- all(halton(n, d, method="C") == halton(n, d, method="Fortran"))
-  check
-  
-  n <- 1e3
-  d <- 1e3
-  system.time(halton(n, d, method="C"), gcFirst = TRUE)
-  system.time(halton(n, d, method="Fortran"), gcFirst = TRUE)
-}

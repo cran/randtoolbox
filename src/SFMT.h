@@ -90,20 +90,30 @@ void init_SFMT(int mersennexponent, int useparamset);
 
 /* =================== end of my code =============== */
 
+/*
+ * 64-bit int size type
+ * similar to SFMT.h: see http://en.wikibooks.org/wiki/C_Programming/C_Reference/stdint.h
+ * and p150 of Write Portable Code by Brian Hook
+ */
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-  #include <inttypes.h>
-  #define HAVE_INT32_64_DEFINED 1
-#elif defined(_MSC_VER) || defined(__BORLANDC__)
-  typedef unsigned int uint32_t;
-  typedef unsigned __int64 uint64_t;
-  #define inline __inline
-  #define HAVE_INT32_64_DEFINED 1
+ #include <inttypes.h>
+ #define HAVE_INT32_64_DEFINED 1
+#elif defined(_MSC_VER) || defined(__BORLANDC__) || defined(__WATCOMC__)
+ typedef unsigned int uint32_t;
+ typedef unsigned __int64 uint64_t;
+ #define inline __inline
+ #define HAVE_INT32_64_DEFINED 1
+#elif defined(__LP64__) || defined(__powerpc64__)
+ typedef unsigned int uint32_t;
+ typedef unsigned long uint64_t;
+ #define inline __inline
+ #define HAVE_INT32_64_DEFINED 1
 #else
-  #include <inttypes.h>
-  #if defined(__GNUC__)
-    #define inline __inline__
-  #endif
-  #define HAVE_INT32_64_DEFINED 1
+ #include <inttypes.h>
+ #if defined(__GNUC__)
+ #define inline __inline__
+ #endif
+ #define HAVE_INT32_64_DEFINED 1
 #endif
 
 #ifndef PRIu64

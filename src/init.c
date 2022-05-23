@@ -6,13 +6,8 @@
  * @author Petr Savicky 
  *
  *
- * Copyright (C) 2017, Christophe Dutang, 
- * Petr Savicky, Academy of Sciences of the Czech Republic. 
- * Christophe Dutang, see http://dutangc.free.fr 
- * All rights reserved.
- *
  * The new BSD License is applied to this software.
- * Copyright (c) 2013 Christophe Dutang, Petr Savicky. 
+ * Copyright (c) 2022 Christophe Dutang, Petr Savicky. 
  * All rights reserved.
  *
  *      Redistribution and use in source and binary forms, with or without
@@ -96,10 +91,9 @@ static const R_CallMethodDef CallEntries[] =
 };
 
 
-/* .Fortran calls defined LowDiscrepancy.f 
+/* .Fortran calls defined LowDiscrepancy.f <deprecated>
  * C version of these Fortran routines are halton_c() and sobol_c() in randtoolbox.c
- */
-/* DOES NOT WORK*/
+ *
 extern void F77_NAME(halton_f)(void *, void *, void *, void *, void *, void *, void *);
 extern void F77_NAME(sobol_f)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 
@@ -109,7 +103,7 @@ static const R_FortranMethodDef FortranEntries[] = {
   {"sobol_f", (DL_FUNC) &F77_NAME(sobol_f),  11}, //LowDiscrepancy.f
   {NULL, NULL, 0}
 };
-
+*/
 
 //there is no routine accessed with .External()
 
@@ -117,7 +111,7 @@ static const R_FortranMethodDef FortranEntries[] = {
 void R_init_randtoolbox(DllInfo *dll)
 {
   //register method accessed with .C, .Call, .Fortran, .External respectively
-  R_registerRoutines(dll, CEntries, CallEntries, FortranEntries, NULL); 
+  R_registerRoutines(dll, CEntries, CallEntries, NULL, NULL); 
   
   /*dynamic lookup only for
   double *user_unif_rand(void);

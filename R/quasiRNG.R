@@ -5,13 +5,9 @@
 # @author Christophe Dutang
 # @author Diethelm Wuertz 
 #
-# Copyright (C) 2009, Diethelm Wuertz, ETH Zurich. 
-# Copyright (C) 2009-2021, Christophe Dutang, 
-# Christophe Dutang, see http://dutangc.free.fr
-# All rights reserved.
 #
 # The new BSD License is applied to this software.
-# Copyright (c) 2019 Christophe Dutang, Diethelm Wuertz. 
+# Copyright (c) 2022 Christophe Dutang, Diethelm Wuertz. 
 # All rights reserved.
 #
 #      Redistribution and use in source and binary forms, with or without
@@ -159,7 +155,7 @@ halton <- function (n, dim = 1, init = TRUE, normal = FALSE, usetime = FALSE,
     stop("invalid argument 'start'")
   if(!is.numeric(mexp))
     stop("invalid argument 'mexp'")
-  method <- match.arg(method, c("C", "Fortran"))
+  method <- match.arg(method, "C")
   
   # Description:
   #   Uniform Halton Low Discrepancy Sequence
@@ -191,56 +187,19 @@ halton <- function (n, dim = 1, init = TRUE, normal = FALSE, usetime = FALSE,
   #if(init && start != 0 && !normal) 
   #  warning("You should start your sequence from 0 as recommended by Owen (2020).")
   
-  if(method == "Fortran")
-  {  
-    if(init && start != 0 && start != 1) 
-      warning("start argument is ignored.")
-    # Generate:
-    qn <- numeric(nb * dim)
-    
-    # SUBROUTINE HALTON_F(QN, N, DIMEN, BASE, OFFSET, INIT, TRANSFORM)
-    #implemented in src/LowDiscrepancy.f
-    result_fortran <- .Fortran(CF_halton_f,
-                       qn= as.double( qn ),
-                       n= as.integer( nb ),
-                       dim= as.integer( dim ),
-                       base= as.integer( rngEnv$base ),
-                       offset= as.integer( rngEnv$offset ),
-                       init= as.integer( init ),
-                       trans= as.integer( 0 ),
-                       PACKAGE = "randtoolbox")
-    
-    # For the next numbers save (only used if init=FALSE in the next call)
-    .setrandtoolboxEnv(.halton.seed = result_fortran[c("base", "offset")])
-    # Deviates:
-    result <- matrix(result_fortran[["qn"]], ncol = dim)
-    
-    #add 0 for starting point, decrease offset
-    if(!usetime && init && start == 0) 
-    {
-      if(dim == 1)
-        result <- c(0, result[-nb])
-      else
-        result <- rbind(0, result[-nb,])
-      lshift <- list("base" = result_fortran[["base"]], 
-                     "offset" = result_fortran[["offset"]]-1)
-      .setrandtoolboxEnv(.halton.seed = lshift)
-    }
-    
-  }else #method == "C"
-  {
-    ## Mersenne exponent only used when mixed=TRUE
-    authorizedParam <- c(607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091)
-    if( !(mexp %in% authorizedParam) )
-      stop("'mexp' must be in {607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091}. ")
-    
-    #implemented in src/randtoolbox.c
-    result <- .Call(CF_doHalton, nb, dim, rngEnv$offset, mixed, usetime, mexp)
-    # For the next numbers save (only used if init=FALSE in the next call)
-    lshift <- list("base" = get.primes(dim), 
-                   "offset" = rngEnv$offset+nb)
-    .setrandtoolboxEnv(.halton.seed = lshift)
-  }
+  #method == "C"
+  ## Mersenne exponent only used when mixed=TRUE
+  authorizedParam <- c(607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091)
+  if( !(mexp %in% authorizedParam) )
+    stop("'mexp' must be in {607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091}. ")
+  
+  #implemented in src/randtoolbox.c
+  result <- .Call(CF_doHalton, nb, dim, rngEnv$offset, mixed, usetime, mexp)
+  # For the next numbers save (only used if init=FALSE in the next call)
+  lshift <- list("base" = get.primes(dim), 
+                 "offset" = rngEnv$offset+nb)
+  .setrandtoolboxEnv(.halton.seed = lshift)
+  
   
   if(any(result > 1 | result < 0))
     warning("A call to halton() generate numerics outside [0,1).")
@@ -261,7 +220,7 @@ runif.halton <- halton
 
 
 sobol <- function (n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal = FALSE,
-                   mixed = FALSE, method="Fortran", mexp = 19937, start = 1,
+                   mixed = FALSE, method="C", mexp = 19937, start = 1,
                    maxit = 10)
 {   
   ## Check arguments
@@ -285,7 +244,7 @@ sobol <- function (n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal 
     stop("invalid argument 'mexp'")
   if(!is.numeric(maxit))
     stop("invalid argument 'maxit'")
-  method <- match.arg(method, c("C", "Fortran"))
+  method <- match.arg(method, "C")
   
   #for scrambled sequences when sobol_fortran() generates numbers outside [0,1)
   if(maxit <= 0 || maxit > 1e3)
@@ -295,6 +254,8 @@ sobol <- function (n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal 
   if(nb < 0) stop("invalid argument 'n'")
   if(nb == 0) return(numeric(0))
   
+  if(init && start != 0 && start != 1) 
+    warning("start argument is ignored.")
   #not necessary
   #if(init && start != 0 && !normal) 
   #  warning("You should start your sequence from 0 as recommended by Owen (2020).")
@@ -327,162 +288,41 @@ sobol <- function (n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal 
     
   }
   
-  if(method == "Fortran")
-  {  
-    # Description:
-    #   Uniform Sobol Low Discrepancy Sequence
-    # Details:
-    #   DIMENSION : dimension <= 1111
-    #           N : LD numbers to create
-    #  SCRAMBLING : One of the numbers 0,1,2,3
-    
-    
-    # Restart Settings:
-    if (init) 
-      .setrandtoolboxEnv(.sobol.seed = 
-                           list(quasi = rep(0, dim), ll = 0, count = 0, sv = rep(0, dim*30), seed = seed))
-    if(!exists(".sobol.seed", envir=.randtoolboxEnv, mode="list"))
-      stop("Sobol algorithm not initialized.")
-    
-    if(!init) #starting from last point
-    {
-      # Generate:
-      qn <- numeric(nb * dim)
-      
-      #  SUBROUTINE SOBOL_F(QN, N, DIMEN, QUASI, LL, COUNT, SV, IFLAG, iSEED, INIT, TRANSFORM)
-      #implemented in src/LowDiscrepancy.f
-      result <- .Fortran(CF_sobol_f,
-                         as.double( qn ),
-                         as.integer( nb ),
-                         as.integer( dim ),
-                         as.double ( .getrandtoolboxEnv(".sobol.seed")$quasi ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$ll ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$count ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$sv ),
-                         as.integer( scrambling ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$seed ),
-                         as.integer( init ),
-                         as.integer( 0 ),
-                         PACKAGE = "randtoolbox")
-      F_sobol <- TRUE
-      # Deviates:
-      sobolres <- matrix(result[[1]], ncol = dim)
-    }else if(init && start == 0) #init = TRUE, use starting point 0
-    {
-      
-      if(nb > 1)
-      {
-        # Generate nb-1 points
-        qn <- numeric((nb-1) * dim)
-        
-        #  SUBROUTINE SOBOL_F(QN, N, DIMEN, QUASI, LL, COUNT, SV, IFLAG, iSEED, INIT, TRANSFORM)
-        #implemented in src/LowDiscrepancy.f
-        result <- .Fortran(CF_sobol_f,
-                           as.double( qn ),
-                           as.integer( nb-1 ),
-                           as.integer( dim ),
-                           as.double ( .getrandtoolboxEnv(".sobol.seed")$quasi ),
-                           as.integer( .getrandtoolboxEnv(".sobol.seed")$ll ),
-                           as.integer( .getrandtoolboxEnv(".sobol.seed")$count ),
-                           as.integer( .getrandtoolboxEnv(".sobol.seed")$sv ),
-                           as.integer( scrambling ),
-                           as.integer( .getrandtoolboxEnv(".sobol.seed")$seed ),
-                           as.integer( init ),
-                           as.integer( 0 ),
-                           PACKAGE = "randtoolbox")
-        F_sobol <- TRUE
-        # Deviates:
-        sobolres <- matrix(result[[1]], ncol = dim)
-        #add 0 for starting point
-        if(dim == 1)
-          sobolres <- c(0, sobolres)
-        else
-          sobolres <- rbind(0, sobolres)
-      }else #sequence is only 0
-      {
-        F_sobol <- FALSE
-        sobolres <- matrix(0, ncol=dim)
-      }
-    }else if(init && start == 1) #init = TRUE, use starting 1 
-    {
-      # Generate nb points
-      qn <- numeric(nb * dim)
-      
-      #  SUBROUTINE SOBOL_F(QN, N, DIMEN, QUASI, LL, COUNT, SV, IFLAG, iSEED, INIT, TRANSFORM)
-      #implemented in src/LowDiscrepancy.f
-      result <- .Fortran(CF_sobol_f,
-                         as.double( qn ),
-                         as.integer( nb ),
-                         as.integer( dim ),
-                         as.double ( .getrandtoolboxEnv(".sobol.seed")$quasi ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$ll ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$count ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$sv ),
-                         as.integer( scrambling ),
-                         as.integer( .getrandtoolboxEnv(".sobol.seed")$seed ),
-                         as.integer( init ),
-                         as.integer( 0 ),
-                         PACKAGE = "randtoolbox")
-      F_sobol <- TRUE
-      # Deviates:
-      sobolres <- matrix(result[[1]], ncol = dim)
-    }else 
-      stop("wrong start value.")
-    
-    #check value inside [0,1)
-    if(scramblmixed)
-    {  
-      if(any(sobolres >= 1 | sobolres < 0))
-      {
-        warning("A call to sobol() generate numerics outside [0,1), so seed is randomized.")
-        
-        iter <- 0
-        while(any(sobolres >= 1 | sobolres < 0) && iter < maxit)
-        {
-          iter <- iter + 1
-          myrandseed <- (2^32-1)*runif(1)
-          result <- .Fortran(CF_sobol_f,
-                             as.double( qn ),
-                             as.integer( nb ),
-                             as.integer( dim ),
-                             as.double ( .getrandtoolboxEnv(".sobol.seed")$quasi ),
-                             as.integer( .getrandtoolboxEnv(".sobol.seed")$ll ),
-                             as.integer( .getrandtoolboxEnv(".sobol.seed")$count ),
-                             as.integer( .getrandtoolboxEnv(".sobol.seed")$sv ),
-                             as.integer( scrambling ),
-                             as.integer( myrandseed ),
-                             as.integer( init ),
-                             as.integer( 0 ),
-                             PACKAGE = "randtoolbox")
-          sobolres <- matrix(result[[1]], ncol = dim)
-        }
-        if(iter == maxit)
-          stop("100 calls to sobol() have all generated (some) numerics outside [0,1), so we resign.")
-        #=> else appropriate seed found
-        
-      }
-    }else
-    {
-      if(any(sobolres >= 1 | sobolres < 0))
-        warning("A call to sobol() generate numerics outside [0,1).")
-    }
-    
-    # For the next numbers save (only used if init=FALSE in the next call)
-    if(F_sobol) 
-      .setrandtoolboxEnv(.sobol.seed = list(quasi = result[[4]], ll = result[[5]],
-                                                count = result[[6]], sv = result[[7]], 
-                                                seed = result[[9]]))
-  }else #method == "C"
+  #method == "C"
+  
+  # Description:
+  #   Uniform Sobol Low Discrepancy Sequence
+  # Details:
+  #   DIMENSION : dimension <= 1111
+  #           N : LD numbers to create
+  #  SCRAMBLING : One of the numbers 0,1,2,3
+  
+  
+  # Restart Settings:
+  if (init) 
+    .setrandtoolboxEnv(.sobol.seed = 
+                         list(quasi = rep(0, dim), ll = 0, count = 0, sv = rep(0, dim*30), seed = seed))
+  if(!exists(".sobol.seed", envir=.randtoolboxEnv, mode="list"))
+    stop("Sobol algorithm not initialized.")
+  C_sobol_init <- TRUE
+  
+  #Determine the number of points
+  if(init) 
   {
-    ## Mersenne exponent only used when mixed=TRUE
-    authorizedParam <- c(607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091)
-    if( !(mexp %in% authorizedParam) )
-      stop("'mexp' must be in {607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091}. ")
-    stop("sobol in C not yet implemented")
-    
-    sobolres <- .Call(CF_doSobol, nb, dim, 0, FALSE, FALSE, mexp)
-    
+    nbfinal <- nb + start
+  }else
+  {
+    nbfinal <- nb + as.integer( .getrandtoolboxEnv(".sobol.seed")$seed )
   }
+  
+  sobolres <- .Call(CF_doSobol, nbfinal, dim, 0, FALSE, FALSE, mexp)
+  #keep last nb points
+  sobolres <- tail(sobolres, nb)
+  
+  # For the next numbers save (only used if init=FALSE in the next call)
+  if(C_sobol_init) 
+    .setrandtoolboxEnv(.sobol.seed = list(seed = tail(nbfinal, 1)))
+  
   
   ## Normal transformation
   if(normal)

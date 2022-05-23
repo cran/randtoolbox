@@ -7,7 +7,7 @@
 %
 %
 % The new BSD License is applied to this software.
-% Copyright (c) 2009 Christophe Dutang, Petr Savicky, Diethelm Wuertz. 
+% Copyright (c) 2022 Christophe Dutang, Petr Savicky, Diethelm Wuertz. 
 % All rights reserved.
 %
 %      Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 %%% 
 
 
-\documentclass[11pt, a4paper, twocolumn]{article}
+\documentclass[11pt, a4paper]{article}
 
 %\VignetteIndexEntry{A note on random number generation}
 %\VignettePackage{randtoolbox}
@@ -80,7 +80,7 @@
 
 %sweave package
 \usepackage[noae]{Sweave}
-\setkeys{Gin}{width=0.49\textwidth} %change size of figure
+%\setkeys{Gin}{width=0.49\textwidth} %change size of figure
 
 %url
 \usepackage{url}
@@ -93,34 +93,34 @@
 
 
 % layout
-\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage[left=2cm, right=2cm, top=2.5cm, bottom=2.5cm]{geometry}
 
 
 % two column config from http://blog.robfelty.org/2007/03/20/latex-two-column-layouts-and-rubber-lengths/
-
-% don't hyphenate so much - default = 200, max (never hyphenate) = 10,000
-\hyphenpenalty=2000  
-
-%two column float page must be 90% full
-\renewcommand\dblfloatpagefraction{.90}
-%two column top float can cover up to 80% of page
-\renewcommand\dbltopfraction{.80}
-%float page must be 90% full
-\renewcommand\floatpagefraction{.90}
-%top float can cover up to 80% of page
-\renewcommand\topfraction{.80}
-%bottom float can cover up to 80% of page
-\renewcommand\bottomfraction{.80}
-%at least 10% of a normal page must contain text
-\renewcommand\textfraction{.1}
-
-%separation between floats and text
-\setlength\dbltextfloatsep{9pt plus 5pt minus 3pt }
-%separation between two column floats and text
-\setlength\textfloatsep{10pt plus 4pt minus 3pt}
-
-%space between columns
-\setlength{\columnsep}{1.5cm}
+% 
+% % don't hyphenate so much - default = 200, max (never hyphenate) = 10,000
+% \hyphenpenalty=2000  
+% 
+% %two column float page must be 90% full
+% \renewcommand\dblfloatpagefraction{.90}
+% %two column top float can cover up to 80% of page
+% \renewcommand\dbltopfraction{.80}
+% %float page must be 90% full
+% \renewcommand\floatpagefraction{.90}
+% %top float can cover up to 80% of page
+% \renewcommand\topfraction{.80}
+% %bottom float can cover up to 80% of page
+% \renewcommand\bottomfraction{.80}
+% %at least 10% of a normal page must contain text
+% \renewcommand\textfraction{.1}
+% 
+% %separation between floats and text
+% \setlength\dbltextfloatsep{9pt plus 5pt minus 3pt }
+% %separation between two column floats and text
+% \setlength\textfloatsep{10pt plus 4pt minus 3pt}
+% 
+% %space between columns
+% \setlength{\columnsep}{1.5cm}
 
 
 % macros
@@ -161,7 +161,7 @@
 
 \maketitle
 
-\twocolumn
+%\twocolumn
 
 
 {\raggedright  
@@ -476,7 +476,7 @@ are part of the family of multiple-recursive matrix generators since they verify
 a multiple recursive equation with matrix constants. For MT, we have
 the following recurrence
 \begin{multline*}
-x_{k+n} =\\ \underbrace{
+x_{k+n} = \underbrace{
 x_k \left(\begin{array}{cc} I_{\omega-r} &0\\ 0 & 0 \end{array}\right) A
 \oplus x_{k+1} \left(\begin{array}{cc} 0 & 0\\ 0 & I_{r} \end{array}\right)A  \oplus x_{k+m}.}_{
 h(x_k, x_{k+1}, \dots, x_m,\dots,x_{k+n-1})}
@@ -828,8 +828,8 @@ p_j(x) = x^q+a_1x^{q-1}+\dots +a_{q-1}x+1.
 $$
 Then we define the following $q$-term recurrence relation on integers $(M_{i,j})_i$
 \begin{multline*}
-M_{i,j} = 2a_1 M_{i-1,j} \oplus 2^2a_2 M_{i-2,j} \oplus \dots\\ 
-\oplus 2^{q-1}a_{q-1} M_{i-q+1,j} \oplus 2^qa_q M_{i-q,j} \oplus M_{i-q}
+M_{i,j} = 2a_1 M_{i-1,j} \oplus 2^2a_2 M_{i-2,j} \oplus \dots
+\oplus 2^{q-1}a_{q-1} M_{i-q+1,j} \oplus 2^qa_q M_{i-q,j} \oplus M_{i-q},
 \end{multline*}
 where $i>q$. 
 
@@ -859,6 +859,7 @@ type of scrambling, and by a combination of both.
 
 The program we have interfaced to R is based on the ACM Algorithm 659 described by 
 \cite{bratley} and \cite{bratleyfoxniederreiter}. Modifications by \cite{hong} allow for a randomization of the sequences. Furthermore, in the case of the Sobol sequence we followed the implementation of \cite{joekuo} which can handle up to 1111 dimensions.
+\cite{joekuo08} propose implementations up to 21201 dimensions.
 
 To interface the Fortran routines to the R environment some modifications had to be performed. One important point was to make possible to re-initialize a sequence and to recall a sequence without renitialization from R. This required to remove BLOCKDATA, COMMON and SAVE statements from the original code and to pass the initialization variables through the argument lists of the subroutines, so that these variables can be accessed from R.
 
@@ -1260,12 +1261,10 @@ To use the different scrambling option, you just to use the \code{scrambling} ar
  %%% R code
 <<sobol, fig=FALSE, echo=TRUE, eval=FALSE>>=
 sobol(10)
-sobol(10, scramb=3)
 @
 <<sobol2, fig=FALSE, echo=FALSE>>=
 options( width =40)
 sobol(10)
-sobol(10, scramb=3)
 @
 %%%
 
@@ -1274,16 +1273,16 @@ It is easier to see the impact of scrambling by plotting two-dimensional sequenc
 
 %%% R code
 <<unitsquare1, fig=FALSE, echo=TRUE, eval=FALSE>>=
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 plot(sobol(1000, 2))
-plot(sobol(10^3, 2, scram=1))
+plot(sobol(10^3, 2, scrambling=1))
 @
 \begin{figure}[!htb]
 \begin{center}
-<<unitsquare2, fig=TRUE, echo=FALSE, width=5, height=10, eps=FALSE>>=
-par(mfrow = c(2,1))
+<<unitsquare2, fig=TRUE, echo=FALSE, width=10, height=5, eps=FALSE>>=
+par(mfrow = c(1,2))
 plot(sobol(1000, 2), xlab ="u", ylab="v", main="Sobol (no scrambling)")
-plot(sobol(10^3, 2, scram=1), xlab ="u", ylab="v", main="Sobol (Owen)")
+plot(sobol(10^3, 2, scrambling=1), xlab ="u", ylab="v", main="Sobol (Owen)")
 @
 \caption{Sobol (two sampling types)}
 \label{sobol01}
@@ -1359,14 +1358,14 @@ In order to see the difference between, we can plot the empirical autocorrelatio
 function (\code{acf} in \soft{R}), see figure \ref{acfplot}.
 %%% R code
 <<torus9, fig=FALSE, echo=TRUE, eval=FALSE>>=
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 acf(torus(10^5))
 acf(torus(10^5, mix=TRUE))
 @
 \begin{figure}[!htb]
 \begin{center}
-<<torusacf, fig=TRUE, echo=FALSE, height=6, width = 4, eps=FALSE>>=
-par(mfrow = c(2,1))
+<<torusacf, fig=TRUE, echo=FALSE, height=4, width = 6, eps=FALSE>>=
+par(mfrow = c(1,2))
 acf(torus(10^5))
 acf(torus(10^5, mix=TRUE))
 @
@@ -1389,14 +1388,14 @@ First we compare SFMT algorithm with Torus algorithm on figure \ref{SFMTTorus}.
 
 %%% R code
 <<unitsquare3, fig=FALSE, echo=TRUE, eval=FALSE>>=
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 plot(SFMT(1000, 2))
 plot(torus(10^3, 2))
 @
 \begin{figure}[!htb]
 \begin{center}
-<<unitsquare4, fig=TRUE, echo=FALSE, width=5, height=10, eps=FALSE>>=
-par(mfrow = c(2,1))
+<<unitsquare4, fig=TRUE, echo=FALSE, width=10, height=5, eps=FALSE>>=
+par(mfrow = c(1,2))
 plot(SFMT(1000, 2), xlab ="u", ylab="v", main="SFMT")
 plot(torus(1000, 2), xlab ="u", ylab="v", main="Torus")
 @
@@ -1410,16 +1409,16 @@ Secondly we compare WELL generator with Faure-Tezuka-scrambled Sobol sequences o
 
 %%% R code
 <<unitsquare5, fig=FALSE, echo=TRUE, eval=FALSE>>=
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 plot(WELL(1000, 2))
-plot(sobol(10^3, 2, scram=2))
+plot(sobol(10^3, 2, scrambling=2))
 @
 \begin{figure}[!htb]
 \begin{center}
-<<unitsquare6, fig=TRUE, echo=FALSE, width=5, height=10, eps=FALSE>>=
-par(mfrow = c(2,1))
+<<unitsquare6, fig=TRUE, echo=FALSE, width=10, height=5, eps=FALSE>>=
+par(mfrow = c(1,2))
 plot(WELL(1000, 2), xlab ="u", ylab="v", main="WELL 512a")
-plot(sobol(10^3, 2, scram=2), xlab ="u", ylab="v", main="Sobol (Faure-Tezuka)")
+plot(sobol(10^3, 2, scrambling=2), xlab ="u", ylab="v", main="Sobol (Faure-Tezuka)")
 @
 \caption{WELL vs. Sobol}
 \label{WELLSobol}
@@ -1440,8 +1439,8 @@ plot(sobol(10^3, 2, scram=2), xlab ="u", ylab="v", main="Sobol (Faure-Tezuka)")
 \subsubsection{$d$ dimensional integration}
 Now we will show how to use low-discrepancy sequences to compute a $d$-dimensional integral defined on the unit hypercube. We want compute
 \begin{multline*}
-I_{cos}(d) = \int_{\mathbb R^d} cos(|| x ||) e^{|| x ||^2 } dx\\
-\approx \frac{\pi^{d/2}}{n} \sum_{i=1}^n cos\left(\sqrt{ \sum\limits_{j=1}^d \left(\Phi^{-1} \right)^2 (t_{ij}) } \right)
+I_{cos}(d) = \int_{\mathbb R^d} cos(|| x ||) e^{|| x ||^2 } dx
+\approx \frac{\pi^{d/2}}{n} \sum_{i=1}^n cos\left(\sqrt{ \sum\limits_{j=1}^d \left(\Phi^{-1} \right)^2 (t_{ij}) } \right).
 \end{multline*}
 where $\Phi^{-1}$ denotes the quantile function of the standard normal distribution.
 
@@ -1455,7 +1454,7 @@ ans <- NULL
 for(i in 1:3)
 {
  tij <- sobol(nb[i], dim=25, 
-  scrambling=2, normal=TRUE)
+  scrambling=0, normal=TRUE)
  Icos <- sqrt(rowSums(tij^2/2))
  Icos <- mean(cos(Icos)) * pi^(25/2)
  ans <- rbind(ans, c(n=nb[i], 
@@ -1471,7 +1470,7 @@ nb <- c(1200, 14500, 214000)
 ans <- NULL
 for(i in 1:3)
 {
-	tij <- sobol(nb[i], dim=25, scramb=2, norm=TRUE )
+	tij <- sobol(nb[i], dim=25, scramb=0, norm=TRUE )
 	Icos <- mean(cos(sqrt( apply( tij^2/2, 1, sum ) ))) * pi^(25/2)
 	ans <- rbind(ans, c(n=nb[i], I25=Icos, Delta=(Icos-I25)/I25 ))
 }
@@ -1787,14 +1786,14 @@ focuses on detecting a particular RNG.
 
 %%% R code
 <<hist, fig=FALSE, echo=TRUE, eval=FALSE>>=
-par(mfrow = c(2,1))
+par(mfrow = c(1,2))
 hist(SFMT(10^3), 100)
 hist(torus(10^3), 100)
 @
 \begin{figure}[!htb]
 \begin{center}
-<<hist, fig=TRUE, echo=FALSE, width=5, height=10, eps=FALSE>>=
-par(mfrow = c(2,1))
+<<hist, fig=TRUE, echo=FALSE, width=10, height=5, eps=FALSE>>=
+par(mfrow = c(1,2))
 hist(SFMT(10^3), 100)
 hist(torus(10^3), 100)
 @
