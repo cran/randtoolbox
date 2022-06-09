@@ -1,4 +1,4 @@
-f3ef3253f26e596b3531e9f676aa1199 *DESCRIPTION
+4a50dac13857b31b36bf61a2cfaa899a *DESCRIPTION
 79e084b3f4a2ee14fc54cc75eff3356b *LICENSE
 459096b001974c4207065de6eb9ee3e1 *NAMESPACE
 82bbfa93c805f3b9a841404fab6d48b0 *R/binary-operator.R
@@ -8,7 +8,7 @@ f3b8062b9ef66d1809fe6190875a4c8f *R/randtoolboxEnv.R
 41fd3ffab8b3a83ff19c2c3e066a16b5 *R/rngWELLScriptR.R
 5da7f2f5780fbe7eb802625562fd740c *R/runifInterface.R
 fa9bc615103128b0425ae12df8457d7f *R/sobol-basic.R
-fc751572cc9c792009a8fe294cc561ec *R/testRNG.R
+06515d4dc9e109ede8e3905e9d3e8c44 *R/testRNG.R
 c6f016427b19e87fd6334d3165077a40 *R/trueRNG.R
 f811362586d58e3ce67bd394d40419ac *R/version.R
 98e4b89685d1146bc946bfdc1606b40a *R/zzz.R
@@ -18,13 +18,13 @@ f811362586d58e3ce67bd394d40419ac *R/version.R
 445f87536b8ca754c8703c377ea42132 *configure.ac
 e91ef97cef20dd8977b5773ca261fc3a *configure.win
 16eef10b606f97739cf4e4c0af634142 *inst/CITATION
-cdc6e8a7102c37f4bda972c106f13231 *inst/NEWS
+21d06975120d39ba23efbfac4c939ca3 *inst/NEWS
 555426303e48dce4b9eb2d52d9e6b728 *inst/doc/fullpres.R
 45e1006d13762ca8cf26d6784d602ff6 *inst/doc/fullpres.Rnw
-0353d780a5e72ce3c4b5f596778e318f *inst/doc/fullpres.pdf
+7f55852aec3c5c7096e8d995d1d101c2 *inst/doc/fullpres.pdf
 730209a89480a87b117b4d454c283874 *inst/doc/shortintro.R
 d5264209d8ee491e97a042375d815e94 *inst/doc/shortintro.Rnw
-01672847fa5de3c28e853b2fa3b55170 *inst/doc/shortintro.pdf
+eaff0449663de7d23a0520e598123529 *inst/doc/shortintro.pdf
 2970f61af6d82a352186cf543ca9ca3b *man/auxfun.Rd
 4726de3452853144c8dbd7ddacba094c *man/colltest.Rd
 c6f94953db091b563955b64735b94add *man/colltestsparse.Rd
@@ -43,7 +43,7 @@ feecbbad0f19a1f6c4b4af125e110d7b *man/pokertest.Rd
 5c6a671e8cc73502e512d5fbf557f210 *man/sobol-test-func.Rd
 3d34da392ade5d5051c7428e8dbb1810 *src/LowDiscrepancy-halton.c
 0bdf52712a9246d471b6df376be89a14 *src/LowDiscrepancy-halton.h
-adba5bcd34197780e2d24f71a961d9cc *src/LowDiscrepancy-sobol-orig1111.c
+60672f6546105adbdc9e30e968d8fbb6 *src/LowDiscrepancy-sobol-orig1111.c
 20c7f09b5c502f8b7a10b889df5b4e7f *src/LowDiscrepancy-sobol-orig1111.h
 b9c7e476bcb51262786a16c28ace4ecd *src/Makevars.win
 4c7a6299629483fc86233153ff2db898 *src/SFMT-alti.h

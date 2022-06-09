@@ -44,9 +44,11 @@
 //maximum degree for primitive polynomial
 #define MAXDEG 13
 
+//integer 1 as 32-bit integer to be bitwisely shifted by <<
+static uint32_t uint32_one = 1;
 
 //1 111 rows and 13 columns so 14 443 terms for initial mj
-static int initmj[MAXDEG*MAXDIM] = {
+static uint32_t initmj[MAXDEG*MAXDIM] = {
   1,0,0,0,0,0,0,0,0,0,0,0,0,
   1,0,0,0,0,0,0,0,0,0,0,0,0,
   1,1,0,0,0,0,0,0,0,0,0,0,0,
@@ -1415,7 +1417,7 @@ void initgeneratorV_orig1111(int dim, int maxbit4mj, int maxbit4inttype, uint32_
   {
     j = 0; 
     for(i = 0; i < maxbit4mj; i++)
-      V[i + j * maxbit4mj] = 1 << (maxbit4inttype - (i+1)); 
+      V[i + j * maxbit4mj] = uint32_one << (maxbit4inttype - (i+1)); 
   }
   
   /*other dimension V=(vi_1,...,vi_2)*/

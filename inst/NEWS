@@ -1,5 +1,15 @@
 === randtoolbox: an R package for random number generation and testing ===
 
+Version 2.0.1
+=============
+
+BUG FIX
+- two errors appearing in USBAN memory tests. Previous output
+when re-building ‘fullpres.Rnw’ was
+LowDiscrepancy-sobol-orig1111.c:1418:32: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
+LowDiscrepancy-sobol-orig1111.c:1440:57: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
+
+
 Version 2.0.0
 =============
 - remove Fortran code for Halton and Sobol sequences 
@@ -8,10 +18,11 @@ Version 2.0.0
 
 Version 1.31.2
 =============
-- last version with both Fortran and C code (not on CRAN).
+- last version with both Fortran and C code (never released on CRAN).
 
 Version 1.31.1
 =============
+BUG FIX
 - clean up test files because tests/test-sobol-scram.R failed 
 on i386-pc-solaris2.10 (32-bit). Output was
  > umat <- sobol(n=1e5, dim=1111)
