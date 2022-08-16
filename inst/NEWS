@@ -1,11 +1,19 @@
 === randtoolbox: an R package for random number generation and testing ===
 
+Version 2.0.2
+=============
+
+NOTE FIX 
+- remove an escaped LaTeX special in pseudoRNG.Rd.
+- remove math rendering problems for Stirling numbers in 
+colltest.Rd and colltestsparse.Rd.
+
 Version 2.0.1
 =============
 
 BUG FIX
 - two errors appearing in USBAN memory tests. Previous output
-when re-building ‘fullpres.Rnw’ was
+when re-building fullpres.Rnw was
 LowDiscrepancy-sobol-orig1111.c:1418:32: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
 LowDiscrepancy-sobol-orig1111.c:1440:57: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
 

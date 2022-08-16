@@ -71,7 +71,7 @@ The currently available generator are given below.
 		x_n = (x_{n-37} + x_{n-100}) mod 2^{30},}	
 	In R, there is the integer version of this generator.	
 
-	All the C code for this generator called RAN\_ARRAY by Knuth is the code of 
+	All the C code for this generator called \code{RANARRAY} by Knuth is the code of 
 	D. Knuth (cf.  \url{https://www-cs-faculty.stanford.edu/~uno/programs.html})
     except some C code, we add, to \emph{interface} with R.}
 

@@ -29,11 +29,11 @@ nbSample = 10, \dots)
 
         The distribution of collision number \eqn{C} is given by 
         \deqn{
-            P(C = c) = \prod_{i=0}^{n-c-1}\frac{k-i}{k} \frac{1}{k^c} \,_2S_n^{n-c}, 
+            P(C = c) = \prod_{i=0}^{n-c-1}\frac{k-i}{k} \frac{1}{k^c} {}_2S_n^{n-c}, 
         }{%
             P(C = c) = \prod_{i=0}^{n-c-1} (k-i)/k *1/(k^c) 2S_n^{n-c}, 
         }
-        where \eqn{\,_2S_n^k}{2S_n^{n-c}} denotes the Stirling number of the second kind
+        where \eqn{{}_2S_n^k}{2S_n^{n-c}} denotes the Stirling number of the second kind
         and \eqn{c=0,\dots,n-1}{c=0,..., n-1}.
 
         This formula cannot be used for large \eqn{n} since the Stirling number
