@@ -87,7 +87,6 @@ torus <- function(n, dim = 1, prime, init = TRUE, mixed = FALSE, usetime = FALSE
   if( !(mexp %in% authorizedParam) )
     stop("'mexp' must be in {607, 1279, 2281, 4253, 11213, 19937, 44497, 86243, 132049, 216091}.")
   
-  
   ## Restart Settings:
   if(init) 
     .setrandtoolboxEnv(.torus.seed = list(offset = as.integer(start)))
@@ -200,7 +199,6 @@ halton <- function (n, dim = 1, init = TRUE, normal = FALSE, usetime = FALSE,
                  "offset" = rngEnv$offset+nb)
   .setrandtoolboxEnv(.halton.seed = lshift)
   
-  
   if(any(result > 1 | result < 0))
     warning("A call to halton() generate numerics outside [0,1).")
   
@@ -262,8 +260,10 @@ sobol <- function (n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal 
   
   scramblmixed <- scrambling > 0 || mixed
   
-  if(scrambling > 0 && mixed)
-    warnings("only scrambling is used.")
+  if(scrambling > 0)
+    warning("scrambling is currently disabled.")
+  # if(scrambling > 0 && mixed)
+  #   warning("only scrambling is used.")
   if(scrambling > 0)
   {
     if(is.null(seed))
@@ -295,8 +295,7 @@ sobol <- function (n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal 
   # Details:
   #   DIMENSION : dimension <= 1111
   #           N : LD numbers to create
-  #  SCRAMBLING : One of the numbers 0,1,2,3
-  
+  #  SCRAMBLING : One of the numbers 0,1,2,3 => not yet implemented
   
   # Restart Settings:
   if (init) 
@@ -314,15 +313,14 @@ sobol <- function (n, dim = 1, init = TRUE, scrambling = 0, seed = NULL, normal 
   {
     nbfinal <- nb + as.integer( .getrandtoolboxEnv(".sobol.seed")$seed )
   }
-  
+  #generate more points that needed as CF_doSobol() starts from 0
   sobolres <- .Call(CF_doSobol, nbfinal, dim, 0, FALSE, FALSE, mexp)
-  #keep last nb points
-  sobolres <- tail(sobolres, nb)
+  #keep last nb points without names
+  sobolres <- tail(sobolres, nb, keepnums=FALSE)
   
   # For the next numbers save (only used if init=FALSE in the next call)
   if(C_sobol_init) 
     .setrandtoolboxEnv(.sobol.seed = list(seed = tail(nbfinal, 1)))
-  
   
   ## Normal transformation
   if(normal)

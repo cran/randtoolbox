@@ -2,22 +2,26 @@ Package: randtoolbox
 Type: Package
 Title: Toolbox for Pseudo and Quasi Random Number Generation and Random
         Generator Tests
-Version: 2.0.2
-Author: R port by Yohan Chalabi, Christophe Dutang, Petr Savicky and Diethelm Wuertz with some underlying C codes of (i) the SFMT algorithm from M. Matsumoto and M. Saito, (ii) the Knuth-TAOCP RNG from D. Knuth. 
+Version: 2.0.3
+Author: R code by Yohan Chalabi [ctb], Christophe Dutang [aut, cre], Petr Savicky [aut], 
+    Diethelm Wuertz [aut]; C code of Knuth-TAOCP RNG by Donald Knuth [aut];
+    C code of Torus, Halton and Sobol sequences by Christophe Dutang [aut, cre];
+    C code of SFMT algorithm by Makoto Matsumoto [aut], Mutsuo Saito [aut]. 
 Maintainer: Christophe Dutang <dutangc@gmail.com>
 Description: Provides (1) pseudo random generators - general linear congruential generators, 
     multiple recursive generators and generalized feedback shift register (SF-Mersenne Twister
-    algorithm and WELL generators); (2) quasi random generators - the Torus algorithm, the
+    algorithm (<doi:10.1007/978-3-540-74496-2_36>) and WELL (<doi:10.1145/1132973.1132974>) 
+    generators); (2) quasi random generators - the Torus algorithm, the
     Sobol sequence, the Halton sequence (including the Van der Corput sequence) and (3) some
-    generator tests - the gap test, the serial test, the poker test.
-    See e.g. Gentle (2003) <doi:10.1007/b97336>. The package can be provided
-    without the rngWELL dependency on demand.
+    generator tests - the gap test, the serial test, the poker test, see, e.g., 
+    Gentle (2003) <doi:10.1007/b97336>. 
     Take a look at the Distribution task view of types and tests of random number generators.
+    The package can be provided without the 'rngWELL' dependency on demand.
     Package in Memoriam of Diethelm and Barbara Wuertz.
 Depends: rngWELL (>= 0.10-1)
 License: BSD_3_clause + file LICENSE
 URL: https://r-forge.r-project.org/projects/rmetrics/
 NeedsCompilation: yes
-Packaged: 2022-08-16 06:01:34 UTC; dutang
+Packaged: 2022-11-08 13:32:20 UTC; dutang
 Repository: CRAN
-Date/Publication: 2022-08-16 13:00:09 UTC
+Date/Publication: 2022-11-08 14:50:02 UTC

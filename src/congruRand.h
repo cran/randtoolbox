@@ -5,6 +5,12 @@
  * @author Christophe Dutang
  * @author Petr Savicky 
  *
+ * Copyright (C) 2022, Christophe Dutang
+ * # remove a warning: this old-style function definition is not preceded by a prototype
+ * # raised by 
+ * > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ * -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ * -c congruRand.c -o congruRand.o
  *
  * Copyright (C) 2009, Christophe Dutang, 
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
@@ -103,10 +109,13 @@
  #endif
 #endif
 
-double user_unif_rand_congru();
+/* prototype defined in runifInterface.c */
+void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), double (*selected_rand)(void));
+/* prototype defined in congruRand.c */
+double user_unif_rand_congru(void);
 void user_unif_init_congru(uint32_t seed);
 
-double get_congruRand();
+double get_congruRand(void);
 int check_congruRand(uint64_t mod, uint64_t mask, uint64_t mult, uint64_t incr, uint64_t seed);
 void set_congruRand(uint64_t inp_mod, uint64_t inp_mult, uint64_t inp_incr, uint64_t inp_seed, uint64_t inp_mask);
 void get_seed_congruRand(uint64_t *out_seed);

@@ -72,13 +72,12 @@ The currently available generator are given below.
 	In R, there is the integer version of this generator.	
 
 	All the C code for this generator called \code{RANARRAY} by Knuth is the code of 
-	D. Knuth (cf.  \url{https://www-cs-faculty.stanford.edu/~uno/programs.html})
+	D. Knuth (cf. Knuth's webpage)
     except some C code, we add, to \emph{interface} with R.}
 
     \item{\bold{Mersenne Twister 2002 generator:}}{
     The generator suggested by Makoto Matsumoto and Takuji Nishimura with
-    the improved initialization from 2002. See
-    \url{http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html}
+    the improved initialization from 2002. See Matsumoto's webpage
     for more information on the generator itself. This generator is available
     only via \code{set.generator()} and \code{runif()} interface. Mersenne Twister
     generator used in base R is the same generator (the recurrence), but with
@@ -89,7 +88,7 @@ The currently available generator are given below.
 
     \item{\bold{SF Mersenne-Twister algorithm:}}{
 	\code{SFMT} function implements the SIMD-oriented Fast Mersenne Twister algorithm
-	(cf. \url{http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html}).	
+	(cf. Matsumoto's webpage).	
 	The SFMT generator has a period of length \eqn{2^m-1} where \eqn{m} is a
 	Mersenne exponent. In the function \code{SFMT}, \eqn{m} is given through
 	\code{mexp} argument. By default it is 19937 like the ''old'' MT algorithm.
@@ -115,8 +114,7 @@ The currently available generator are given below.
 	See Matsumoto M. and Nishimura T. (1998) for detailed information.}"
 
 	All the C code for SFMT algorithm used in this 
-	package is the code of M. Matsumoto and M. Saito (cf. 
-	\url{http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html}), except we add
+	package is the code of M. Matsumoto and M. Saito (cf. Matsumoto's webpage), except we add
 	some C code to \emph{interface} with R. Streaming SIMD Extensions 2 (SSE2) 
 	operations are not yet supported.}
 
@@ -137,8 +135,7 @@ The currently available generator are given below.
 	argument.
 	
 	All the C code for WELL generator used in this 
-	package is the code of P. L'Ecuyer (cf. 
-	\url{http://www.iro.umontreal.ca/~lecuyer/}), except
+	package is the code of P. L'Ecuyer (cf. L'Ecuyer's webpage), except
 	some C code, we add, to \emph{interface} with R.}
 
    \item{\bold{Set the seed:}}{
@@ -173,18 +170,18 @@ See the pdf vignette for details.
 Knuth D. (1997), \emph{The Art of Computer Programming V2 Seminumerical Algorithms}, Third Edition, Massachusetts: Addison-Wesley.
 
 Matsumoto M. and Nishimura T. (1998), \emph{Dynamic Creation of Pseudorandom Number Generators},
-Monte Carlo and Quasi-Monte Carlo Methods, Springer, pp 56--69. (available online)
+Monte Carlo and Quasi-Monte Carlo Methods, Springer, pp 56--69. \doi{10.1007/978-3-642-59657-5_3}
 
-Matsumoto M., Saito M. (2008), \emph{SIMD-oriented Fast Mersenne Twister: a 128-bit Pseudorandom Number Generator}. (available online)
+Matsumoto M., Saito M. (2008), \emph{SIMD-oriented Fast Mersenne Twister: a 128-bit Pseudorandom Number Generator}. \doi{10.1007/978-3-540-74496-2_36}
 
 Paneton F., L'Ecuyer P. and Matsumoto M. (2006), \emph{Improved Long-Period Generators 
-Based on Linear Recurrences Modulo 2}, ACM Transactions on Mathematical Software. (preprint
-available online)
+Based on Linear Recurrences Modulo 2}, ACM Transactions on Mathematical Software. 
+\doi{10.1145/1132973.1132974}
 
 Park S. K., Miller K. W. (1988), \emph{Random number generators: good
-ones are hard to find}. Association for Computing Machinery, vol. 31, 10, pp 1192-2001. (available online) 
+ones are hard to find}. Association for Computing Machinery, vol. 31, 10, pp 1192-2001. 
+\doi{10.1145/63039.63042}
 
-Wikipedia (2008), \emph{a linear congruential generator}.
 }
 \seealso{
     \code{\link{.Random.seed}} for what is done in R about random number generation and \code{\link{runifInterface}} for the \code{runif} interface.
@@ -329,16 +326,16 @@ knuthTAOCP(1)
 
 
 
-# (7) computation times on my 2017 macbook (my 2007 macbook), mean of 1000 runs
+# (7) computation times on a 2022 macbook (2017 macbook / 2007 macbook), mean of 1000 runs
 #
 
 \dontrun{
 # algorithm			time in seconds for n=10^6
-# classical Mersenne Twister  0.028155 (0.066) 
-# SF Mersenne Twister  	      0.008223 (0.044) 
-# WELL generator				      0.006407 (0.065)
-# Knuth TAOCP				        	0.002923 (0.046)
-# Park Miller  		      			0.015635 (0.108)
+# classical Mersenne Twister  0.005077 (0.028155 / 0.066) 
+# SF Mersenne Twister  	      0.003994 (0.008223 / 0.044) 
+# WELL generator				      0.006653 (0.006407 / 0.065)
+# Knuth TAOCP				        	0.001574 (0.002923 / 0.046)
+# Park Miller  		      			0.007479 (0.015635 / 0.108)
 n <- 1e+06
 mean( replicate( 1000, system.time( runif(n), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( SFMT(n), gcFirst=TRUE)[3]) )

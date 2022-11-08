@@ -39,8 +39,8 @@ polynomial and specified integers \eqn{m_j}.
 }
 \references{
 Glasserman P., (2003);
-    \emph{Monte Carlo Methods in Financial Engineering},
-    Springer.
+\emph{Monte Carlo Methods in Financial Engineering},
+Springer. \doi{10.1007/978-0-387-21617-1}
 }
 \seealso{
     \code{\link{quasiRNG}} for quasi random number generation. 

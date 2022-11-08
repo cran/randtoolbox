@@ -1,5 +1,16 @@
 === randtoolbox: an R package for random number generation and testing ===
 
+Version 2.0.3
+=============
+- re-enable the use of set.generator(name="congruRand",...).
+- remove almost all URL and/or replace by DOI or text.
+
+WARNING FIX
+- remove the following warning in some C functions: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+
+BUG FIX
+- correct the dimnames of sobol() outputs, reported by Arnald Puy.
+
 Version 2.0.2
 =============
 
@@ -72,7 +83,7 @@ WELLrng, setSeed4WELL) in C header files, thanks to Brian Ripley.
 - scrambling = 1, 3 for Sobol sequences may generate 0.0, so randomizing
 the seed is performed in that case.
 
-Version 1.30.0 (Version in Memoriam of Diethelm and Barbara Wuertz)
+Version 1.30.0 
 =============
 - disable the use of set.generator(name="congruRand",...).
 - clean up C code.
@@ -203,7 +214,7 @@ licences in this package, namely, GPL, BSD, public domain, etc...
 (cf. 1.08-version DESCRIPTION file of this package). 
 - From 1.09, all this code of this package is under the new BSD licence. 
 A copy of the BSD licence is available at 
-http://www.opensource.org/licenses/bsd-license.php
+https://opensource.org/licenses/bsd-license.php
 - extract Pierre L'Ecuyer's code from randtoolbox and 
 put it in a dedicated package rngWELL,
 - depends now on rngWELL.

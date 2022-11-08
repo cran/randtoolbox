@@ -10,6 +10,14 @@
 /*    This version also adopts Brendan McKay's suggestion to
       accommodate naive users who forget to call ranf_start(seed).         */
 
+/*    remove the warning in ranf_arr_cycle: 
+ *    this old-style function definition is not preceded by a prototype
+ *    see 
+ *    > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ *    -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ *    -c init.c -o init.o
+ */
+
 /*    If you find any bugs, please report them immediately to
  *                 taocp@cs.stanford.edu
  *    (and you will be rewarded if the bug is genuine). Thanks!            */
@@ -87,7 +95,8 @@ void ranf_start(seed)    /* do this before using ranf_array */
 }
 
 #define ranf_arr_next() (*ranf_arr_ptr>=0? *ranf_arr_ptr++: ranf_arr_cycle())
-double ranf_arr_cycle()
+/* CD modif : add void for this procedure */
+double ranf_arr_cycle(void)
 {
   if (ranf_arr_ptr==&ranf_arr_dummy)
     ranf_start(314159L); /* the user forgot to initialize */
@@ -97,7 +106,9 @@ double ranf_arr_cycle()
   return ranf_arr_buf[0];
 }
 
-/* not needed in this R interface
+/* CD modif
+ * not needed in this R interface
+ * 
 #include <stdio.h>
 int main()
 {

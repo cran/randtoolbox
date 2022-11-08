@@ -9,6 +9,12 @@
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
  * Christophe Dutang, see http://dutangc.free.fr 
  * All rights reserved.
+ * 
+ * # remove a warning: this old-style function definition is not preceded by a prototype
+ * # raised by 
+ * > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ * -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ * -c randtoolbox.c -o randtoolbox.o 
  *
  * The new BSD License is applied to this software.
  * Copyright (c) 2022 Christophe Dutang, Petr Savicky. 
@@ -122,9 +128,9 @@ void knuthTAOCP(double *u, int nb, int dim);
 
 void setSeed(long s);
 void randSeedByArray(int length);
-void randSeed();
+void randSeed(void);
 
-void reconstruct_primes();
+void reconstruct_primes(void);
 
 /* Functions accessed from .C() */
 void get_primes(int *n, int *pri);

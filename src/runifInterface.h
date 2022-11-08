@@ -4,6 +4,12 @@
  *
  * @author Petr Savicky 
  *
+ * Copyright (C) 2022, Christophe Dutang
+ * # remove a warning: this old-style function definition is not preceded by a prototype
+ * # raised by 
+ * > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ * -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ * -c runifInterface.c -o runifInterface.o 
  *
  * Copyright (C) 2009, Petr Savicky, Academy of Sciences of the Czech Republic. 
  * All rights reserved.
@@ -47,17 +53,20 @@
  *
  */
 
-void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), double (*selected_rand)());
+/* prototype*/
+void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), double (*selected_rand)(void));
 
 #ifndef define_here
 extern
 #endif
-void (*WELL_get_set_entry_point)(void (* user_unif_set_generator)());
+/* function to be used with user_unif_set_generator */
+void (*WELL_get_set_entry_point)(void (int, void (*)(unsigned int), double (*)(void)) );
+
 
 /* Functions accessed from .C() */
-void set_noop();
+void set_noop(void);
 void current_generator(int *pgener);
-void put_user_unif_set_generator();
+void put_user_unif_set_generator(void);
 
 /* Functions to be found by RNGkind() */
 double *user_unif_rand(void);

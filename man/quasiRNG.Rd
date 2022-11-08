@@ -125,28 +125,27 @@ See the pdf vignette for details.
   otherwise a vector of length \code{n}.
 }
 \references{
-
 Bratley P., Fox B.L. (1988),
-    \emph{Algorithm 659: Implementing Sobol's Quasirandom
-    Sequence Generator},
-    ACM Transactions on Mathematical Software 14, 88--100.
+\emph{Algorithm 659: Implementing Sobol's Quasirandom Sequence Generator},
+ACM Transactions on Mathematical Software 14, 88--100.
+\doi{10.1145/42288.214372}
 
 Joe S., Kuo F.Y. (2003),
-    \emph{Remark on Algorithm 659: Implementing Sobol's Quaisrandom
-    Seqence Generator},
-    ACM Transactions on Mathematical Software 29, 49--57.
+\emph{Remark on Algorithm 659: Implementing Sobol's Quaisrandom Seqence Generator},
+ACM Transactions on Mathematical Software 29, 49--57.
+\doi{10.1145/641876.641879}
 
 Joe S., Kuo F.Y. (2008),
-    \emph{Constructing Sobol sequences with better two-dimensional projections},
-    SIAM J. Sci. Comput. 30, 2635--2654,
-\url{https://web.maths.unsw.edu.au/~fkuo/sobol/index.html}.    
+\emph{Constructing Sobol sequences with better two-dimensional projections},
+SIAM J. Sci. Comput. 30, 2635--2654,
+\doi{10.1137/070709359}.    
 
 Owen A.B. (2020), \emph{On dropping the first Sobol' point},
-\url{https://arxiv.org/abs/2008.08051}.
+\doi{10.1007/978-3-030-98319-2_4}.
 
 Planchet F., Jacquemin J. (2003), 
-  \emph{L'utilisation de methodes de simulation en assurance}. 
-  Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
+\emph{L'utilisation de methodes de simulation en assurance}. 
+Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (available online)
 
 }
 \seealso{
@@ -245,15 +244,15 @@ sobol(5, init=FALSE)
 #previous call
 sobol(10)
 
-# (4) computation times on my 2017 macbook (on my 2007 macbook), mean of 1000 runs
+# (4) computation times on a 2022 macbook (2017 macbook / 2007 macbook), mean of 1000 runs
 #
 
 \dontrun{
 # algorithm			time in seconds for n=10^6
-# Torus algo					  0.012 (0.058)
-# mixed Torus algo 	    0.018 (0.087)
-# Halton sequence				0.180 (0.878)
-# Sobol sequence				0.027 (0.214)
+# Torus algo					  0.00689 (0.012 / 0.058)
+# mixed Torus algo 	    0.009354 (0.018 / 0.087)
+# Halton sequence				0.023575 (0.180 / 0.878)
+# Sobol sequence				0.010444 (0.027 / 0.214)
 n <- 1e+06
 mean( replicate( 1000, system.time( torus(n), gcFirst=TRUE)[3]) )
 mean( replicate( 1000, system.time( torus(n, mixed=TRUE), gcFirst=TRUE)[3]) )

@@ -55,12 +55,12 @@ simulation en assurance}. Bulletin Francais d'Actuariat, vol. 6, 11, 3-69. (avai
 
 L'Ecuyer P. (2001), \emph{Software for uniform random number
 generation distinguishing the good and the bad}. Proceedings of the 2001 
-Winter Simulation Conference. (available online)
+Winter Simulation Conference. \doi{10.1109/WSC.2001.977250}
 
 
 L'Ecuyer P. (2007), \emph{Test U01: a C library for empirical testing of 
 random number generators.} ACM Trans. on Mathematical 
-Software 33(4), 22.
+Software 33(4), 22. \doi{10.1145/1268776.1268777}
 }
 \seealso{
     other tests of this package \code{\link{freq.test}}, \code{\link{serial.test}}, \code{\link{gap.test}},

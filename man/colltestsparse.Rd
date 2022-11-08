@@ -55,11 +55,12 @@ A data frame with \code{nbSample} rows and the following columns.
 \references{
 P. L'Ecuyer, R. Simard, S. Wegenkittl, Sparse serial tests
 of uniformity for random number generators.
-SIAM Journal on Scientific Computing, 24, 2 (2002), 652-668.
+SIAM Journal on Scientific Computing, 24, 2 (2002), 652-668. 
+\doi{10.1137/S1064827598349033}
 
 L'Ecuyer P. (2007), Test U01: a C library for empirical testing of 
 random number generators. ACM Trans. on Mathematical 
-Software 33(4), 22.
+Software 33(4), 22. \doi{10.1145/1268776.1268777}
 }
 \seealso{
     other tests of this package \code{\link{coll.test}}, \code{\link{freq.test}}, \code{\link{serial.test}}, \code{\link{poker.test}},

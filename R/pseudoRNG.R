@@ -70,7 +70,8 @@ congruRand <- function(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
     stop("invalid argument 'mult'")
   if(!is.numeric(incr) || length(incr) != 1 || incr > mod || incr < 0)
     stop("invalid argument 'incr'")    
-  
+  if(mod >= 2^64)
+    warning("congruRand() does not correctly handle a modulo greater than or equal to 2^64, use runifInterface()")
   if(missing(echo))
     echo <- FALSE
   nb <- ifelse(length(n)>1, length(n), n)

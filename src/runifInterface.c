@@ -4,6 +4,12 @@
  *
  * @author Petr Savicky 
  *
+ * Copyright (C) 2022, Christophe Dutang
+ * # remove a warning: this old-style function definition is not preceded by a prototype
+ * # raised by 
+ * > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ * -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ * -c runifInterface.c -o runifInterface.o 
  *
  * Copyright (C) 2009, Petr Savicky, Academy of Sciences of the Czech Republic. 
  * All rights reserved.
@@ -64,7 +70,7 @@ static int generator;
 static double (*user_unif_rand_selected) (void); // not (double *) as user_unif_rand
 static void (*user_unif_init_selected) (unsigned int seed);
 
-void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), double (*selected_rand)())
+void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), double (*selected_rand)(void))
 {
 	generator = gener;
 	user_unif_init_selected = selected_init;
@@ -72,7 +78,7 @@ void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), dou
 }
 
 // .C entry point called from randtoolbox initialization (.onLoad)
-void put_user_unif_set_generator()
+void put_user_unif_set_generator(void)
 {
 	WELL_get_set_entry_point(user_unif_set_generator);
 }
@@ -106,7 +112,7 @@ void no_operation(unsigned int seed)
 }
 
 // .C entry point
-void set_noop()
+void set_noop(void)
 {
 	user_unif_init_selected = no_operation;
 }

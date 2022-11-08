@@ -5,6 +5,11 @@
  * @author Christophe Dutang
  * @author Petr Savicky 
  *
+ * # remove a warning: this old-style function definition is not preceded by a prototype
+ * # raised by 
+ * > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ * -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ * -c init.c -o init.o
  *
  * The new BSD License is applied to this software.
  * Copyright (c) 2022 Christophe Dutang, Petr Savicky. 
@@ -91,8 +96,8 @@ static const R_CallMethodDef CallEntries[] =
 };
 
 
-/* .Fortran calls defined LowDiscrepancy.f <deprecated>
- * C version of these Fortran routines are halton_c() and sobol_c() in randtoolbox.c
+/* <deprecated> : C version of these Fortran routines are halton_c() and sobol_c() in randtoolbox.c
+ * .Fortran calls defined LowDiscrepancy.f 
  *
 extern void F77_NAME(halton_f)(void *, void *, void *, void *, void *, void *, void *);
 extern void F77_NAME(sobol_f)(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
@@ -103,7 +108,7 @@ static const R_FortranMethodDef FortranEntries[] = {
   {"sobol_f", (DL_FUNC) &F77_NAME(sobol_f),  11}, //LowDiscrepancy.f
   {NULL, NULL, 0}
 };
-*/
+* */
 
 //there is no routine accessed with .External()
 
@@ -113,10 +118,10 @@ void R_init_randtoolbox(DllInfo *dll)
   //register method accessed with .C, .Call, .Fortran, .External respectively
   R_registerRoutines(dll, CEntries, CallEntries, NULL, NULL); 
   
-  /*dynamic lookup only for
+  /* dynamic lookup only for
   double *user_unif_rand(void);
   void user_unif_init(unsigned int seed);
-  in src/runifInterface.h*/
+  in src/runifInterface.h */
   R_useDynamicSymbols(dll, TRUE);
   
   
@@ -131,10 +136,13 @@ void R_init_randtoolbox(DllInfo *dll)
   R_RegisterCCallable("randtoolbox", "collisionTest", (DL_FUNC) collisionTest);
   R_RegisterCCallable("randtoolbox", "knuthTAOCP", (DL_FUNC) knuthTAOCP); 
   
-  //retrieve RNG function coming from rngWELL package, see files rngWELL.c(h) in that pkg
+  //retrieve RNG function coming from rngWELL package using prototype
+  //see rngWELL.c(h) in that pkg for WELLrng() 
   WELLrng = (void (*) (double *, int, int, int, int, int)) R_GetCCallable("rngWELL", "WELLrng");
-  WELL_get_set_entry_point =(void (*) (void (*)())) R_GetCCallable("rngWELL", "WELL_get_set_entry_point");
-  /* // well RNG function coming from rngWELL package, see files runifInterface.c(h) in that pkg
+  //see runifInterface.c(h) in that pkg for WELL_get_set_entry_point()
+  WELL_get_set_entry_point =(void (*) (void (*)(int, void (*)(unsigned int), double (*)(void) ) ) ) R_GetCCallable("rngWELL", "WELL_get_set_entry_point");
+  
+  /* // other functions coming from rngWELL package : <no longer needed>
   getRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "getRngWELL");
   putRngWELL = (void (*) (int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "putRngWELL");
   initMT2002 = (void (*) (unsigned int *, int *, unsigned int *)) R_GetCCallable("rngWELL", "initMT2002");*/

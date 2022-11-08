@@ -52,31 +52,30 @@
 set.generator <- function(name=c("WELL", "MersenneTwister", "default"), parameters=NULL, seed=NULL, ...,
 	only.dsc=FALSE)
 {
-	name <- match.arg(name)
+	name <- match.arg(name, c("congruRand","WELL", "MersenneTwister", "default"))
 	dots <- list(...)
-	if (name == "congruRand")
-	  stop("the use of linear congruential generator is temporarily disabled, use congruRand() instead.")
-	# if (name == "congruRand")
-	# {
-	# 	if (is.null(parameters))
-	# 		parameters <- c(mod=dots$mod, mult=dots$mult, incr=dots$incr)
-	# 	if (length(parameters) == 0)
-	# 		parameters <- c(mod="2147483647", mult="16807", incr="0")
-	# 	if (!identical(names(parameters), c("mod", "mult", "incr")))
-	# 	{
-	# 		param.names <- paste(names(parameters),collapse=" ")
-	# 		stop("parameter list \"", param.names, "\" is not correct for congruRand")
-	# 	}
-	# 	if (is.null(seed))
-	# 		seed <- floor(as.double(parameters["mod"]) * runif(1))
-	# 	if (is.numeric(parameters))
-	# 		parameters <- formatC(parameters, format="f", digits=0)
-	# 	if (is.numeric(seed))
-	# 		seed <- formatC(seed, format="f", digits=0)
-	# 	state <- c(seed=seed)
-	# 	description <- list(name=name, parameters=parameters, state=state)
-	# } else 
-	  if (name == "WELL")
+	#if (name == "congruRand")
+	#  stop("the use of linear congruential generator is temporarily disabled, use congruRand() instead.")
+	 if (name == "congruRand")
+	 {
+	 	if (is.null(parameters))
+	 		parameters <- c(mod=dots$mod, mult=dots$mult, incr=dots$incr)
+	 	if (length(parameters) == 0)
+	 		parameters <- c(mod="2147483647", mult="16807", incr="0")
+	 	if (!identical(names(parameters), c("mod", "mult", "incr")))
+	 	{
+	 		param.names <- paste(names(parameters),collapse=" ")
+	 		stop("parameter list \"", param.names, "\" is not correct for congruRand")
+	 	}
+	 	if (is.null(seed))
+	 		seed <- floor(as.double(parameters["mod"]) * runif(1))
+	 	if (is.numeric(parameters))
+	 		parameters <- formatC(parameters, format="f", digits=0)
+	 	if (is.numeric(seed))
+	 		seed <- formatC(seed, format="f", digits=0)
+	 	state <- c(seed=seed)
+	 	description <- list(name=name, parameters=parameters, state=state)
+	 }else if (name == "WELL")
 	{
 		if (is.null(parameters))
 		{
@@ -155,32 +154,31 @@ put.description <- function(description)
 	name <- description$name
 	parameters <- description$parameters
 	state <- description$state
-	# if (name == "congruRand")
-	# {
-	#   #implemented in src/congruRand.c
-	# 	aux <- .C(CF_put_state_congru,
-	# 		parameters,
-	# 		state,
-	# 		err = integer(1),
-	# 		PACKAGE="randtoolbox")
-	# 	if (aux$err != 0)
-	# 		stop("check congruRand error: ", aux$err)
-	# 	if (RNGkind()[1] != "user-supplied")
-	# 	{
-	# 	  #implemented in src/runifInterface.c
-	# 		.C(CF_set_noop, PACKAGE="randtoolbox")
-	# 		RNGkind("user-supplied")
-	# 		#implemented in src/congruRand.c
-	# 		aux <- .C(CF_put_state_congru,
-	# 			parameters,
-	# 			state,
-	# 			err = integer(1),
-	# 			PACKAGE="randtoolbox")
-	# 		if (aux$err != 0)
-	# 			stop("check congruRand error: ", aux$err)
-	# 	}
-	# } else 
-	  if (name == "WELL")
+	if (name == "congruRand")
+	{
+	  #implemented in src/congruRand.c
+		aux <- .C(CF_put_state_congru,
+			parameters,
+			state,
+			err = integer(1),
+			PACKAGE="randtoolbox")
+		if (aux$err != 0)
+			stop("check congruRand error: ", aux$err)
+		if (RNGkind()[1] != "user-supplied")
+		{
+		  #implemented in src/runifInterface.c
+			.C(CF_set_noop, PACKAGE="randtoolbox")
+			RNGkind("user-supplied")
+			#implemented in src/congruRand.c
+			aux <- .C(CF_put_state_congru,
+				parameters,
+				state,
+				err = integer(1),
+				PACKAGE="randtoolbox")
+			if (aux$err != 0)
+				stop("check congruRand error: ", aux$err)
+		}
+	} else if (name == "WELL")
 	{
 	  #implemented in src/runifInterface.c
 		.C(CF_set_noop, PACKAGE="randtoolbox")
@@ -218,34 +216,33 @@ get.description <- function()
 	generator <- .C(CF_current_generator,
 		integer(1),
 		PACKAGE="randtoolbox")[[1]]
-	cat("generator", generator, "\n")
-	# if (generator == 1)
-	# {
-	# 	name <- "congruRand"
-	# 	outspace <- "18446744073709551616" # 2^64
-	# 	#implemented in src/congruRand.c
-	# 	aux <- .C(CF_get_state_congru,
-	# 		parameters=rep(outspace, times=3),
-	# 		seed=outspace,
-	# 		PACKAGE="randtoolbox")
-	# 	parameters <- aux$parameters
-	# 	names(parameters) <- c("mod", "mult", "incr")
-	# 	seed <- aux$seed
-	# 	state <- c(seed=aux$seed)
-	# 	if(parameters[1] == "4294967296" && parameters[2] == "1664525" && parameters[3] == "1013904223")
-	# 		literature <- "Knuth - Lewis"
-	# 	else if(parameters[1] == "281474976710656" && parameters[2] == "31167285" && parameters[3] == "1")
-	# 		literature <- "Lavaux - Jenssens"
-	# 	else if(parameters[1] == "18446744073709551616" && parameters[2] == "636412233846793005" && parameters[3] == "1")
-	# 		literature <- "Haynes"
-	# 	else if(parameters[1] == "4294967296" && parameters[2] == "69069" && parameters[3] == "0") 
-	# 		literature <- "Marsaglia"
-	# 	else if(parameters[1] == "4294967295" && parameters[2] == "16807" && parameters[3] == "0") 
-	# 		literature <- "Park - Miller"
-	# 	else 
-	# 		literature <- "Unknown"
-	# } else 
-	  if (generator == 2)
+	#cat("generator", generator, "\n")
+	if (generator == 1)
+	{
+		name <- "congruRand"
+		outspace <- "18446744073709551616" # i.e. 2^64
+		#implemented in src/congruRand.c
+		aux <- .C(CF_get_state_congru,
+			parameters=rep(outspace, times=3),
+			seed=outspace,
+			PACKAGE="randtoolbox")
+		parameters <- aux$parameters
+		names(parameters) <- c("mod", "mult", "incr")
+		seed <- aux$seed
+		state <- c(seed=aux$seed)
+		if(parameters[1] == "4294967296" && parameters[2] == "1664525" && parameters[3] == "1013904223")
+			literature <- "Knuth - Lewis"
+		else if(parameters[1] == "281474976710656" && parameters[2] == "31167285" && parameters[3] == "1")
+			literature <- "Lavaux - Jenssens"
+		else if(parameters[1] == "18446744073709551616" && parameters[2] == "636412233846793005" && parameters[3] == "1")
+			literature <- "Haynes"
+		else if(parameters[1] == "4294967296" && parameters[2] == "69069" && parameters[3] == "0")
+			literature <- "Marsaglia"
+		else if(parameters[1] == "4294967295" && parameters[2] == "16807" && parameters[3] == "0")
+			literature <- "Park - Miller"
+		else
+			literature <- "Unknown"
+	} else if (generator == 2)
 	{
 		name <- "WELL"
 		#implemented in rngWELL package, see NAMESPACE

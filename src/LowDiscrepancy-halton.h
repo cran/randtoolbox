@@ -4,6 +4,13 @@
 *
 * @author Christophe Dutang
 *
+* Copyright (C) 2022, Christophe Dutang
+* # remove a warning: this old-style function definition is not preceded by a prototype
+* # raised by 
+* > clang -DNDEBUG   -isystem /usr/local/clang15/include \
+* -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+* -c LowDiscrepancy-halton.c -o LowDiscrepancy-halton.o
+* 
 * Copyright (C) Aug. 2016, Christophe Dutang, C translation of a Fortran code
 *
 * The new BSD License is applied to this software.
@@ -48,4 +55,4 @@
 
 double HALTONREC(int DIMEN, unsigned long long OFFSET);
 void INITHALTON(int DIMEN, double *QUASI); // not used
-void reconstruct_prime(); //same as void reconstruct_primes()
+void reconstruct_prime(void); //same as void reconstruct_primes()

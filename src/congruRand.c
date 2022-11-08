@@ -5,6 +5,12 @@
  * @author Christophe Dutang
  * @author Petr Savicky 
  *
+ * Copyright (C) 2022, Christophe Dutang
+ * # remove a warning: this old-style function definition is not preceded by a prototype
+ * # raised by 
+ * > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ * -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ * -c congruRand.c -o congruRand.o
  *
  * Copyright (C) 2019, Christophe Dutang,
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
@@ -68,7 +74,7 @@ uint64_t mod, mask, mult, incr, congru_seed;
 
 // possible value of user_unif_rand_selected in runifInterface.c
 // when mask == 0LL
-double user_unif_rand_congru_0()
+double user_unif_rand_congru_0(void)
 {
 	double x;
 	congru_seed  = (mult * congru_seed + incr) % mod;
@@ -81,7 +87,7 @@ double user_unif_rand_congru_0()
 
 // possible value of user_unif_rand_selected in runifInterface.c
 // when mask > 0LL and mask != two_64m1_h
-double user_unif_rand_congru_1()
+double user_unif_rand_congru_1(void)
 {
 	double x;
 	congru_seed  = (mult * congru_seed + incr) & mask;
@@ -95,7 +101,7 @@ double user_unif_rand_congru_1()
 // possible value of user_unif_rand_selected in runifInterface.c
 // when mask > 0LL and mask == two_64m1_h 
 // NB: the recursion mult * congru_seed + incr is automatically truncated by conversion to uint64_t
-double user_unif_rand_congru_2()
+double user_unif_rand_congru_2(void)
 {
 	double x;
 	congru_seed  = (mult * congru_seed + incr);
@@ -113,7 +119,7 @@ void user_unif_init_congru(uint32_t seed)
 }
 
 // called from randtoolbox.c by congruRand function
-double get_congruRand()
+double get_congruRand(void)
 {
 	double x;
   if(mask == 0) //mask == 0x0
@@ -172,26 +178,28 @@ void get_seed_congruRand(uint64_t *out_seed)
 }
 
 // .C entry point used by get.description
+/* revision 5168, Sun Nov 20 22:32:38 2011 UTC introduces 
+  a bug by replacing sprintf() by Rprintf()   */
 void get_state_congru(char **params, char **seed)
 {
 	if (mod != 0LL) {
-		Rprintf(params[0], "%" PRIu64 "\n", mod);
+		sprintf(params[0], "%" PRIu64, mod); /* defined in <stdio.h> */
 	} else {
-		strcpy(params[0], two_64_s);
+		strcpy(params[0], two_64_s); /* defined in <string.h> */
 	}
-	Rprintf(params[1], "%" PRIu64 "\n", mult);
-	Rprintf(params[2], "%" PRIu64 "\n", incr);
-	Rprintf(seed[0], "%" PRIu64 "\n", congru_seed);
+	sprintf(params[1], "%" PRIu64, mult);
+	sprintf(params[2], "%" PRIu64, incr);
+	sprintf(seed[0], "%" PRIu64, congru_seed);
 }
 
 // .C entry point used by put.description
 void put_state_congru(char **params, char **seed, int *err)
 {
-  error(_("temporarily disabled function"));
+  /*error(_("temporarily disabled function"));*/
   
-  /*
+  /* */
 	uint64_t inp_mod, inp_mask, inp_mult, inp_incr, inp_seed;
-  if (strcmp(params[0], two_64_s) == 0) {
+  if (strcmp(params[0], two_64_s) == 0) { /* defined in <string.h> */
 		inp_mod = 0;
 		inp_mask = two_64m1_h;
 	} else {
@@ -202,7 +210,7 @@ void put_state_congru(char **params, char **seed, int *err)
 			inp_mask = 0;
 		}
 	}
-	sscanf(params[1], "%" SCNu64 "\n", &inp_mult);
+	sscanf(params[1], "%" SCNu64 "\n", &inp_mult); /* defined in <stdio.h> */
 	sscanf(params[2], "%" SCNu64 "\n", &inp_incr);
 	sscanf(seed[0], "%" SCNu64 "\n", &inp_seed);
 	
@@ -225,6 +233,6 @@ void put_state_congru(char **params, char **seed, int *err)
 		user_unif_set_generator(1, user_unif_init_congru, user_unif_rand_congru_2);
 	}
 	*err = 0;
-	*/
+	/* */
 }
 

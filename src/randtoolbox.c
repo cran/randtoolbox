@@ -10,7 +10,13 @@
  * Petr Savicky, Academy of Sciences of the Czech Republic. 
  * Christophe Dutang, see http://dutangc.free.fr 
  * All rights reserved.
- *
+ * 
+ * # remove a warning: this old-style function definition is not preceded by a prototype
+ * # raised by 
+ * > clang -DNDEBUG   -isystem /usr/local/clang15/include                                      \
+ * -I"/Library/Frameworks/R.framework/Headers"  -fpic  -O3 -Wall -pedantic -Wstrict-prototypes \
+ * -c randtoolbox.c -o randtoolbox.o 
+ *  
  * The new BSD License is applied to this software.
  * Copyright (c) 2022 Christophe Dutang, Petr Savicky. 
  * All rights reserved.
@@ -723,7 +729,7 @@ void setSeed(long s)
 
 //randomize and set the seed when not initialized
 //idea taken from the R internal C function Randomize()
-void randSeed()
+void randSeed(void)
 {
   
 #if HAVE_SYS_TIME_H
@@ -828,7 +834,7 @@ void randSeedByArray(int length)
 //the first 100 000 prime numbers taken from http://primes.utm.edu/
 #include "primes.h"
 
-void reconstruct_primes()
+void reconstruct_primes(void)
 {
   int i;
   if (primeNumber[2] == 1)
