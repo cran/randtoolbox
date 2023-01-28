@@ -75,7 +75,11 @@
  #define HAVE_INT32_64_DEFINED 1
 #endif
 
+#ifndef LowDiscrepancy_sobol_orig1111_H
+#define LowDiscrepancy_sobol_orig1111_H
 
 /* utility functions to be called in randtoolbox.c */
-
 void initgeneratorV_orig1111(int dim, int maxbit4mj, int maxbit4inttype, uint32_t *V);
+
+
+#endif

@@ -2,7 +2,7 @@ Package: randtoolbox
 Type: Package
 Title: Toolbox for Pseudo and Quasi Random Number Generation and Random
         Generator Tests
-Version: 2.0.3
+Version: 2.0.4
 Author: R code by Yohan Chalabi [ctb], Christophe Dutang [aut, cre], Petr Savicky [aut], 
     Diethelm Wuertz [aut]; C code of Knuth-TAOCP RNG by Donald Knuth [aut];
     C code of Torus, Halton and Sobol sequences by Christophe Dutang [aut, cre];
@@ -22,6 +22,6 @@ Depends: rngWELL (>= 0.10-1)
 License: BSD_3_clause + file LICENSE
 URL: https://r-forge.r-project.org/projects/rmetrics/
 NeedsCompilation: yes
-Packaged: 2022-11-08 13:32:20 UTC; dutang
+Packaged: 2023-01-28 13:28:58 UTC; dutang
 Repository: CRAN
-Date/Publication: 2022-11-08 14:50:02 UTC
+Date/Publication: 2023-01-28 14:10:02 UTC

@@ -1,12 +1,25 @@
 === randtoolbox: an R package for random number generation and testing ===
 
+Version 2.0.4
+=============
+- remove gcc check in configure.ac file generating config files
+(follow guideline of r-exts).
+- remove useless autoconf macro and simplifies configure.ac. 
+
+WARNING FIX
+- remove sscanf in favor of strtoul or strtoull or _strtoui64
+for set.generator().
+- remove sprintf in favor of a dedicated ulltostr
+for get.description().
+
 Version 2.0.3
 =============
 - re-enable the use of set.generator(name="congruRand",...).
 - remove almost all URL and/or replace by DOI or text.
 
 WARNING FIX
-- remove the following warning in some C functions: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+- remove the following warning in some C functions: a function declaration 
+without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
 
 BUG FIX
 - correct the dimnames of sobol() outputs, reported by Arnald Puy.
@@ -25,15 +38,19 @@ Version 2.0.1
 BUG FIX
 - two errors appearing in USBAN memory tests. Previous output
 when re-building fullpres.Rnw was
-LowDiscrepancy-sobol-orig1111.c:1418:32: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
-LowDiscrepancy-sobol-orig1111.c:1440:57: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
+LowDiscrepancy-sobol-orig1111.c:1418:32: runtime error: 
+left shift of 1 by 31 places cannot be represented in type 'int'
+LowDiscrepancy-sobol-orig1111.c:1440:57: runtime error: 
+left shift of 1 by 31 places cannot be represented in type 'int'
 
 
 Version 2.0.0
 =============
 - remove Fortran code for Halton and Sobol sequences 
 (the latter was under the ACM licence).
-- scrambling for Sobol sequences is temporarily disabled.
+- scrambling for Sobol sequences is temporarily disabled:
+the Fortran version of Sobol sequences can be found on R-forge
+in randsobolfortran package.
 
 Version 1.31.2
 =============

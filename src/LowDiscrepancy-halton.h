@@ -50,9 +50,12 @@
 #include <Rinternals.h>
 #include <Rmath.h>
 
+#ifndef LowDiscrepancy_halton_H
+#define LowDiscrepancy_halton_H
 
 /* utility functions to be called in randtoolbox.c */
-
 double HALTONREC(int DIMEN, unsigned long long OFFSET);
 void INITHALTON(int DIMEN, double *QUASI); // not used
 void reconstruct_prime(void); //same as void reconstruct_primes()
+
+#endif 

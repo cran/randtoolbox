@@ -60,6 +60,7 @@
 #include <R.h>
 #include <Rmath.h>
 
+#include "config.h"
 #include "locale.h"
 
 
@@ -109,6 +110,10 @@
  #endif
 #endif
 
+
+#ifndef congruRand_H
+#define congruRand_H
+
 /* prototype defined in runifInterface.c */
 void user_unif_set_generator(int gener, void (*selected_init)(unsigned int), double (*selected_rand)(void));
 /* prototype defined in congruRand.c */
@@ -120,8 +125,12 @@ int check_congruRand(uint64_t mod, uint64_t mask, uint64_t mult, uint64_t incr, 
 void set_congruRand(uint64_t inp_mod, uint64_t inp_mult, uint64_t inp_incr, uint64_t inp_seed, uint64_t inp_mask);
 void get_seed_congruRand(uint64_t *out_seed);
 
+/* utility function to convert unsigned long long to string */
+void ulltostr(uint64_t value, char* stroutput, int base);
+
 /* Functions accessed from .C() */
 void get_state_congru(char **params, char **seed);
 void check_state_congru(char **params, char **seed, int *err);
 void put_state_congru(char **params, char **seed, int *err);
 
+#endif

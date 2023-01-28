@@ -62,6 +62,8 @@ extern
 /* function to be used with user_unif_set_generator */
 void (*WELL_get_set_entry_point)(void (int, void (*)(unsigned int), double (*)(void)) );
 
+#ifndef runifInterface_H
+#define runifInterface_H
 
 /* Functions accessed from .C() */
 void set_noop(void);
@@ -71,3 +73,5 @@ void put_user_unif_set_generator(void);
 /* Functions to be found by RNGkind() */
 double *user_unif_rand(void);
 void user_unif_init(unsigned int seed);
+
+#endif 

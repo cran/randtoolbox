@@ -61,8 +61,8 @@
 
 
 #define two_64_d 18446744073709551616.0
-#define two_64m1 18446744073709551615ULL
 #define two_64_s "18446744073709551616"
+#define two_64m1 18446744073709551615ULL
 #define two_64m1_h 0xffffffffffffffff
 
 
@@ -178,45 +178,136 @@ void get_seed_congruRand(uint64_t *out_seed)
 }
 
 // .C entry point used by get.description
-/* revision 5168, Sun Nov 20 22:32:38 2011 UTC introduces 
-  a bug by replacing sprintf() by Rprintf()   */
 void get_state_congru(char **params, char **seed)
 {
+  /* previous calls were
+   sprintf(params[0], "%" PRIu64, mod); // defined in <stdio.h>
+   sprintf(params[1], "%" PRIu64, mult);
+   sprintf(params[2], "%" PRIu64, incr);
+   sprintf(seed[0], "%" PRIu64, congru_seed);
+   
+   * revision 5168, Sun Nov 20 22:32:38 2011 UTC introduces 
+   * a bug by replacing sprintf() by Rprintf()
+   * 
+   * revision 6372, Fri Jan 28 13:05:16 2023 UTC now uses 
+   * ulltostr()
+   */
+  
 	if (mod != 0LL) {
-		sprintf(params[0], "%" PRIu64, mod); /* defined in <stdio.h> */
+		ulltostr(mod, params[0], 10);
 	} else {
 		strcpy(params[0], two_64_s); /* defined in <string.h> */
 	}
-	sprintf(params[1], "%" PRIu64, mult);
-	sprintf(params[2], "%" PRIu64, incr);
-	sprintf(seed[0], "%" PRIu64, congru_seed);
+	ulltostr(mult, params[1], 10);
+	ulltostr(incr, params[2], 10);
+	ulltostr(congru_seed, seed[0], 10);
 }
 
 // .C entry point used by put.description
 void put_state_congru(char **params, char **seed, int *err)
 {
-  /*error(_("temporarily disabled function"));*/
   
-  /* */
+  /* see 
+   * convert string to unsigned long long 
+   * on UNIX, we use strtoull or strtoul, see 
+   https://linux.die.net/man/3/strtoull 
+   https://linux.die.net/man/3/strtoul 
+   * on windows, we use string to unsigned int64, see
+   https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/strtoui64-wcstoui64-strtoui64-l-wcstoui64-l
+   * the code (uint64_t) _atoi64 could have been used 
+   */
+  
+  /* former calls use sscanf 
+   sscanf(params[0], "%" SCNu64 "\n", &inp_mod); //defined in <stdio.h>
+   sscanf(params[1], "%" SCNu64 "\n", &inp_mult) 
+   sscanf(params[2], "%" SCNu64 "\n", &inp_incr); 
+   sscanf(seed[0], "%" SCNu64 "\n", &inp_seed); 
+   */
+  
+  /* temporary outputs of string-to-unsigned-long-long() */
 	uint64_t inp_mod, inp_mask, inp_mult, inp_incr, inp_seed;
-  if (strcmp(params[0], two_64_s) == 0) { /* defined in <string.h> */
+
+  if (strcmp(params[0], two_64_s) == 0) 
+  { /* defined in <string.h> */
 		inp_mod = 0;
 		inp_mask = two_64m1_h;
-	} else {
-		sscanf(params[0], "%" SCNu64 "\n", &inp_mod);
+	}else 
+	{
+	  /* former call was  */
+#if HAVE_STRTOULL
+{
+    /* value is set by the function to the next character after the numerical value */
+    char * endptrarg1a;
+	  inp_mod = strtoull(params[0], &endptrarg1a, 10);
+}
+#elif HAVE_STRTOUL
+{
+    /* value is set by the function to the next character after the numerical value */
+    char * endptrarg1b;
+    inp_mod = strtoul(params[0], &endptrarg1b, 10);
+}
+#elif HAVE_WINDOWS_STR_UI64_H
+{
+    /* value is set by the function to the next character after the numerical value */
+    char * endptrarg1c;
+    inp_mod = _strtoui64(params[0], &endptrarg1c, 10);
+}
+#else
+{
+    inp_mod = atoi(params[0]);  
+}
+#endif
+
 		if ((inp_mod & (inp_mod - 1)) == 0) {
 			inp_mask = inp_mod - 1;
 		} else {
 			inp_mask = 0;
 		}
 	}
-	sscanf(params[1], "%" SCNu64 "\n", &inp_mult); /* defined in <stdio.h> */
-	sscanf(params[2], "%" SCNu64 "\n", &inp_incr);
-	sscanf(seed[0], "%" SCNu64 "\n", &inp_seed);
 	
+#if HAVE_STRTOULL
+{
+  /* value is set by the function to the next character after the numerical value */
+  char * endptrarg2a;
+  inp_mult = strtoull(params[1], &endptrarg2a, 10);
+  inp_incr = strtoull(params[2], &endptrarg2a, 10);
+  inp_seed = strtoull(seed[0], &endptrarg2a, 10);
+}
+#elif HAVE_STRTOUL
+{
+  /* value is set by the function to the next character after the numerical value */
+  char * endptrarg2b;
+  inp_mult = strtoul(params[1], &endptrarg2b, 10);
+  inp_incr = strtoul(params[2], &endptrarg2b, 10);
+  inp_seed = strtoul(seed[0], &endptrarg2b, 10);
+  
+}
+#elif HAVE_WINDOWS_STR_UI64_H
+{
+  /* value is set by the function to the next character after the numerical value */
+  char * endptrarg2c;
+  inp_mult = _strtoui64(params[1], &endptrarg2c, 10);
+  inp_incr = _strtoui64(params[2], &endptrarg2c, 10);
+  inp_seed = _strtoui64(seed[0], &endptrarg2c, 10);
+}
+#else
+{
+  inp_mult = atoi(params[1]);
+  inp_incr = atoi(params[2]);
+  inp_seed = atoi(seed[0]);
+}
+#endif
+/* debug 
+Rprintf("inp_mod is %llu\n", inp_mod);
+Rprintf("inp_mult is %llu\n", inp_mult);
+Rprintf("inp_incr is %llu\n", inp_incr);
+Rprintf("inp_seed is %llu\n", inp_seed);
+*/
+
 	*err = check_congruRand(inp_mod, inp_mask, inp_mult, inp_incr, inp_seed);
 	
 	if (*err < 0) return;
+	/* if no error, set the new value */
 	mod = inp_mod;
 	mask = inp_mask;
 	mult = inp_mult;
@@ -235,4 +326,48 @@ void put_state_congru(char **params, char **seed, int *err)
 	*err = 0;
 	/* */
 }
+
+/* utility function to convert unsigned long long to string 
+ * NB: on some systems, there is ulltoa() in <stdlib.h>.
+ */
+void ulltostr(uint64_t value, char* stroutput, int base)
+{
+  uint64_t tmp_digit = 0, tmp_res = 0;
+  uint64_t tmp_dignb = value;
+  int count = 0;
+  
+  if(stroutput != NULL)
+  {
+    if (tmp_dignb == 0)
+    {
+      count++;
+    }
+    /* compute digit number */
+    while(tmp_dignb > 0)
+    {
+      tmp_dignb = tmp_dignb/base;
+      count++;
+    }
+    /* go to first digit */
+    stroutput += count;
+    
+    /* compute digits */
+    *stroutput = '\0';
+    do
+    {
+      tmp_digit = value / base;
+      tmp_res = value - base * tmp_digit;
+      if (tmp_res < 10)
+      {
+        * --stroutput = '0' + tmp_res;
+      }
+      else if ((tmp_res >= 10) && (tmp_res < 16))
+      {
+        * -- stroutput = 'A' - 10 + tmp_res;
+      }
+    } while ((value = tmp_digit) != 0);
+    
+  }
+}
+
 
