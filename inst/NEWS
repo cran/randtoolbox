@@ -1,5 +1,9 @@
 === randtoolbox: an R package for random number generation and testing ===
 
+Version 2.0.5
+=============
+- new devel version
+
 Version 2.0.4
 =============
 - remove gcc check in configure.ac file generating config files

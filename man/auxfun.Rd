@@ -19,33 +19,35 @@ permut(n)
         with \eqn{Stirl_n^1 = Stirl_n^n = 1}.
         e.g. 
 	\itemize{
-        \item{}{\eqn{n = 0}, returns 1}
-        \item{}{\eqn{n = 1}, returns a vector with 0,1}
-        \item{}{\eqn{n = 2}, returns a vector with 0,1,1}
-        \item{}{\eqn{n = 3}, returns a vector with 0,1,3,1}
-        \item{}{\eqn{n = 4}, returns a vector with 0,1,7,6,1...}
+    \item \eqn{n = 0}, returns 1.
+    \item \eqn{n = 1}, returns a vector with 0,1.
+    \item \eqn{n = 2}, returns a vector with 0,1,1.
+    \item \eqn{n = 3}, returns a vector with 0,1,3,1.
+    \item \eqn{n = 4}, returns a vector with 0,1,7,6,1...
 	}
-        Go to wikipedia for more details.
+  Go to wikipedia for more details.
 	
-	\code{permut} compute permutation of \eqn{{1, ..., n}} and store it
-	in a matrix.
+	\code{permut} compute all permutations of \eqn{{1, ..., n}} and store it
+	in a matrix of \eqn{n} columns.
 	e.g. 
 	\itemize{
-	\item{}{\eqn{n=1}, returns a matrix with \tabular{c}{1}}
-	\item{}{\eqn{n=2}, returns a matrix with \tabular{cc}{
+	  \item \eqn{n=1}, returns a matrix with \tabular{c}{1}
+	  \item \eqn{n=2}, returns a matrix with 
+	\tabular{cc}{
 	1 \tab 2 \cr
-	2 \tab 1 \cr}}
-	\item{}{\eqn{n=3} returns a matrix with \tabular{ccc}{
+	2 \tab 1 \cr}
+	  \item \eqn{n=3} returns a matrix with 
+	\tabular{ccc}{
 	3 \tab 1 \tab 2\cr
 	3 \tab 2 \tab 1\cr
 	1 \tab 3 \tab 2\cr
 	2 \tab 3 \tab 1\cr
 	1 \tab 2 \tab 3\cr
-	2 \tab 1 \tab 3\cr}}
+	2 \tab 1 \tab 3\cr}
 	}
 }
 \value{
-  a vector with stirling numbers.
+  a vector with stirling numbers or a matrix with permutations.
 }
 \seealso{
     \code{\link{choose}} for combination numbers.

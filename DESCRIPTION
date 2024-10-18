@@ -2,12 +2,16 @@ Package: randtoolbox
 Type: Package
 Title: Toolbox for Pseudo and Quasi Random Number Generation and Random
         Generator Tests
-Version: 2.0.4
-Author: R code by Yohan Chalabi [ctb], Christophe Dutang [aut, cre], Petr Savicky [aut], 
-    Diethelm Wuertz [aut]; C code of Knuth-TAOCP RNG by Donald Knuth [aut];
-    C code of Torus, Halton and Sobol sequences by Christophe Dutang [aut, cre];
-    C code of SFMT algorithm by Makoto Matsumoto [aut], Mutsuo Saito [aut]. 
-Maintainer: Christophe Dutang <dutangc@gmail.com>
+Version: 2.0.5
+Authors@R: c(
+    person("Christophe", "Dutang", role = c("aut", "cre"), email = "dutangc@gmail.com", 
+      comment = c(ORCID = "0000-0001-6732-1501")),
+    person("Petr", "Savicky", role= "aut", email="savicky@cs.cas.cz"),
+    person("Yohan", "Chalabi", role = "ctb", comment="part of R Code"),
+    person("Diethelm", "Wuertz", role = "aut", comment="part of R Code"),
+    person("Donald", "Knuth", role = "aut", comment="C code of Knuth-TAOCP RNG"),
+    person("Makoto", "Matsumoto", role = "aut", comment="C code of SFMT algorithm"),
+    person("Mutsuo", "Saito", role = "aut", comment="C code of SFMT algorithm"))
 Description: Provides (1) pseudo random generators - general linear congruential generators, 
     multiple recursive generators and generalized feedback shift register (SF-Mersenne Twister
     algorithm (<doi:10.1007/978-3-540-74496-2_36>) and WELL (<doi:10.1145/1132973.1132974>) 
@@ -22,6 +26,14 @@ Depends: rngWELL (>= 0.10-1)
 License: BSD_3_clause + file LICENSE
 URL: https://r-forge.r-project.org/projects/rmetrics/
 NeedsCompilation: yes
-Packaged: 2023-01-28 13:28:58 UTC; dutang
+Packaged: 2024-10-18 07:21:21 UTC; dutang
+Author: Christophe Dutang [aut, cre] (<https://orcid.org/0000-0001-6732-1501>),
+  Petr Savicky [aut],
+  Yohan Chalabi [ctb] (part of R Code),
+  Diethelm Wuertz [aut] (part of R Code),
+  Donald Knuth [aut] (C code of Knuth-TAOCP RNG),
+  Makoto Matsumoto [aut] (C code of SFMT algorithm),
+  Mutsuo Saito [aut] (C code of SFMT algorithm)
+Maintainer: Christophe Dutang <dutangc@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-01-28 14:10:02 UTC
+Date/Publication: 2024-10-18 10:10:04 UTC
